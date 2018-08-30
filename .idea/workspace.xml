@@ -1371,7 +1371,7 @@
       <workItem from="1535100587664" duration="9017000" />
       <workItem from="1535332401918" duration="8209000" />
       <workItem from="1535340732451" duration="26272000" />
-      <workItem from="1535439214788" duration="50702000" />
+      <workItem from="1535439214788" duration="51335000" />
     </task>
     <task id="LOCAL-00107" summary="用户档案模板导入">
       <created>1532660274837</created>
@@ -1752,7 +1752,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1430626000" />
+    <option name="totallyTimeSpent" value="1431259000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1765,6 +1765,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1456" height="876" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4706704" sideWeight="0.36819485" order="5" side_tool="true" content_ui="tabs" />
