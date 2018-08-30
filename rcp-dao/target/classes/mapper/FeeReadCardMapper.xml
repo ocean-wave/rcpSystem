@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FeeReadCardMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeeReadCard" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="cur_tranf_rto" property="curTranfRto" jdbcType="INTEGER" />
+    <result column="vol_tranf_rto" property="volTranfRto" jdbcType="INTEGER" />
+    <result column="pay_count" property="payCount" jdbcType="INTEGER" />
+    <result column="re_wrt_time" property="reWrtTime" jdbcType="VARCHAR" />
+    <result column="error_cnt" property="errorCnt" jdbcType="INTEGER" />
+    <result column="ratio" property="ratio" jdbcType="INTEGER" />
+    <result column="key_state" property="keyState" jdbcType="INTEGER" />
+    <result column="key_count" property="keyCount" jdbcType="INTEGER" />
+    <result column="key_ver" property="keyVer" jdbcType="INTEGER" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="overdraft_fee" property="overdraftFee" jdbcType="DECIMAL" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="meter_no" property="meterNo" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

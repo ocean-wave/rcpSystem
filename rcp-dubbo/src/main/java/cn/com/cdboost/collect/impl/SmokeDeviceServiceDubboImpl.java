@@ -1,0 +1,146 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.dao.SmokeDeviceMapper;
+import cn.com.cdboost.collect.dto.param.SmokeDeviceSelectTotalDB;
+import cn.com.cdboost.collect.exception.RcpDubboException;
+import cn.com.cdboost.collect.model.SmokeDevice;
+import cn.com.cdboost.collect.service.SmokeDeviceService;
+import cn.com.cdboost.collect.service.SmokeDeviceServiceDubbo;
+import cn.com.cdboost.collect.vo.SmokeDeviceListNoTimeVo;
+import cn.com.cdboost.collect.vo.SmokeDeviceSelectTotalInfo;
+import cn.com.cdboost.collect.vo.SmokeDeviceVo;
+import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+
+
+/**
+ * @author wt
+ * @desc
+ * @create in  2018/8/22
+ **/
+@Service
+public class SmokeDeviceServiceDubboImpl implements SmokeDeviceServiceDubbo {
+    @Autowired
+    SmokeDeviceMapper smokeDeviceMapper;
+    @Autowired
+    SmokeDeviceService smokeDeviceService;
+
+    @Override
+    public List<SmokeDeviceVo> smokeDeviceList(SmokeDeviceListNoTimeVo smokeDeviceListNoTimeVo) {
+        Condition condition=new Condition(SmokeDevice.class);
+        Example.Criteria criteria=condition.createCriteria();
+        if(!StringUtils.isEmpty(smokeDeviceListNoTimeVo.getCno())){
+            criteria.andLike("cno","%"+smokeDeviceListNoTimeVo.getCno()+"%");
+        }
+        if(!"0".equals(smokeDeviceListNoTimeVo.getStatus())){
+            criteria.andEqualTo("status",smokeDeviceListNoTimeVo.getStatus());
+        }
+        PageHelper.startPage(smokeDeviceListNoTimeVo.getPageNumber(),smokeDeviceListNoTimeVo.getPageSize()," FIELD(STATUS,'4','1','2','3','5')");
+        List<SmokeDevice> select = smokeDeviceMapper.selectByCondition(condition);
+        List<SmokeDeviceVo> smokeDeviceVos= Lists.newArrayList();
+        for (SmokeDevice device : select) {
+            SmokeDeviceVo smokeDeviceVo=new SmokeDeviceVo();
+            BeanUtils.copyProperties(device,smokeDeviceVo);
+            smokeDeviceVos.add(smokeDeviceVo);
+        }
+        return smokeDeviceVos;
+    }
+
+    @Override
+    public List<SmokeDeviceVo> smokeDeviceDetect(SmokeDeviceVo smokeDeviceVo) {
+        Condition condition=new Condition(SmokeDevice.class);
+        Example.Criteria criteria=condition.createCriteria();
+        if(!StringUtils.isEmpty(smokeDeviceVo.getCno())){
+            criteria.andLike("cno","%"+smokeDeviceVo.getCno()+"%");
+        }
+        if(!StringUtils.isEmpty(smokeDeviceVo.getStatus())){
+            criteria.andEqualTo("status",smokeDeviceVo.getStatus());
+        }
+        List<SmokeDevice> select = smokeDeviceMapper.selectByCondition(condition);
+        List<SmokeDeviceVo> smokeDeviceVos= Lists.newArrayList();
+        for (SmokeDevice device : select) {
+            smokeDeviceVo=new SmokeDeviceVo();
+            BeanUtils.copyProperties(device,smokeDeviceVo);
+            smokeDeviceVos.add(smokeDeviceVo);
+        }
+        return smokeDeviceVos;
+    }
+
+    @Override
+    public SmokeDeviceVo selectOne(SmokeDeviceVo smokeDeviceVo) {
+        SmokeDevice smokeDevice=new SmokeDevice();
+        BeanUtils.copyProperties(smokeDeviceVo,smokeDevice);
+        smokeDevice = smokeDeviceService.selectOne(smokeDevice);
+        BeanUtils.copyProperties(smokeDevice,smokeDeviceVo);
+        return smokeDeviceVo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public int insertSelective(SmokeDeviceVo smokeDeviceVo) {
+        SmokeDevice smokeDevice=new SmokeDevice();
+        smokeDevice.setCno(smokeDeviceVo.getCno());
+        smokeDevice = smokeDeviceService.selectOne(smokeDevice);
+        if(smokeDevice!=null&&!"".equals(smokeDevice.getCno())){
+            throw new RcpDubboException("设备已经存在");
+        }
+        SmokeDevice smokeDevice1=new SmokeDevice();
+        BeanUtils.copyProperties(smokeDeviceVo,smokeDevice1);
+        return smokeDeviceService.insertSelective(smokeDevice1);
+    }
+
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public int deleteByCno(List<String> cnos) {
+        int i=0;
+        for (String cno : cnos) {
+            SmokeDevice smokeDevice=new SmokeDevice();
+            smokeDevice.setCno(cno);
+            i+=smokeDeviceMapper.delete(smokeDevice);
+        }
+        return i;
+    }
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public int updateByCno(SmokeDeviceVo smokeDeviceVo) {
+        SmokeDevice smokeDevice=new SmokeDevice();
+        BeanUtils.copyProperties(smokeDeviceVo,smokeDevice);
+        Condition condition=new Condition(SmokeDevice.class);
+        Example.Criteria criteria=condition.createCriteria();
+        criteria.andEqualTo("cno",smokeDevice.getCno());
+        return smokeDeviceMapper.updateByConditionSelective(smokeDevice,condition);
+    }
+
+    @Override
+    public SmokeDeviceSelectTotalInfo SmokeDeviceSelectTotal() {
+        List<SmokeDeviceSelectTotalDB> smokeDeviceSelectTotalDBS = smokeDeviceMapper.SmokeDeviceSelectTotal();
+        SmokeDeviceSelectTotalInfo smokeDeviceSelectTotalInfo=new SmokeDeviceSelectTotalInfo();
+        for (SmokeDeviceSelectTotalDB smokeDeviceSelectTotalDB : smokeDeviceSelectTotalDBS) {
+            if("1".equals(smokeDeviceSelectTotalDB.getStatus())){
+                smokeDeviceSelectTotalInfo.setOnline(smokeDeviceSelectTotalDB.getTotal());
+            }else
+            if("2".equals(smokeDeviceSelectTotalDB.getStatus())){
+                smokeDeviceSelectTotalInfo.setOffline(smokeDeviceSelectTotalDB.getTotal());
+            }else
+            if("4".equals(smokeDeviceSelectTotalDB.getStatus())){
+                smokeDeviceSelectTotalInfo.setAlarm(smokeDeviceSelectTotalDB.getTotal());
+            }else
+            if("5".equals(smokeDeviceSelectTotalDB.getStatus())){
+                smokeDeviceSelectTotalInfo.setUndervoltage(smokeDeviceSelectTotalDB.getTotal());
+            }else
+            if("total".equals(smokeDeviceSelectTotalDB.getStatus())){
+                smokeDeviceSelectTotalInfo.setTotal(smokeDeviceSelectTotalDB.getTotal());
+            }
+        }
+        return smokeDeviceSelectTotalInfo;
+    }
+}

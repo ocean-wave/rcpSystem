@@ -1,0 +1,162 @@
+package cn.com.cdboost.collect.controller;
+
+
+import cn.com.cdboost.collect.aop.SystemControllerLog;
+import cn.com.cdboost.collect.dto.LoginUser;
+import cn.com.cdboost.collect.dto.response.LoginSuccessInfo;
+import cn.com.cdboost.collect.enums.Action;
+import cn.com.cdboost.collect.enums.GlobalConstant;
+import cn.com.cdboost.collect.model.Org;
+import cn.com.cdboost.collect.model.RoleRight;
+import cn.com.cdboost.collect.model.User;
+import cn.com.cdboost.collect.service.OrgService;
+import cn.com.cdboost.collect.service.RoleService;
+import cn.com.cdboost.collect.service.UserLogService;
+import cn.com.cdboost.collect.service.UserService;
+import cn.com.cdboost.collect.util.CryptographyUtil;
+import cn.com.cdboost.collect.util.DESUtil;
+import cn.com.cdboost.collect.util.HttpUtil;
+import cn.com.cdboost.collect.vo.Result;
+import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
+import java.util.List;
+
+
+@Controller
+public class LoginController {
+	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private RoleService roleService;
+	@Autowired
+	private OrgService orgService;
+	@Autowired
+	private UserLogService userLogService;
+	/**
+	 * 用户登录
+	 * @param request
+	 * @param session
+	 * @param loginName
+	 * @param password
+	 * @return
+	 */
+	@SystemControllerLog(description = "用户登录")
+	@RequestMapping(value="/login",method={RequestMethod.POST})
+	@ResponseBody
+	public String login(HttpServletRequest request, HttpSession session, @RequestParam String loginName, @RequestParam String password) throws Exception {
+		Result<LoginSuccessInfo> result = new Result<>();
+		if (StringUtils.isEmpty(loginName)) {
+			result.error("用户名不能为空");
+			return JSON.toJSONString(result);
+		}
+
+		if (StringUtils.isEmpty(password)) {
+			result.error("密码不能为空");
+			return JSON.toJSONString(result);
+		}
+
+		User currentUser = userService.getUserByLoginName(loginName);
+		if (currentUser == null) {
+			result.error("用户名或密码错误");
+			return JSON.toJSONString(result);
+		}
+
+		Subject subject = SecurityUtils.getSubject();
+		UsernamePasswordToken token = new UsernamePasswordToken(loginName, CryptographyUtil.md5(DESUtil.decryption(password,GlobalConstant.SECRET_KEY), GlobalConstant.SECRET_SALT));
+		// 登录验证
+		try {
+			subject.login(token);
+		} catch (Exception e) {
+			String message = "用户名或密码错误";
+			logger.error(message,e);
+			result.error(message);
+			return JSON.toJSONString(result);
+		}
+
+		LoginUser loginUser = new LoginUser();
+		BeanUtils.copyProperties(currentUser,loginUser);
+
+		// 查询用户拥有的所有组织权限
+		List<Org> orgs = orgService.queryChildren(currentUser.getOrgNo());
+		List<Long> orgNoList = Lists.newArrayList();
+		for (Org org : orgs) {
+			orgNoList.add(org.getOrgNo());
+		}
+
+		// 查询用户角色
+		Long roleId = userService.getRoleIdByUserID(currentUser.getId());
+		loginUser.setRoleId(roleId);
+		loginUser.setSessionId(session.getId());
+
+		// 查询用户角色权限信息
+		List<RoleRight> rolePermissions = roleService.getRolePermissionByRoleId(roleId);
+
+		// 获取真实client端IP
+		String clientIpAddr = HttpUtil.getClientIpAddr(request);
+		logger.info("登录用户clientIP=" + clientIpAddr);
+
+		// session缓存
+		session.setAttribute(GlobalConstant.ORG_NO_LIST,orgNoList);
+		session.setAttribute(GlobalConstant.CLIENT_REAL_IP,clientIpAddr);
+		session.setAttribute(GlobalConstant.SESSION_AUTHS, rolePermissions);
+		session.setAttribute(GlobalConstant.CURRENT_LOGIN_USER, loginUser);
+		session.setAttribute("TIMEOUT_FLAG", System.currentTimeMillis());
+		logger.info("登录用户的sessionId=" + session.getId());
+
+		//需要返回的用户信息,需修改，直接返回实体对象
+		LoginSuccessInfo successInfo = new LoginSuccessInfo();
+		successInfo.setUserId(currentUser.getId());
+		successInfo.setUserName(currentUser.getUserName());
+		successInfo.setUserMobile(currentUser.getUserMobile());
+		successInfo.setUserMail(currentUser.getUserMail());
+		result.setData(successInfo);
+		userLogService.create(currentUser.getId(), Action.LOGING.getActionId(),"用户登录","loginName",loginName,"用户["+currentUser.getUserName()+"]从["+request.getRemoteAddr()+"]登录","loginName:["+currentUser.getUserName()+"]");
+		return JSON.toJSONString(result);
+	}
+
+
+	/**
+	 * 用户退出系统
+	 * @param session
+	 * @return
+	 */
+	@SystemControllerLog(description = "用户退出系统")
+	@RequestMapping(value = "/logout",method={RequestMethod.POST})
+	@ResponseBody
+	public String logout(HttpSession session) {
+		LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+		if(currentUser!=null){
+			userLogService.create(currentUser.getId(), Action.LOGINGOUT.getActionId(),"用户登出","loginName",currentUser.getUserName(),"用户["+currentUser.getUserName()+"]退出","loginName:[\""+currentUser.getUserName()+"\"]");
+		}
+		// 清空session中所有属性
+		Enumeration<String> attributeNames = session.getAttributeNames();
+		while (attributeNames.hasMoreElements()) {
+			session.removeAttribute(attributeNames.nextElement().toString());
+		}
+
+		// session设置成无效
+		session.invalidate();
+
+		Result result = new Result();
+		return JSON.toJSONString(result);
+	}
+}

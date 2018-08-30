@@ -1,0 +1,596 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.constant.AliyunSmsConstant;
+import cn.com.cdboost.collect.constant.FeeControlConstant;
+import cn.com.cdboost.collect.constant.SmsConstant;
+import cn.com.cdboost.collect.dto.param.*;
+import cn.com.cdboost.collect.enums.DeviceType;
+import cn.com.cdboost.collect.exception.BusinessException;
+import cn.com.cdboost.collect.model.CustomerPhoneBind;
+import cn.com.cdboost.collect.model.Sms;
+import cn.com.cdboost.collect.service.*;
+import cn.com.cdboost.collect.util.*;
+import cn.com.cdboost.collect.vo.alisms.QuerySendDetailParam;
+import cn.com.cdboost.collect.vo.alisms.SendSmsParam;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.aliyuncs.dysmsapi.model.v20170525.QuerySendDetailsResponse;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * 阿里云短信服务实现类
+ */
+@Service
+public class AliyunSmsServiceImpl implements AliyunSmsService {
+    private static final Logger logger = LoggerFactory.getLogger(AliyunSmsServiceImpl.class);
+
+    @Autowired
+    private CustomerPhoneBindService customerPhoneBindService;
+    @Autowired
+    private CustomerDevMapService customerDevMapService;
+    @Autowired
+    private ChargingDevlogService chargingDevlogService;
+    @Autowired
+    private SmsService smsService;
+    @Autowired
+    private SmsSchemeService smsSchemeService;
+
+    @Value("${aliyun.accessKeyId}")
+    private String accessKeyId;
+    @Value("${aliyun.accessKeySecret}")
+    private String accessKeySecret;
+    @Value("${aliyun.signName}")
+    private String signName;
+    @Value("${aliyun.templateCode.validateCode}")
+    private String validateCode;
+    @Value("${aliyun.templateCode.paySuccessSmsTemplateCode}")
+    private String paySuccessSmsTemplateCode;
+    @Value("${aliyun.templateCode.remoteSuccessSmsTemplateCode}")
+    private String remoteSuccessSmsTemplateCode;
+    @Value("${aliyun.templateCode.alarmSmsTemplateCode}")
+    private String alarmSmsTemplateCode;
+    @Value("${aliyun.templateCode.chargeNormalStop}")
+    private String chargeNormalStop;
+    @Value("${aliyun.templateCode.chargeAbnormalStop}")
+    private String chargeAbnormalStop;
+    @Value("${aliyun.content.validateContent}")
+    private String validateContent;
+    @Value("${aliyun.content.paySuccessSmsContent}")
+    private String paySuccessSmsContent;
+    @Value("${aliyun.content.remoteSuccessSmsContent}")
+    private String remoteSuccessSmsContent;
+    @Value("${aliyun.content.alarmSmsContent}")
+    private String alarmSmsContent;
+    @Value("${aliyun.templateCode.chargeNormalStopContent}")
+    private String chargeNormalStopContent;
+    @Value("${aliyun.templateCode.chargeAbnormalStopContent}")
+    private String chargeAbnormalStopContent;
+
+    @Override
+    public String sendSmsCode(String mobilePhone,String customerNo) {
+        // 随机生成4位验证码
+        String randomNumCode = RandonNumberUtils.getRandomNumCode(6);
+
+        // 设置验证码有效期5分钟
+        CodeCacheUtil.set(mobilePhone,randomNumCode);
+
+        // 发送验证码短信
+        SendSmsParam param = new SendSmsParam();
+        param.setAccessKeyId(accessKeyId);
+        param.setAccessKeySecret(accessKeySecret);
+        param.setSignName(signName);
+        param.setTemplateCode(validateCode);
+        param.setPhoneMobiles(mobilePhone);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code",randomNumCode);
+        param.setTemplateParam(jsonObject.toString());
+        try {
+            SendSmsResponse sendSmsResponse = AliyunSmsUtil.sendSms(param);
+            if(sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals("OK")) {
+                //请求成功
+                String bizId = sendSmsResponse.getBizId();
+                // 新增短信记录
+                Sms sms = new Sms();
+                sms.setCustomerContact(mobilePhone);
+                sms.setCustomerNo(customerNo);
+                String str = String.format(validateContent,randomNumCode);
+                sms.setMessageContent(str);
+                sms.setCreateUserId(0L);
+                sms.setCreateTime(new Date());
+                sms.setSendTime(new Date());
+                sms.setMsgType(SmsConstant.SmsType.SMS_CODE.getType());
+                sms.setMessageStatus(0);
+                sms.setSmsUuid(bizId);
+                sms.setIsAutoBuider(0);
+                smsService.insertSelective(sms);
+            } else {
+                logger.info("验证码发送失败：sendSmsResponse=" + JSON.toJSONString(sendSmsResponse));
+                String code = sendSmsResponse.getCode();
+                this.processSmsSendError(code);
+            }
+        } catch (ClientException e) {
+            logger.info("发送短信验证码异常",e);
+        }
+        return randomNumCode;
+    }
+
+    @Override
+    public void verifySmsCode(String mobilePhone, String code) {
+        // 从缓存取出验证码
+        String validateCode = CodeCacheUtil.get(mobilePhone);
+        if (validateCode == null) {
+            throw new BusinessException("验证码已失效");
+        }
+        if (!validateCode.equals(code)) {
+            throw new BusinessException("验证码错误");
+        }
+    }
+    @Override
+    public void sendOrderPaySuccess(SmsPaySuccessParam param) {
+        // 查询需要发送的电话号码
+        String customerNo = param.getCustomerNo();
+        List<CustomerPhoneBind> phoneBinds = customerPhoneBindService.queryByCustomerNo(customerNo);
+        List<String> mobilePhones = Lists.newArrayList();
+        for (CustomerPhoneBind phoneBind : phoneBinds) {
+            mobilePhones.add(phoneBind.getMobilePhone());
+        }
+
+        // 发送短信
+        SendSmsParam smsParam = new SendSmsParam();
+        smsParam.setAccessKeyId(accessKeyId);
+        smsParam.setAccessKeySecret(accessKeySecret);
+        smsParam.setSignName(signName);
+        smsParam.setTemplateCode(paySuccessSmsTemplateCode);
+
+        String phoneMobiles = Joiner.on(",").join(mobilePhones);
+        smsParam.setPhoneMobiles(phoneMobiles);
+
+        // 构造短信模板内容
+        PaySuccessTempParam tempParam = new PaySuccessTempParam();
+        tempParam.setCustomerName(param.getCustomerName());
+        tempParam.setPayTime(param.getPayTime());
+
+        // 支付方式
+        Integer payMethod = param.getPayMethod();
+        String payMethodName = FeeControlConstant.PayMethod.getDescByCode(payMethod);
+        tempParam.setPayMethodName(payMethodName);
+
+        // 设备编号
+        String cno = param.getCno();
+        String deviceNo = CNoUtil.getNo(cno);
+        tempParam.setDeviceNo(deviceNo);
+
+        // 设备类型名称
+        String deviceType = cno.substring(0,2);
+        String deviceTypeName = DeviceType.getMessageByCode(deviceType);
+        tempParam.setDeviceTypeName(deviceTypeName);
+
+        // 支付金额
+        String payMoney = param.getPayMoney();
+        String payMoneyStr = MathUtil.fen2yuan(payMoney);
+        tempParam.setPayMoney(payMoneyStr);
+
+        // 费用类型
+        String feeType = FeeControlConstant.FeeType.getDescByCode(deviceType);
+        tempParam.setFeeType(feeType);
+
+        tempParam.setDeviceTypeName2(deviceTypeName);
+        smsParam.setTemplateParam(JSON.toJSONString(tempParam));
+        try {
+            SendSmsResponse sendSmsResponse = AliyunSmsUtil.sendSms(smsParam);
+            if(sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals("OK")) {
+                //请求成功
+                String bizId = sendSmsResponse.getBizId();
+                // 短信内容
+                List<Object> lists = Lists.newArrayList();
+                lists.add(tempParam.getCustomerName());
+                lists.add(tempParam.getPayTime());
+                lists.add(payMethodName);
+                lists.add(deviceNo);
+                lists.add(deviceTypeName);
+                lists.add(payMoneyStr);
+                lists.add(feeType);
+                lists.add(deviceTypeName);
+                Object[] objects = lists.toArray(new Object[lists.size()]);
+                String smsContent = String.format(paySuccessSmsContent,objects);
+
+                List<Sms> dataList = Lists.newArrayList();
+                Date date = new Date();
+                for (String mobilePhone : mobilePhones) {
+                    Sms sms = new Sms();
+                    sms.setCustomerContact(mobilePhone);
+                    sms.setCustomerNo(customerNo);
+                    sms.setMessageContent(smsContent);
+                    sms.setCreateUserId(0L);
+                    sms.setCreateTime(date);
+                    sms.setSendTime(date);
+                    sms.setMsgType(SmsConstant.SmsType.PAY_SUCCESS.getType());
+                    sms.setMessageStatus(0);
+                    sms.setSmsUuid(bizId);
+                    sms.setIsAutoBuider(0);
+                    dataList.add(sms);
+                }
+
+                // 批量新增短信记录
+                smsService.insertList(dataList);
+            } else {
+                logger.info("支付成功，发送缴费到账提醒短信失败：sendSmsResponse=" + JSON.toJSONString(sendSmsResponse));
+            }
+        } catch (ClientException e) {
+            logger.error("支付成功，发送缴费到账提醒短信异常",e);
+        }
+    }
+
+    @Override
+    public void remoteRechargeSuccess(SmsRemoteSuccessParam param) {
+        String customerNo = param.getCustomerNo();
+        List<CustomerPhoneBind> phoneBinds = customerPhoneBindService.queryByCustomerNo(customerNo);
+        List<String> mobilePhones = Lists.newArrayList();
+        for (CustomerPhoneBind phoneBind : phoneBinds) {
+            mobilePhones.add(phoneBind.getMobilePhone());
+        }
+
+        // 发送短信
+        SendSmsParam smsParam = new SendSmsParam();
+        smsParam.setAccessKeyId(accessKeyId);
+        smsParam.setAccessKeySecret(accessKeySecret);
+        smsParam.setSignName(signName);
+        smsParam.setTemplateCode(remoteSuccessSmsTemplateCode);
+
+        String phoneMobiles = Joiner.on(",").join(mobilePhones);
+        smsParam.setPhoneMobiles(phoneMobiles);
+
+        // 构造短信模板内容
+        RemoteSuccessTempParam tempParam = new RemoteSuccessTempParam();
+        tempParam.setCustomerName(param.getCustomerName());
+        tempParam.setPayTime(param.getPayTime());
+
+        // 支付方式
+        Integer payMethod = param.getPayMethod();
+        String payMethodName = FeeControlConstant.PayMethod.getDescByCode(payMethod);
+        tempParam.setPayMethodName(payMethodName);
+
+        // 支付金额
+        String payMoney = param.getPayMoney();
+//        String payMoneyStr = MathUtil.fen2yuan(payMoney);
+        tempParam.setPayMoney(payMoney);
+
+        // 费用类型
+        String cno = param.getCno();
+        String deviceType = cno.substring(0,2);
+        String feeType = FeeControlConstant.FeeType.getDescByCode(deviceType);
+        tempParam.setFeeType(feeType);
+
+        // 设备编号
+        String deviceNo = CNoUtil.getNo(cno);
+        tempParam.setDeviceNo(deviceNo);
+
+        // 设备类型名称
+        String deviceTypeName = DeviceType.getMessageByCode(deviceType);
+        tempParam.setDeviceTypeName(deviceTypeName);
+        smsParam.setTemplateParam(JSON.toJSONString(tempParam));
+        try {
+            SendSmsResponse sendSmsResponse = AliyunSmsUtil.sendSms(smsParam);
+            if(sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals("OK")) {
+                //请求成功
+                String bizId = sendSmsResponse.getBizId();
+                // 短信内容
+                List<Object> lists = Lists.newArrayList();
+                lists.add(tempParam.getCustomerName());
+                lists.add(tempParam.getPayTime());
+                lists.add(payMethodName);
+                lists.add(payMoney);
+                lists.add(feeType);
+                lists.add(deviceNo);
+                lists.add(deviceTypeName);
+                Object[] objects = lists.toArray(new Object[lists.size()]);
+                String smsContent = String.format(remoteSuccessSmsContent,objects);
+
+                List<Sms> dataList = Lists.newArrayList();
+                Date date = new Date();
+                for (String mobilePhone : mobilePhones) {
+                    Sms sms = new Sms();
+                    sms.setCustomerContact(mobilePhone);
+                    sms.setCustomerNo(customerNo);
+                    sms.setMessageContent(smsContent);
+                    sms.setCreateUserId(0L);
+                    sms.setCreateTime(date);
+                    sms.setSendTime(date);
+                    sms.setMsgType(SmsConstant.SmsType.REMOTE_PAY_SUCCESS.getType());
+                    sms.setMessageStatus(0);
+                    sms.setSmsUuid(bizId);
+                    sms.setIsAutoBuider(0);
+                    dataList.add(sms);
+                }
+
+                // 批量新增短信记录
+                smsService.insertList(dataList);
+            } else {
+                logger.info("下发电表成功，发送充值到账提醒短信失败：sendSmsResponse=" + JSON.toJSONString(sendSmsResponse));
+            }
+        } catch (ClientException e) {
+            logger.error("下发电表成功，发送充值到账提醒短信异常",e);
+        }
+    }
+
+    @Override
+    public void sendAlarmSms(List<SmsAlarmParam> param, Integer isAutoBuider) {
+        logger.info("发送短信告警信息入参param=" + JSON.toJSONString(param));
+        if (CollectionUtils.isEmpty(param)) {
+            return;
+        }
+
+        for (SmsAlarmParam alarmParam : param) {
+            List<String> mobiles = alarmParam.getMobiles();
+            AlarmTempParam alarmTempParam = this.getAlarmTempParam(alarmParam);
+            SendSmsParam smsParam = new SendSmsParam();
+            smsParam.setAccessKeyId(accessKeyId);
+            smsParam.setAccessKeySecret(accessKeySecret);
+            smsParam.setTemplateCode(alarmSmsTemplateCode);
+            smsParam.setSignName(signName);
+            String mobilePhones = Joiner.on(",").join(mobiles);
+            smsParam.setPhoneMobiles(mobilePhones);
+            smsParam.setTemplateParam(JSON.toJSONString(alarmTempParam));
+            try {
+                // 按表发送短信
+                SendSmsResponse sendSmsResponse = AliyunSmsUtil.sendSms(smsParam);
+                if(sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals("OK")) {
+                    String bizId = sendSmsResponse.getBizId();
+                    List<Sms> dataList = Lists.newArrayList();
+                    Date date = new Date();
+                    for (String mobile : mobiles) {
+                        // 短信内容
+                        List<Object> lists = Lists.newArrayList();
+                        lists.add(alarmTempParam.getCustomerName());
+                        lists.add(alarmTempParam.getCollectTime());
+                        lists.add(alarmTempParam.getDeviceName());
+                        lists.add(alarmTempParam.getAlarmThreshold());
+                        lists.add(alarmTempParam.getRemainAmount());
+                        Object[] objects = lists.toArray(new Object[lists.size()]);
+                        String smsContent = String.format(alarmSmsContent,objects);
+
+                        Sms sms = new Sms();
+                        sms.setCustomerContact(mobile);
+                        sms.setCustomerNo(alarmTempParam.getCustomerNo());
+                        sms.setMessageContent(smsContent);
+                        sms.setCreateUserId(0L);
+                        sms.setCreateTime(date);
+                        sms.setSendTime(date);
+                        sms.setMsgType(SmsConstant.SmsType.ALARM.getType());
+                        sms.setMessageStatus(0);
+                        sms.setSmsUuid(bizId);
+                        sms.setIsAutoBuider(isAutoBuider);
+                        dataList.add(sms);
+                    }
+
+                    // 批量新增短信记录
+                    logger.info("批量新增Sms表短信记录dataList=" + JSON.toJSONString(dataList));
+                    smsService.insertList(dataList);
+                } else {
+                    logger.info("发送告警短信失败：sendSmsResponse=" + JSON.toJSONString(sendSmsResponse));
+                    String code = sendSmsResponse.getCode();
+                    this.processSmsSendError(code);
+                }
+            } catch (Exception e) {
+                logger.error("发送告警短信异常",e);
+                throw new BusinessException("发送短信失败");
+            }
+        }
+    }
+
+    @Override
+    public void sendChargeNormalAlarm(ChargeNormalAlarmParam alarmParam) {
+        logger.info("充电正常结束，发送短信ChargeNormalAlarmParam=" + JSON.toJSONString(alarmParam));
+        // 发送告警短信
+        SendSmsParam param = new SendSmsParam();
+        param.setAccessKeyId(accessKeyId);
+        param.setAccessKeySecret(accessKeySecret);
+        param.setSignName(signName);
+        param.setTemplateCode(chargeNormalStop);
+        param.setPhoneMobiles(alarmParam.getMobilePhone());
+        param.setTemplateParam(JSON.toJSONString(alarmParam));
+        try {
+            SendSmsResponse sendSmsResponse = AliyunSmsUtil.sendSms(param);
+            if(sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals("OK")) {
+                //请求成功
+                String bizId = sendSmsResponse.getBizId();
+                //短信内容
+                List<Object> lists = Lists.newArrayList();
+                lists.add(alarmParam.getChargeTime());
+                lists.add(alarmParam.getBeginTime());
+                lists.add(alarmParam.getEndTime());
+                Object[] objects = lists.toArray(new Object[lists.size()]);
+
+                // 新增短信记录
+                Sms sms = new Sms();
+                sms.setCustomerContact(alarmParam.getMobilePhone());
+                sms.setCustomerNo(alarmParam.getOpenId());
+                String str = String.format(chargeNormalStopContent,objects);
+                sms.setMessageContent(str);
+                sms.setCreateUserId(0L);
+                sms.setCreateTime(new Date());
+                sms.setSendTime(new Date());
+                sms.setMsgType(SmsConstant.SmsType.ALARM.getType());
+                sms.setMessageStatus(0);
+                sms.setSmsUuid(bizId);
+                sms.setIsAutoBuider(0);
+                smsService.insertSelective(sms);
+                //更新日志表短信发送状态
+                chargingDevlogService.updateSmsStatus(alarmParam.getChargingGuid());
+            } else {
+                logger.info("短信发送失败：sendSmsResponse=" + JSON.toJSONString(sendSmsResponse));
+                String code = sendSmsResponse.getCode();
+                this.processSmsSendError(code);
+            }
+        } catch (ClientException e) {
+            logger.info("发送短信异常",e);
+        }
+    }
+
+    @Override
+    public void sendChargeAbnormalAlarm(ChargeAbnormalAlarmParam alarmParam) {
+        logger.info("充电异常结束，发送短信ChargeAbnormalAlarmParam=" + JSON.toJSONString(alarmParam));
+        // 发送告警短信
+        SendSmsParam param = new SendSmsParam();
+        param.setAccessKeyId(accessKeyId);
+        param.setAccessKeySecret(accessKeySecret);
+        param.setSignName(signName);
+        param.setTemplateCode(chargeAbnormalStop);
+        param.setPhoneMobiles(alarmParam.getMobilePhone());
+        param.setTemplateParam(JSON.toJSONString(alarmParam));
+        try {
+            SendSmsResponse sendSmsResponse = AliyunSmsUtil.sendSms(param);
+            if(sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals("OK")) {
+                //请求成功
+                String bizId = sendSmsResponse.getBizId();
+                //短信内容
+                List<Object> lists = Lists.newArrayList();
+                lists.add(alarmParam.getEndTime());
+                lists.add(alarmParam.getEventContent());
+                lists.add(alarmParam.getContactPhone());
+                Object[] objects = lists.toArray(new Object[lists.size()]);
+
+                // 新增短信记录
+                Sms sms = new Sms();
+                sms.setCustomerContact(alarmParam.getMobilePhone());
+                sms.setCustomerNo(alarmParam.getOpenId());
+                String str = String.format(chargeAbnormalStopContent,objects);
+                sms.setMessageContent(str);
+                sms.setCreateUserId(0L);
+                sms.setCreateTime(new Date());
+                sms.setSendTime(new Date());
+                sms.setMsgType(SmsConstant.SmsType.ALARM.getType());
+                sms.setMessageStatus(0);
+                sms.setSmsUuid(bizId);
+                sms.setIsAutoBuider(0);
+                smsService.insertSelective(sms);
+                //更新日志表短信发送状态
+                chargingDevlogService.updateSmsStatus(alarmParam.getChargingGuid());
+            } else {
+                logger.info("短信发送失败：sendSmsResponse=" + JSON.toJSONString(sendSmsResponse));
+                String code = sendSmsResponse.getCode();
+                this.processSmsSendError(code);
+            }
+        } catch (ClientException e) {
+            logger.info("发送短信异常",e);
+        }
+    }
+
+    @Override
+    public void checkSendStatus(List<Sms> list) {
+        logger.info("检查短信发送状态入参list=" + JSON.toJSONString(list));
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        Date date = new Date();
+        String sendDate = format.format(date);
+        for (Sms sms : list) {
+            QuerySendDetailParam param = new QuerySendDetailParam();
+            param.setAccessKeyId(accessKeyId);
+            param.setAccessKeySecret(accessKeySecret);
+            param.setPhoneNumber(sms.getCustomerContact());
+            param.setBizId(sms.getSmsUuid());
+            param.setPageSize(10L);
+            param.setCurrentPage(1L);
+            param.setSendDate(sendDate);
+            try {
+                QuerySendDetailsResponse detailsResponse = AliyunSmsUtil.querySendDetails(param);
+                //获取返回结果
+                if(detailsResponse.getCode() != null && detailsResponse.getCode().equals("OK")){
+                    //代表请求成功
+                    List<QuerySendDetailsResponse.SmsSendDetailDTO> smsSendDetailDTOs = detailsResponse.getSmsSendDetailDTOs();
+                    for (QuerySendDetailsResponse.SmsSendDetailDTO dto : smsSendDetailDTOs) {
+                        try {
+                            Date parse = DateUtil.parse(dto.getSendDate());
+                            // sms状态更新
+                            Sms updateParam = new Sms();
+                            updateParam.setId(sms.getId());
+                            int sendStatus = dto.getSendStatus().intValue();
+                            if (sendStatus == AliyunSmsConstant.SmsSendStatus.WAIT_RETURN.getStatus()) {
+                                // 等待回执
+                                continue;
+                            } else if (sendStatus == AliyunSmsConstant.SmsSendStatus.SEND_FAIL.getStatus()) {
+                                // 发送失败
+                                updateParam.setMessageStatus(2);
+                                updateParam.setUpdateTime(new Date());
+                            } else {
+                                // 发送成功
+                                updateParam.setMessageStatus(1);
+                                updateParam.setSendTime(parse);
+                                updateParam.setUpdateTime(new Date());
+                            }
+                            smsService.updateByPrimaryKeySelective(updateParam);
+
+                            Integer msgType = sms.getMsgType();
+                            Integer isAutoBuider = sms.getIsAutoBuider();
+                            if (SmsConstant.SmsType.ALARM.getType().equals(msgType) && isAutoBuider == 1) {
+                                // 按手机号查询的，每次只会有一条
+                                int num = smsSchemeService.updateCountAndSendTime(sms.getCustomerNo(), sms.getCustomerContact(), parse,new Date());
+                                logger.info("SmsScheme表更新完毕，更新条数num=" + num);
+                            }
+                        } catch (ParseException e) {
+                            logger.error("日期转换异常",e);
+                        }
+                    }
+                }
+            } catch (ClientException e) {
+                logger.error("短信状态查询接口异常",e);
+            }
+        }
+    }
+
+    /**
+     * 处理短信发送失败的情况
+     * @param code
+     */
+    private void processSmsSendError(String code) {
+        if (AliyunSmsConstant.SmsErrorCode.MOBILE_NUMBER_ILLEGAL.getCode().equals(code)) {
+            throw new BusinessException(AliyunSmsConstant.SmsErrorCode.MOBILE_NUMBER_ILLEGAL.getMessage());
+        } else if (AliyunSmsConstant.SmsErrorCode.BUSINESS_LIMIT_CONTROL.getCode().equals(code)) {
+            throw new BusinessException("同一个手机号码发送短信验证码，支持一分钟内1条，一小时内5条 ，一天内累计10条");
+        } else if (AliyunSmsConstant.SmsErrorCode.AMOUNT_NOT_ENOUGH.getCode().equals(code)) {
+            throw new BusinessException(AliyunSmsConstant.SmsErrorCode.AMOUNT_NOT_ENOUGH.getMessage());
+        } else {
+            throw new BusinessException("发送短信失败");
+        }
+    }
+    /**
+     * 构造告警模板参数对象
+     * @param alarmParam
+     * @return
+     */
+    private AlarmTempParam getAlarmTempParam(SmsAlarmParam alarmParam) {
+        AlarmTempParam param = new AlarmTempParam();
+        param.setCustomerNo(alarmParam.getCustomerNo());
+        param.setCustomerName(alarmParam.getCustomerName());
+        param.setCollectTime(alarmParam.getCollectTime());
+
+        // 设备名称
+        String deviceTypeStr = DeviceType.getMessageByCode(alarmParam.getDeviceType());
+        param.setDeviceName(deviceTypeStr);
+
+        // 告警阈值
+        String alarmThreshold = MathUtil.setPrecision(alarmParam.getAlarmThreshold(), 2);
+        param.setAlarmThreshold(alarmThreshold);
+
+        // 剩余金额
+        String remainAmount = MathUtil.setPrecision(alarmParam.getRemainAmount(), 2);
+        param.setRemainAmount(remainAmount);
+        return param;
+    }
+}

@@ -1,0 +1,85 @@
+{
+  "data": [
+    {
+      "customerName":"张三",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李四",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"王五",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"张麻子",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李二娃",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李二娃",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李二娃",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李二娃",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李二娃",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李二娃",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李二娃",
+      "customerNo":"001100",
+      "electDeviceNo":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    }
+  ],
+  "total": 5,
+  "message": "success",
+  "code": 1
+}

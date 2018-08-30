@@ -1,0 +1,45 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.dao.ChargingProjectMapper;
+import cn.com.cdboost.collect.dto.ProjectDto;
+import cn.com.cdboost.collect.model.ChargingProject;
+import cn.com.cdboost.collect.service.ChargingProjectService;
+import com.google.common.collect.Lists;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ChargingProjectServiceImpl extends BaseServiceImpl<ChargingProject> implements ChargingProjectService {
+    @Autowired
+    private ChargingProjectMapper chargingProjectMapper;
+    @Override
+    public List<ProjectDto> queryAllProject() {
+        //查询所有项目
+        List<ChargingProject> chargingProjects = chargingProjectMapper.selectAll();
+        List<ProjectDto> projectDtos = Lists.newArrayList();
+        for (ChargingProject chargingProject:chargingProjects){
+            ProjectDto projectDto = new ProjectDto();
+            BeanUtils.copyProperties(chargingProject,projectDto);
+            projectDtos.add(projectDto);
+        }
+        return projectDtos;
+    }
+
+    @Override
+    public ChargingProject queryByProjectGuid(String projectGuid) {
+        ChargingProject param = new ChargingProject();
+        param.setProjectGuid(projectGuid);
+        return chargingProjectMapper.selectOne(param);
+    }
+
+    @Override
+    public ChargingProject queryProjectInfo() {
+        List<ChargingProject> chargingProjects = chargingProjectMapper.selectAll();
+        ChargingProject chargingProject = chargingProjects.get(0);
+        return chargingProject;
+    }
+}

@@ -1,0 +1,75 @@
+-- 清除数据库数据脚本
+truncate table em_a_imp_collflag;
+truncate table em_d_changemeter;
+truncate table em_d_changemeteroth;
+truncate table em_d_cost_calcflag;
+truncate table em_d_cost_calculate;
+truncate table em_d_customer_phonebind;
+truncate table em_d_customer_wxbind;
+truncate table em_d_customerdevmap;
+truncate table em_d_customerdevmap_his;
+truncate table em_d_customerinfo;
+truncate table em_d_customerinfo_cost;
+truncate table em_d_customerinfo_his;
+truncate table em_d_day_customer_sum;
+truncate table em_d_day_efficiency;
+truncate table em_d_day_impsum;
+truncate table em_d_day_meter_sum;
+truncate table em_d_dayfreecollectflag;
+truncate table em_d_dayfreesum;
+truncate table em_d_device_comparam;
+truncate table em_d_device_event;
+truncate table em_d_device_heartbeat;
+truncate table em_d_deviceconnparam;
+truncate table em_d_deviceinfo;
+truncate table em_d_deviceinfo_devicestate;
+truncate table em_d_devicemeterparam;
+truncate table em_d_fee_acct;
+truncate table em_d_fee_autodeduct;
+truncate table em_d_fee_changeiccard;
+truncate table em_d_fee_changeiccard_copy;
+truncate table em_d_fee_onoff;
+truncate table em_d_fee_pay;
+truncate table em_d_fee_payopt;
+truncate table em_d_fee_payorder;
+truncate table em_d_fee_readcard;
+truncate table em_d_fee_refund;
+truncate table em_d_freeze_analyze;
+truncate table em_d_freeze_log;
+truncate table em_d_freezeflg;
+truncate table em_d_imp_elecdata;
+truncate table em_d_imp_elecfail;
+truncate table em_d_meter_day_power;
+truncate table em_d_meter_init_power;
+truncate table em_d_meter_state;
+truncate table em_d_metercollectdata;
+truncate table em_d_metercollectgroup;
+truncate table em_d_meterreadqueue;
+truncate table em_d_meterrelation;
+truncate table em_d_meterscheme;
+truncate table em_d_metersuppinfo;
+truncate table em_d_metersuppquery;
+truncate table em_d_metersupptask;
+truncate table em_d_month_energy;
+truncate table em_d_monthsumdata;
+truncate table em_d_monthsumramount;
+truncate table em_d_query_impot;
+truncate table em_d_query_scheme;
+truncate table em_d_query_schememet;
+truncate table em_d_sms;
+truncate table em_d_smsscheme;
+truncate table em_d_switch_delay;
+truncate table em_s_userlog;
+truncate table tmp_em_d_customerinfo;
+truncate table tmp_lineloss_query;
+
+-- 清除充电桩数据
+-- truncate table em_d_charging_cst;
+-- truncate table em_d_charging_deduct;
+-- truncate table em_d_charging_device;
+-- truncate table em_d_charging_devlog;
+-- truncate table em_d_charging_pay;
+-- truncate table em_d_charging_use_detailed;
+
+-- 清除除了预置数据之外的数据
+

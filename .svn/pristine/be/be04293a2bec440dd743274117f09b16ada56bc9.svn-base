@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.DeviceComParamMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.DeviceComParam" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="protocol_type" property="protocolType" jdbcType="INTEGER" />
+    <result column="baund" property="baund" jdbcType="INTEGER" />
+    <result column="parity" property="parity" jdbcType="INTEGER" />
+    <result column="channel" property="channel" jdbcType="INTEGER" />
+    <result column="prefix" property="prefix" jdbcType="CHAR" />
+    <result column="wake_up_interval" property="wakeUpInterval" jdbcType="INTEGER" />
+    <result column="wake_up_num" property="wakeUpNum" jdbcType="INTEGER" />
+    <result column="wake_up_cmd" property="wakeUpCmd" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

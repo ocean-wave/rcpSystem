@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingPayChemeMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingPayCheme" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="scheme_guid" property="schemeGuid" jdbcType="VARCHAR" />
+    <result column="pay_category" property="payCategory" jdbcType="INTEGER" />
+    <result column="num_months" property="numMonths" jdbcType="INTEGER" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="money" property="money" jdbcType="DECIMAL" />
+    <result column="charging_time" property="chargingTime" jdbcType="INTEGER" />
+    <result column="charging_cnt" property="chargingCnt" jdbcType="INTEGER" />
+    <result column="project_guid" property="projectGuid" jdbcType="VARCHAR" />
+    <result column="sort_no" property="sortNo" jdbcType="INTEGER" />
+    <result column="is_enable" property="isEnable" jdbcType="INTEGER" />
+  </resultMap>
+</mapper>

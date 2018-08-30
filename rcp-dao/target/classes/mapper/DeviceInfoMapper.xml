@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.DeviceInfoMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.DeviceInfo" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="assets_no" property="assetsNo" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="CHAR" />
+    <result column="p_device_no" property="pDeviceNo" jdbcType="VARCHAR" />
+    <result column="device_model" property="deviceModel" jdbcType="VARCHAR" />
+    <result column="device_factory" property="deviceFactory" jdbcType="VARCHAR" />
+    <result column="install_date" property="installDate" jdbcType="DATE" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="run_state" property="runState" jdbcType="VARCHAR" />
+    <result column="coord_type" property="coordType" jdbcType="INTEGER" />
+    <result column="lng" property="lng" jdbcType="DECIMAL" />
+    <result column="lat" property="lat" jdbcType="DECIMAL" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_user_id" property="updateUserId" jdbcType="BIGINT" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_auto_sms" property="isAutoSms" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="rely_cno" property="relyCno" jdbcType="VARCHAR" />
+    <result column="is_on" property="isOn" jdbcType="INTEGER" />
+    <result column="on_off_opt_user" property="onOffOptUser" jdbcType="BIGINT" />
+    <result column="last_on_off_time" property="lastOnOffTime" jdbcType="TIMESTAMP" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="off_scheme" property="offScheme" jdbcType="INTEGER" />
+    <result column="off_param" property="offParam" jdbcType="INTEGER" />
+    <result column="device_factory_val" property="deviceFactoryVal" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <resultMap id="deviceInfoDto" type="cn.com.cdboost.collect.dto.DeviceInfoDto">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="assets_no" property="assetsNo" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
+    <result column="p_device_no" property="pDeviceNo" jdbcType="VARCHAR" />
+    <result column="device_model" property="deviceModel" jdbcType="VARCHAR" />
+    <result column="device_factory" property="deviceFactory" jdbcType="VARCHAR" />
+    <result column="install_date" property="installDate" jdbcType="VARCHAR" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="run_state" property="runState" jdbcType="VARCHAR" />
+    <result column="coord_type" property="coordType" jdbcType="INTEGER" />
+    <result column="lng" property="lng" jdbcType="DECIMAL" />
+    <result column="lat" property="lat" jdbcType="DECIMAL" />
+    <result column="install_user_id" property="installUserId" jdbcType="BIGINT" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_user_id" property="updateUserId" jdbcType="BIGINT" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL" />
+    <result column="is_auto_sms" property="isAutoSms" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="init_amount" property="initAmount" jdbcType="DECIMAL" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="transformer_no" property="transformerNo" jdbcType="VARCHAR" />
+    <result column="building_no" property="buildingNo" jdbcType="VARCHAR" />
+    <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="is_on" property="isOn" jdbcType="INTEGER" />
+    <result column="is_online" property="isOnline" jdbcType="INTEGER" />
+    <result column="on_off_opt_user" property="onOffOptUser" jdbcType="BIGINT" />
+    <result column="last_on_off_time" property="lastOnOffTime" jdbcType="TIMESTAMP" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT"/>
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="rely_cno" property="relyCno" jdbcType="VARCHAR" />
+    <result column="ratio" property="ratio" jdbcType="INTEGER" />
+    <result column="local_control" property="localControl" jdbcType="INTEGER" />
+    <result column="mote_type" property="moteType" jdbcType="VARCHAR" />
+    <result column="format_date" property="formatDate" jdbcType="VARCHAR" />
+    <result column="cjq_no" property="cjqNo" jdbcType="VARCHAR" />
+    <result column="jzq_no" property="jzqNo" jdbcType="VARCHAR" />
+    <result column="comm_rule" property="commRule" jdbcType="INTEGER" />
+    <result column="comm_port" property="commPort" jdbcType="INTEGER" />
+    <result column="collect_dev_type" property="collectDevType" jdbcType="VARCHAR" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="INTEGER" />
+    <result column="send_flag" property="sendFlag" jdbcType="INTEGER" />
+    <result column="comm_setup_sn" property="commSetupSn" jdbcType="INTEGER" />
+    <result column="comm_point_code" property="commPointCode" jdbcType="INTEGER" />
+    <result column="comm_baudrate" property="commBaudrate" jdbcType="INTEGER" />
+    <result column="open_id" property="openId" jdbcType="VARCHAR" />
+    <result column="last_on_time" property="lastOnTime" jdbcType="TIMESTAMP" />
+    <result column="last_online_time" property="lastOnlineTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <update id="updateDeviceOrgNo">
+    update em_d_deviceinfo t
+    inner join em_d_customerdevmap t0
+    on t.cno=t0.cno
+    set t.org_no=#{orgNo}
+    where t0.customer_no=#{customerNo} AND t0.is_change=0
+  </update>
+
+  <resultMap id="customerDeviceInfoDto" type="cn.com.cdboost.collect.dto.response.CustomerDeviceInfoDto">
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
+    <result column="device_factory" property="deviceFactory" jdbcType="VARCHAR" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="init_amount" property="initAmount" jdbcType="DECIMAL" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="transformer_no" property="transformerNo" jdbcType="VARCHAR" />
+    <result column="building_no" property="buildingNo" jdbcType="VARCHAR" />
+    <result column="open_id" property="openId" jdbcType="VARCHAR" />
+    <result column="cjq_no" property="cjqNo" jdbcType="VARCHAR" />
+    <result column="jzq_no" property="jzqNo" jdbcType="VARCHAR" />
+    <result column="comm_rule" property="commRule" jdbcType="INTEGER" />
+    <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+    <result column="comm_port" property="commPort" jdbcType="INTEGER" />
+    <result column="ratio" property="ratio" jdbcType="INTEGER" />
+    <result column="local_control" property="localControl" jdbcType="INTEGER" />
+    <result column="mote_type" property="moteType" jdbcType="VARCHAR" />
+    <result column="collect_dev_type" property="collectDevType" jdbcType="VARCHAR" />
+    <result column="send_flag" property="sendFlag" jdbcType="INTEGER" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="INTEGER" />
+    <result column="comm_setup_sn" property="commSetupSn" jdbcType="INTEGER" />
+    <result column="comm_point_code" property="commPointCode" jdbcType="INTEGER" />
+    <result column="comm_baudrate" property="commBaudrate" jdbcType="INTEGER" />
+    <result column="is_important" property="isImportant" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!--批量导入-->
+  <select id="importExcel2DB" parameterType="java.util.Map" statementType="CALLABLE"  resultType="Integer">
+    {call PRC_B_All_Import(
+    #{tableName,mode=IN,jdbcType=VARCHAR},
+    #{importID,mode=IN,jdbcType=VARCHAR},
+    #{status,mode=OUT,jdbcType=INTEGER})}
+  </select>
+
+  <!-- 获取设备档案 -->
+  <select id="listDeviceRecords" parameterType="cn.com.cdboost.collect.dto.param.DeviceInfoQueryVo" statementType="CALLABLE" resultMap="deviceInfoDto">
+    {call PRC_W_d_DeviceinfoGet(
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{deviceFactory,mode=IN,jdbcType=VARCHAR},
+    #{installDateSTime,mode=IN,jdbcType=VARCHAR},
+    #{installDateETime,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{isOnline,mode=IN,jdbcType=VARCHAR},
+    #{sortName,mode=IN,jdbcType=VARCHAR},
+    #{sortOrder,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+  <!-- 获取设备档案 -->
+  <select id="listDeviceRecordsNew" parameterType="cn.com.cdboost.collect.dto.param.DeviceInfoQueryVo" statementType="CALLABLE" resultMap="deviceInfoDto">
+    {call PRC_W_d_DeviceinfoGet(
+    #{installDateSTime,mode=IN,jdbcType=VARCHAR},
+    #{installDateETime,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{isOnline,mode=IN,jdbcType=VARCHAR},
+    #{sortName,mode=IN,jdbcType=VARCHAR},
+    #{sortOrder,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{importGuid,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="otherMainSubDto" type="cn.com.cdboost.collect.dto.response.OtherMainSubDto" >
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+  </resultMap>
+
+  <!--返回总表信息,最多返回500条记录-->
+  <select id="queryOtherMainSubTree" resultMap="otherMainSubDto">
+    SELECT d.device_no,d.org_no,d.cno
+    FROM em_d_deviceinfo d
+    <if test="onlineStatus != null">
+      INNER JOIN em_d_deviceinfo_devicestate ds ON d.rely_cno = ds.cno
+    </if>
+    <where>
+      d.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      AND d.device_type = #{deviceType}
+      <if test="deviceNo != null">
+        AND d.device_no LIKE CONCAT('%', #{deviceNo}, '%')
+      </if>
+      <if test="onlineStatus != null">
+        AND ds.is_online = #{onlineStatus}
+      </if>
+      <if test="deviceType == '04'">
+         <![CDATA[ AND d.device_no <> '999999999' ]]>
+      </if>
+      limit 0,500
+    </where>
+  </select>
+
+  <resultMap id="onlineStatus" type="cn.com.cdboost.collect.dto.response.OnlineStatus" >
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="is_online" property="onlineStatus" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!--查询设备在线状态-->
+  <select id="queryMainSubOnlineStatus" resultMap="onlineStatus">
+    SELECT d.cno,ds.is_online
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_deviceinfo_devicestate ds ON d.rely_cno = ds.cno
+    <where>
+      d.cno IN
+      <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=VARCHAR}
+      </foreach>
+    </where>
+  </select>
+
+  <resultMap id="deviceCacheVo" type="cn.com.cdboost.collect.cache.DeviceCacheVo" >
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
+    <result column="p_device_no" property="pDeviceNo" jdbcType="VARCHAR" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="rely_cno" property="relyCno" jdbcType="VARCHAR" />
+    <result column="is_important" property="isImportant" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!--查询所有设备缓存信息-->
+  <select id="selectAllDeviceCache" resultMap="deviceCacheVo">
+    select d.cno,d.device_no,d.device_type,d.p_device_no,d.install_addr,d.org_no,d.rely_cno,p.is_important
+    from em_d_deviceinfo d
+    INNER JOIN em_d_devicemeterparam p ON d.cno=p.cno
+    where d.is_enabled=1
+  </select>
+</mapper>

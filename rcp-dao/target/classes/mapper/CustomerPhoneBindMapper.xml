@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.CustomerPhoneBindMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.CustomerPhoneBind" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="mobile_phone" property="mobilePhone" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="last_send_sms_time" property="lastSendSmsTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <insert id="insertPhoneBind"  parameterType="java.util.List">
+    replace INTO
+    em_d_customer_phonebind(mobile_phone, customer_no, user_id, last_send_sms_time, create_time)
+    VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.mobilePhone,jdbcType=VARCHAR},#{item.customerNo,jdbcType=VARCHAR},#{item.userId,jdbcType=INTEGER},
+      #{item.lastSendSmsTime}, #{item.createTime})
+    </foreach>
+  </insert>
+
+  <delete id="batchDeletePhoneBind" parameterType="java.util.List">
+    DELETE FROM em_d_customer_phonebind WHERE customer_no = #{customer_no} AND mobile_phone IN
+    <foreach collection="mobile_phone" index="index" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </delete>
+
+  <select id="selPhone" parameterType="java.lang.String" resultMap="BaseResultMap">
+    SELECT mobile_phone
+    FROM em_d_customer_phonebind <where>customer_no = #{customerno}</where>
+  </select>
+</mapper>

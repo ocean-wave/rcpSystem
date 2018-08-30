@@ -1,0 +1,53 @@
+package cn.com.cdboost.collect.dao;
+
+import cn.com.cdboost.collect.common.CommonMapper;
+import cn.com.cdboost.collect.dto.*;
+import cn.com.cdboost.collect.dto.chargerApp.WxBaseInfoDto;
+import cn.com.cdboost.collect.dto.chargerApp.vo.WxBaseInfoVo;
+import cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo;
+import cn.com.cdboost.collect.model.ChargingDevice;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+public interface ChargingDeviceMapper extends CommonMapper<ChargingDevice> {
+    List<TotalLineLossInfo> totalLineLossListFreezeInTime(@Param("totalLineLossDto")TotalLineLossDto totalLineLossDto);
+    List<TotalLineLossInfo> totalLineLossCurveFreezeInTime(@Param("totalLineLossDto")TotalLineLossDto totalLineLossDto);
+    List<DayLineLossInfo> dayLineLoss(@Param("dayLineLossDto")DayLineLossDto dayLineLossDto);
+    List<TotalLineLossInfo> totalLineLossListFreeze(@Param("totalLineLossDto")TotalLineLossDto totalLineLossDto);
+    List<TotalLineLossInfo> totalLineLossListInTime(@Param("totalLineLossDto")TotalLineLossDto totalLineLossDto);
+    List<TotalLineLossInfo> totalLineLossCurveInTime(@Param("totalLineLossDto")TotalLineLossDto totalLineLossDto);
+    List<TotalLineLossInfo> totalLineLossCurveFreeze(@Param("totalLineLossDto")TotalLineLossDto totalLineLossDto);
+    /**
+     * 获取基础页面信息
+     * @param wxBaseInfoVo
+     * @return
+     */
+    WxBaseInfoDto queryBaseInfo(WxBaseInfoVo wxBaseInfoVo);
+
+    List<ChargingDevicePortDto> deviceAndPortList(@Param("deviceNos") List<String> deviceNos);
+
+    Integer queryTotal(ChargerDeviceQueryVo queryVo);
+
+    int editDevice(ChargingDevice chargingDevice);
+
+    DeviceDetialCountDto deviceDetialCount(@Param("chargingPlieGuid") String chargingPlieGuid);
+
+    ChargingDeviceDto queryDeviceDetial(@Param("chargingPlieGuid") String chargingPlieGuid);
+
+    List<ElectricAndFeeDto> queryCountList(ChargerDeviceQueryVo queryVo);
+
+    Integer queryCountListTotal(ChargerDeviceQueryVo queryVo);
+
+    Statistics queryElectricAndFeeTotal(ChargerDeviceQueryVo queryVo);
+
+    List<MonitorDeviceDto> monitorDeviceList(ChargerDeviceQueryVo queryVo);
+
+    List<MonitorDeviceTotalDto> monitorDeviceCount(ChargerDeviceQueryVo queryVo);
+
+    List<ElectricAndFeeDto> queryListCount(ChargerDeviceQueryVo queryVo);
+
+    List<ChargingDeviceDto> deviceList(ChargerDeviceQueryVo queryVo);
+
+    List<String> queryMeterNo();
+}

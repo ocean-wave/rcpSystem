@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.MenuMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.Menu" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="menu_id" property="menuId" jdbcType="BIGINT" />
+    <result column="menu_title" property="menuTitle" jdbcType="VARCHAR" />
+    <result column="p_menu_id" property="pMenuId" jdbcType="BIGINT" />
+    <result column="menu_icon" property="menuIcon" jdbcType="VARCHAR" />
+    <result column="menu_url" property="menuUrl" jdbcType="VARCHAR" />
+    <result column="is_last" property="isLast" jdbcType="INTEGER" />
+    <result column="sort_no" property="sortNo" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="level_code" property="levelCode" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

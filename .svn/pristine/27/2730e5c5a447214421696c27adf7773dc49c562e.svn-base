@@ -1,0 +1,152 @@
+package cn.com.cdboost.collect.dto.chargerApp;
+
+import java.math.BigDecimal;
+
+public class ChargeMoneyHistoryDto {
+    /**
+     * 充值时间
+     */
+    private String createTime;
+    /**
+     * 充值金额
+     */
+    private BigDecimal payMoney;
+    /**
+     * 充值方式
+     */
+    private Integer payCategory;
+
+    /**
+     * 充值方式描述
+     */
+    private String payCategoryDesc;
+    /**
+     * 充值状态
+     */
+    private Integer payState;
+    /**
+     * 充值状态描述
+     */
+    private String payStateDesc;
+    /**
+     * 安装地址
+     */
+    private String installAddr;
+    /**
+     * 余额
+     */
+    private BigDecimal remainAmount;
+    /**
+     * 包月用户有效日期
+     */
+    private String endTime;
+
+    private String date;
+
+    private String time;
+
+    private Integer state=0;
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getPayCategoryDesc() {
+        return payCategoryDesc;
+    }
+
+    public void setPayCategoryDesc(String payCategoryDesc) {
+        this.payCategoryDesc = payCategoryDesc;
+    }
+
+    public Integer getPayState() {
+        return payState;
+    }
+
+    public void setPayState(Integer payState) {
+        this.payState = payState;
+    }
+
+    public String getPayStateDesc() {
+        if(payState!=null){
+            if(payState==1){
+                payStateDesc="支付成功";
+            }else if(payState==0){
+                payStateDesc="支付失败";
+            }
+        }
+        return payStateDesc;
+    }
+
+    public void setPayStateDesc(String payStateDesc) {
+        this.payStateDesc = payStateDesc;
+    }
+
+    public String getInstallAddr() {
+        return installAddr;
+    }
+
+    public void setInstallAddr(String installAddr) {
+        this.installAddr = installAddr;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+    public Integer getPayCategory() {
+        return payCategory;
+    }
+
+    public void setPayCategory(Integer payCategory) {
+        this.payCategory = payCategory;
+    }
+
+    public BigDecimal getPayMoney() {
+        return payMoney;
+    }
+
+    public void setPayMoney(BigDecimal payMoney) {
+        this.payMoney = payMoney;
+    }
+
+    public BigDecimal getRemainAmount() {
+        return remainAmount;
+    }
+
+    public void setRemainAmount(BigDecimal remainAmount) {
+        this.remainAmount = remainAmount;
+    }
+}

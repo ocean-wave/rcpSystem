@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.cdboost.collect.dao.SmsSchemeMapper">
+    <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.SmsScheme">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <result column="id" jdbcType="INTEGER" property="id" />
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+        <result column="send_obj" jdbcType="VARCHAR" property="sendObj" />
+        <result column="obj_type" jdbcType="INTEGER" property="objType" />
+        <result column="send_count" jdbcType="INTEGER" property="sendCount" />
+        <result column="last_send_time" jdbcType="TIMESTAMP" property="lastSendTime" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="smssc_status" jdbcType="INTEGER" property="smsscStatus" />
+        <result column="alarm_level" jdbcType="INTEGER" property="alarmLevel" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+
+    <update id="updateCountAndSendTime">
+        UPDATE em_d_smsscheme
+        SET send_count=send_count + 1,last_send_time=#{sendTime,jdbcType=TIMESTAMP},update_time=#{updateTime,jdbcType=TIMESTAMP}
+        <where>
+            obj_type=1
+            AND send_obj=#{mobilePhone,jdbcType=VARCHAR}
+            AND customer_no = #{customerNo,jdbcType=VARCHAR}
+        </where>
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate" parameterType="java.util.List" >
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update em_d_smsscheme
+            <set >
+                send_count=send_count + 1,
+                <if test="item.smsscStatus != null" >
+                    smssc_status = #{item.smsscStatus,jdbcType=INTEGER},
+                </if>
+                <if test="item.lastSendTime != null" >
+                    last_send_time = #{item.lastSendTime,jdbcType=TIMESTAMP},
+                </if>
+            </set>
+            WHERE customer_no = #{item.customerNo,jdbcType=VARCHAR}
+            AND obj_type = #{item.objType,jdbcType=INTEGER}
+            AND send_obj = #{item.sendObj,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <!-- 查询需要发送微信告警的用户表信息 -->
+    <select id="queryAlarmSchemeInfo" resultMap="BaseResultMap">
+        select customer_no,send_obj,obj_type
+        from em_d_smsscheme
+        <where>
+            alarm_level = #{alarmLevel,jdbcType=INTEGER}
+            AND (last_send_time <![CDATA[ < ]]> DATE_ADD(current_timestamp,INTERVAL - #{time,jdbcType=INTEGER} second) OR last_send_time is NULL )
+            <if test="sendCount != null and sendCount > 0">
+                AND send_count <![CDATA[ < ]]>  #{sendCount,jdbcType=INTEGER}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询剩余金额小于等于告警阈值3 -->
+    <select id="queryWarning3" resultMap="BaseResultMap">
+        select t.customer_no,t0.mobile_phone as send_obj,1 as obj_type
+        FROM  em_d_customerinfo_cost t
+        inner join em_d_customer_phonebind t0 on t.customer_no=t0.customer_no
+        WHERE t.update_time is not null
+        and t.remain_amount <![CDATA[ <= ]]> t.alarm_threshold2
+        AND t.alarm_threshold1 > 0
+        UNION ALL
+        select  t.customer_no,t0.open_id as send_obj,2 as obj_type
+        FROM  em_d_customerinfo_cost t
+        inner join em_d_customer_wxbind t0 on t.customer_no=t0.customer_no
+        WHERE t.update_time is not null
+        and t.remain_amount <![CDATA[ <= ]]> t.alarm_threshold2
+    </select>
+
+    <!-- 查询剩余金额小于等于告警阈值2并且大于告警阈值3的数据 -->
+    <select id="queryWarning2" resultMap="BaseResultMap">
+        select t.customer_no,t0.mobile_phone as send_obj,1 as obj_type
+        FROM  em_d_customerinfo_cost t
+        inner join em_d_customer_phonebind t0 on t.customer_no=t0.customer_no
+        WHERE t.update_time is not null
+        and t.remain_amount <![CDATA[ <= ]]> t.alarm_threshold1
+        AND t.remain_amount <![CDATA[ > ]]> t.alarm_threshold2
+        AND t.alarm_threshold1 > 0
+        UNION ALL
+        select  t.customer_no,t0.open_id as send_obj,2 as obj_type
+        FROM  em_d_customerinfo_cost t
+        inner join em_d_customer_wxbind t0 on t.customer_no=t0.customer_no
+        WHERE t.update_time is not null
+        and t.remain_amount <![CDATA[ <= ]]> t.alarm_threshold1
+        AND t.remain_amount <![CDATA[ > ]]> t.alarm_threshold2
+        AND t.alarm_threshold1 > 0
+    </select>
+
+    <!-- 查询剩余金额小于告警阈值1并且大于告警阈值2的数据 -->
+    <select id="queryWarning1" resultMap="BaseResultMap">
+        select t.customer_no,t0.mobile_phone as send_obj,1 as obj_type
+        FROM  em_d_customerinfo_cost t
+        inner join em_d_customer_phonebind t0 on t.customer_no=t0.customer_no
+        WHERE t.update_time is not null
+        and t.remain_amount <![CDATA[ < ]]> t.alarm_threshold
+        AND t.remain_amount <![CDATA[ > ]]> t.alarm_threshold1
+        AND t.alarm_threshold > 0
+        UNION ALL
+        select  t.customer_no,t0.open_id as send_obj,2 as obj_type
+        FROM  em_d_customerinfo_cost t
+        inner join em_d_customer_wxbind t0 on t.customer_no=t0.customer_no
+        WHERE t.update_time is not null
+        and t.remain_amount <![CDATA[ < ]]> t.alarm_threshold
+        AND t.remain_amount <![CDATA[ > ]]> t.alarm_threshold1
+        AND t.alarm_threshold > 0
+    </select>
+
+</mapper>

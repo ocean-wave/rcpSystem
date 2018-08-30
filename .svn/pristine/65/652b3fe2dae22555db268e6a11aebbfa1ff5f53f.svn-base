@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FeePriceSolsMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeePriceSols" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="price_sols_code" property="priceSolsCode" jdbcType="VARCHAR" />
+    <result column="price_sols_name" property="priceSolsName" jdbcType="VARCHAR" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_user_id" property="updateUserId" jdbcType="BIGINT" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="sols_remark" property="solsRemark" jdbcType="VARCHAR" />
+    <result column="effective_date" property="effectiveDate" jdbcType="DATE" />
+  </resultMap>
+
+  <select id="selectByPriceSolsCode" resultMap="resultProcQueryMap" parameterType="java.lang.String" >
+    select
+    a.price_sols_code, a.price_sols_name, a.dict_item_value,
+    a.create_user_id, a.create_time, a.update_user_id,
+    a.update_time, a.is_enabled, a.sols_remark, a.effective_date,
+    b.dict_item_name
+    from em_d_fee_pricesols AS a
+    INNER JOIN em_s_dictitem AS b ON (a.dict_item_value=b.dict_item_value)
+    WHERE price_sols_code = #{priceSolsCode,jdbcType=VARCHAR}
+    AND b.dict_code in(1,10,11)
+  </select>
+
+  <resultMap id="resultProcQueryMap" type="cn.com.cdboost.collect.dto.FeePriceSolsDTO" >
+    <result column="price_sols_code" property="priceSolsCode" jdbcType="VARCHAR" />
+    <result column="price_sols_name" property="priceSolsName" jdbcType="VARCHAR" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_name" property="createUserName" jdbcType="VARCHAR" />
+    <result column="update_user_name" property="updateUserName" jdbcType="VARCHAR"/>
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="sols_remark" property="solsRemark" jdbcType="VARCHAR" />
+    <result column="effective_date" property="effectiveDate" jdbcType="DATE" />
+  </resultMap>
+
+  <!-- 查询并返回电价方案信息记录 -->
+  <select id="queryFeePriceSols" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.param.FeePriceSolsQueryVo" resultMap="resultProcQueryMap">
+    <![CDATA[
+       {call PRC_W_D_PricesolsGet(
+          #{isEnabled, mode=IN, jdbcType=VARCHAR},
+          #{pageSize, mode=IN, jdbcType=INTEGER},
+          #{pageNumber, mode=IN, jdbcType=INTEGER},
+          #{rowCount, mode=OUT, jdbcType=VARCHAR}
+       )}
+    ]]>
+  </select>
+</mapper>

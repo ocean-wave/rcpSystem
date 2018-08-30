@@ -1,0 +1,277 @@
+{
+  "data": [
+    {
+      "day":"2018-7-11",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":1,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":99
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":2,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":98
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":3,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":97
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":2,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":98
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":5,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":98
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":7,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":93
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":10,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":90
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":20,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":80
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":5,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":95
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":4,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":96
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":15,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":85
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":14,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":86
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":18,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":82
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":14,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":96
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":3,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":97
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":6,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":94
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":5,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":95
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":5,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":95
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":10,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":90
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":15,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":85
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":11,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":59
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":17,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":83
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":19,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":91
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":11,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":89
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":10,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":90
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":8,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":92
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":1,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":99
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":5,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":95
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":4,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":96
+    },{
+      "day":"2018-7-10",
+      "powerSupply":100,
+      "electSale":10,
+      "electLoss": 0.1,
+      "lossRate":2,
+      "electDeviceAmount": 0.2,
+      "succeedAmount":40,
+      "succeedRate":98
+    }
+  ],
+  "message": "success",
+  "code": 1
+}

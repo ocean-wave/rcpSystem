@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.MeterCollectDataMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.MeterCollectData" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="collect_name" property="collectName" jdbcType="VARCHAR" />
+    <result column="mr_flag" property="mrFlag" jdbcType="VARCHAR" />
+    <result column="read_type" property="readType" jdbcType="INTEGER" />
+    <result column="read_value" property="readValue" jdbcType="DECIMAL" />
+    <result column="collect_date" property="collectDate" jdbcType="DATE" />
+    <result column="is_real_time" property="isRealTime" jdbcType="INTEGER" />
+    <result column="queue_guid" property="queueGuid" jdbcType="VARCHAR" />
+    <result column="group_guid" property="groupGuid" jdbcType="VARCHAR" />
+    <result column="collect_time" property="collectTime" jdbcType="TIMESTAMP" />
+    <result column="round" property="round" jdbcType="INTEGER" />
+  </resultMap>
+
+  <resultMap type="cn.com.cdboost.collect.dto.response.MeterCollectDataInfo" id="listRealMeterCollectDataMap">
+    <result column="cno" property="deviceCno" jdbcType="VARCHAR" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="is_online" property="isOnline" jdbcType="VARCHAR" />
+    <result column="jzq_cno" property="jzqCno" jdbcType="VARCHAR" />
+    <result column="send_flag" property="sendFlag" jdbcType="VARCHAR" />
+    <result column="comm_rule" property="commRule" jdbcType="VARCHAR" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="pr0" property="pr0" jdbcType="VARCHAR" />
+    <result column="balance" property="balance" jdbcType="VARCHAR" />
+    <result column="collect_time" property="collectTime" jdbcType="VARCHAR" />
+    <result column="group_guid" property="groupGuid" jdbcType="VARCHAR" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="INTEGER" />
+    <result column="read_status" property="readStatus" jdbcType="INTEGER" />
+    <result column="mote_type" property="moteType" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="getDataList" parameterType="cn.com.cdboost.collect.dto.param.RealTimeDataListParam" resultMap="customerData4Month" statementType="CALLABLE">
+    {call PRC_W_D_CollectDataGetOne(
+    #{dataType,mode=IN,jdbcType=INTEGER},
+    #{startDate,mode=IN,jdbcType=VARCHAR},
+    #{endDate,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{customerNo,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=INTEGER},
+    #{pageNumber,mode=IN,jdbcType=INTEGER},
+    #{pageEndIndex,mode=IN,jdbcType=INTEGER},
+    #{total,mode=OUT,jdbcType=VARCHAR}
+    )}
+  </select>
+  <!-- 查询抄表实时数据 -->
+  <select id="listRealMeterCollectData" resultMap="listRealMeterCollectDataMap"
+          parameterType="cn.com.cdboost.collect.dto.param.RealMeterCollectQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_RealCollectGet(
+    #{jzqNo,mode=IN,jdbcType=VARCHAR},
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{guid,mode=IN,jdbcType=VARCHAR},
+    #{searchDate,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{isOnline,mode=IN,jdbcType=VARCHAR},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+  <!-- 查询抄表实时数据New -->
+  <select id="listRealMeterCollectDataNew" resultMap="listRealMeterCollectDataMap"
+          parameterType="cn.com.cdboost.collect.dto.param.RealMeterCollectQueryNewVo" statementType="CALLABLE">
+    {call PRC_W_D_RealCollectGet(
+    #{guid,mode=IN,jdbcType=VARCHAR},
+    #{searchDate,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{isOnline,mode=IN,jdbcType=VARCHAR},
+    #{importGuid,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{pageEndNum,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+  <resultMap type="cn.com.cdboost.collect.dto.response.MeterCollectImpDataInfo" id="importantCollectDataMap">
+    <result column="cno" property="deviceCno" jdbcType="VARCHAR" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="is_online" property="isOnline" jdbcType="VARCHAR" />
+    <result column="jzq_cno" property="jzqCno" jdbcType="VARCHAR" />
+    <result column="send_flag" property="sendFlag" jdbcType="VARCHAR" />
+    <result column="comm_rule" property="commRule" jdbcType="VARCHAR" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="active_total_value" property="pr0" jdbcType="DECIMAL" />
+    <result column="current_a" property="currentA" jdbcType="DECIMAL" />
+    <result column="current_b" property="currentB" jdbcType="DECIMAL" />
+    <result column="current_c" property="currentC" jdbcType="DECIMAL" />
+    <result column="voltage_a" property="voltageA" jdbcType="DECIMAL" />
+    <result column="voltage_b" property="voltageB" jdbcType="DECIMAL" />
+    <result column="voltage_c" property="voltageC" jdbcType="DECIMAL" />
+    <result column="collect_time" property="collectTime" jdbcType="VARCHAR" />
+    <result column="group_guid" property="groupGuid" jdbcType="VARCHAR" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL" />
+    <result column="read_status" property="readStatus" jdbcType="INTEGER" />
+    <result column="mote_type" property="moteType" jdbcType="VARCHAR" />
+    <result column="instant_power_a" property="instantPowerA" jdbcType="DECIMAL" />
+    <result column="instant_power_b" property="instantPowerB" jdbcType="DECIMAL" />
+    <result column="instant_power_c" property="instantPowerC" jdbcType="DECIMAL" />
+    <result column="instant_power" property="instantPower" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <!-- 查询重点用户抄表实时数据 -->
+  <select id="listRealMeterCollectImpData" resultMap="importantCollectDataMap"
+          parameterType="cn.com.cdboost.collect.dto.param.RealMeterCollectQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_ImpRealCollectGet(
+    #{jzqNo,mode=IN,jdbcType=VARCHAR},
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{guid,mode=IN,jdbcType=VARCHAR},
+    #{searchDate,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{isOnline,mode=IN,jdbcType=VARCHAR},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+  <!-- 查询重点用户抄表实时数据 -->
+  <select id="listRealMeterCollectImpDataNew" resultMap="importantCollectDataMap"
+          parameterType="cn.com.cdboost.collect.dto.param.RealMeterCollectQueryNewVo" statementType="CALLABLE">
+    {call PRC_W_D_ImpRealCollectGet(
+    #{guid,mode=IN,jdbcType=VARCHAR},
+    #{searchDate,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{isOnline,mode=IN,jdbcType=VARCHAR},
+    #{importGuid,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{pageEndNum,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="listRealMeterCollectFailDataMap" type="cn.com.cdboost.collect.dto.response.MeterCollectDataFailInfo">
+    <result column="cno" property="deviceCno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="jzq_cno" property="jzqCno" jdbcType="VARCHAR" />
+    <result column="is_online" property="isOnline" jdbcType="VARCHAR" />
+    <result column="group_guid" property="groupGuid" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 查询抄表采集失败的数据 -->
+  <select id="listRealMeterCollectFailData" resultMap="listRealMeterCollectFailDataMap"
+          parameterType="cn.com.cdboost.collect.dto.param.RealMeterCollectFailQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_RealCollectFailDataGet(
+    #{guid,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{searchDate,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="collectRecordDTO" type="cn.com.cdboost.collect.dto.CollectRecordDTO">
+    <id column="collect_date" property="collectDate" jdbcType="VARCHAR" />
+    <result column="customer_count" property="customerCount" jdbcType="INTEGER" />
+    <result column="success_count" property="successCount" jdbcType="INTEGER" />
+    <result column="fail_count" property="failCount" jdbcType="INTEGER" />
+    <result column="success_rate" property="successRate" jdbcType="DECIMAL" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <!-- 查询日冻结的汇总情况 -->
+  <select id="listReadCollectRecord" resultMap="collectRecordDTO" parameterType="java.util.Map" statementType="CALLABLE">
+    {call PRC_W_D_FreeDaySumGet(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="collectDetialDTO" type="cn.com.cdboost.collect.dto.CollectDetialDTO">
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="collect_date" property="collectDate" jdbcType="VARCHAR" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="collect_no" property="collectNo" jdbcType="VARCHAR" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="pay_count" property="payCount" jdbcType="INTEGER" />
+    <result column="pr0" property="pr0" jdbcType="DECIMAL" />
+    <result column="balance" property="balance" jdbcType="DECIMAL" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+
+  </resultMap>
+
+  <!-- 查询日冻结抄收详细 -->
+  <select id="listReadCollectRecordDetail" resultMap="collectDetialDTO"
+          parameterType="cn.com.cdboost.collect.dto.param.ReadCollectRecordDetailQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_FreeCollectDetail(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{flag,mode=IN,jdbcType=VARCHAR},
+    #{date,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{rowCount,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <!-- 自动汇总日冻结的抄收情况 -->
+  <select id="sumFreeForDay" statementType="CALLABLE" resultType="java.lang.String">
+    {call PRC_D_D_SumFreeForDay()}
+  </select>
+
+  <resultMap id="collectNoStatisticsDTO" type="cn.com.cdboost.collect.dto.CollectNoStatisticsDTO">
+    <result column="success_count" property="successCount" jdbcType="INTEGER" />
+    <result column="fail_count" property="failCount" jdbcType="INTEGER" />
+    <result column="customer_count" property="customerCount" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="collect_no" property="collectNo" jdbcType="VARCHAR" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <resultMap type="cn.com.cdboost.collect.dto.response.CollectDataGetInfo" id="collectDataGetInfo">
+    <result column="cno" property="deviceCno" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="collect_time" property="collectTime" jdbcType="VARCHAR" />
+    <result column="is_real_time" property="isRealTime" jdbcType="INTEGER" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="pr0" property="pr0" jdbcType="DECIMAL" />
+    <result column="balance" property="balance" jdbcType="DECIMAL" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 查询抄表历史数据 -->
+  <select id="listMeterCollectData" resultMap="collectDataGetInfo"
+          parameterType="cn.com.cdboost.collect.dto.param.CollectDataGetQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_CollectDataGet(
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{startDate,mode=IN,jdbcType=VARCHAR},
+    #{endDate,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{isRealTime,mode=IN,jdbcType=INTEGER},
+    #{status,mode=IN,jdbcType=VARCHAR},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{size,mode=IN,jdbcType=VARCHAR},
+    #{start,mode=IN,jdbcType=VARCHAR},
+    #{end,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap type="cn.com.cdboost.collect.dto.response.ImpCollectDataGetInfo" id="impCollectHistoryDataMap">
+    <result column="cno" property="deviceCno" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="collect_time" property="collectTime" jdbcType="VARCHAR" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="active_total_value" property="pr0" jdbcType="DECIMAL" />
+    <result column="active_total" property="activeTotal" jdbcType="DECIMAL" />
+    <result column="current_a" property="currentA" jdbcType="DECIMAL" />
+    <result column="current_b" property="currentB" jdbcType="DECIMAL" />
+    <result column="current_c" property="currentC" jdbcType="DECIMAL" />
+    <result column="voltage_a" property="voltageA" jdbcType="DECIMAL" />
+    <result column="voltage_b" property="voltageB" jdbcType="DECIMAL" />
+    <result column="voltage_c" property="voltageC" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <!-- 查询重点用户抄表历史数据 -->
+  <select id="listImpCollectHistoryData" resultMap="impCollectHistoryDataMap"
+          parameterType="cn.com.cdboost.collect.dto.param.ImpCollectDataGetQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_ImpCollectDataGet(
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{startDate,mode=IN,jdbcType=VARCHAR},
+    #{endDate,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{pageEndIndex,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap type="cn.com.cdboost.collect.dto.response.CollectDataDownInfo" id="collectDataDownInfo">
+    <result column="cno" property="deviceCno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="collect_time" property="collectTime" jdbcType="VARCHAR" />
+    <result column="is_real_time" property="isRealTime" jdbcType="INTEGER" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="pr0" property="pr0" jdbcType="DECIMAL" />
+    <result column="balance" property="balance" jdbcType="DECIMAL" />
+    <result column="old_meter_no" property="oldMeterNo" jdbcType="VARCHAR" />
+    <result column="power" property="power" jdbcType="DECIMAL" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 下载历史数据 -->
+  <select id="collectDataDown" resultMap="collectDataDownInfo"
+          parameterType="cn.com.cdboost.collect.dto.param.CollectDataGetQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_CollectDataDown(
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{startDate,mode=IN,jdbcType=VARCHAR},
+    #{endDate,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{isRealTime,mode=IN,jdbcType=INTEGER},
+    #{status,mode=IN,jdbcType=VARCHAR},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{size,mode=IN,jdbcType=VARCHAR},
+    #{start,mode=IN,jdbcType=VARCHAR},
+    #{end,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="collectAnalyzeData" type="cn.com.cdboost.collect.dto.CollectAnalyzeData">
+  </resultMap>
+
+  <resultMap id="arrearageCustomer" type="cn.com.cdboost.collect.dto.ArrearageCustomer">
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="collect_date" property="collectDate" jdbcType="TIMESTAMP" />
+    <result column="read_value" property="readValue" jdbcType="DECIMAL" />
+    <result column="device_type" property="deviceType" jdbcType="CHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="last_send_sms_time" property="lastSendSMSTime" jdbcType="VARCHAR" />
+    <result column="send_message" property="sendMessage" jdbcType="INTEGER" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="remain_power" property="remainPower" jdbcType="DECIMAL" />
+    <result column="customer_brand" property="customerBrand" jdbcType="VARCHAR" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 查询欠费用户 -->
+  <select id="listArrearageCustomers" resultMap="arrearageCustomer"
+          parameterType="cn.com.cdboost.collect.dto.param.ArrearageCustomersQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_ArrearageUserGet(
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="customerData4Month" type="cn.com.cdboost.collect.dto.CustomerData4Month">
+    <result column="collect_date" property="collectDate" jdbcType="VARCHAR" />
+    <result column="pr0" property="pr0" jdbcType="DECIMAL" />
+    <result column="balance" property="balance" jdbcType="DECIMAL" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="pay_count" property="payCount" jdbcType="DECIMAL" />
+    <result column="meter_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="is_real_time" property="dataType" jdbcType="VARCHAR" />
+    <result column="cno" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="collect_time" property="collectDate" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="customElecData" type="cn.com.cdboost.collect.dto.CustomElectDTO">
+    <result column="transformer_no" jdbcType="VARCHAR" property="transformerNo" />
+    <result column="building_no" jdbcType="VARCHAR" property="buildingNo" />
+    <result column="elec_datas" jdbcType="DECIMAL" property="elecDatas" />
+    <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+    <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+    <result column="customer_addr" jdbcType="VARCHAR" property="installAddr" />
+    <result column="dict_item_name" jdbcType="VARCHAR" property="dictItemName" />
+    <result column="elec_data" jdbcType="VARCHAR" property="pr0" />
+  </resultMap>
+
+  <select id="getDataForMonth" parameterType="java.util.Map" resultMap="customerData4Month" statementType="CALLABLE">
+    {call PRC_B_d_CollectDataOneMonthByCustomerNo(
+    #{yearMonth,mode=IN,jdbcType=VARCHAR},
+    #{customerNo,mode=IN,jdbcType=VARCHAR},
+    #{cno,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR})}
+  </select>
+
+  <!-- 查询欠费用户数量-->
+  <select id="getAlarmUserCount" parameterType="java.util.Map" statementType="CALLABLE">
+    {call PRC_W_D_ArrearageUserGetCount(
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{cnt,mode=OUT,jdbcType=INTEGER})}
+  </select>
+
+  <!-- 查询用户用能排行柱状图-->
+  <select id="getCustomElechart" parameterType="cn.com.cdboost.collect.dto.param.ElecDataVo" resultMap="customElecData" statementType="CALLABLE">
+    {call PRC_W_D_AnalElecByWhere(
+    #{startDate,mode=IN,jdbcType=TIMESTAMP},
+    #{endDate,mode=IN,jdbcType=TIMESTAMP},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{transformerNo,mode=IN,jdbcType=INTEGER},
+    #{userid,mode=IN,jdbcType=INTEGER}
+    )}
+  </select>
+  <!-- 查询用户区域用电排行-->
+  <select id="getCustomElecData" parameterType="cn.com.cdboost.collect.dto.param.ElecDataVo" resultMap="customElecData" statementType="CALLABLE">
+    {call PRC_W_D_AnalElecTop(
+    #{startDate,mode=IN,jdbcType=TIMESTAMP},
+    #{endDate,mode=IN,jdbcType=TIMESTAMP},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=INTEGER},
+    #{sortOrder1,mode=IN,jdbcType=INTEGER},
+    #{userid,mode=IN,jdbcType=BIGINT}
+    )}
+  </select>
+
+
+  <!-- 统计查询，抄表数据，柱状图数据返回-->
+  <resultMap id="perDayData4Histogram" type="cn.com.cdboost.collect.dto.response.PerDayData4Histogram">
+    <result column="eq_value" property="eqValue" jdbcType="DECIMAL" />
+    <result column="calc_data" property="calcData" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <!-- 统计查询，抄表数据，列表数据返回-->
+  <resultMap id="perDayData4List" type="cn.com.cdboost.collect.dto.response.PerDayData4List">
+    <result column="collect_date" property="collectDate" jdbcType="TIMESTAMP" />
+    <result column="pr0" property="pr0" jdbcType="DECIMAL" />
+    <result column="balance" property="balance" jdbcType="DECIMAL" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="pay_count" property="payCount" jdbcType="INTEGER" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="local_control" property="localControl" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 统计查询，抄表数据查询-->
+  <select id="getCollectDataForPerDay" resultMap="perDayData4Histogram,perDayData4List"
+          parameterType="cn.com.cdboost.collect.dto.param.CollectDataForPerDayQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_AnalElcByCst(
+    #{customerNo,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{cno,mode=IN,jdbcType=VARCHAR},
+    #{sTime,mode=IN,jdbcType=VARCHAR},
+    #{eTime,mode=IN,jdbcType=VARCHAR})}
+  </select>
+</mapper>

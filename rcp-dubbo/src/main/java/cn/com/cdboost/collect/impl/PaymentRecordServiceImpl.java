@@ -1,0 +1,64 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.dao.FeePayMapper;
+import cn.com.cdboost.collect.exception.BusinessException;
+import cn.com.cdboost.collect.model.CustomerInfo;
+import cn.com.cdboost.collect.model.FeePay;
+import cn.com.cdboost.collect.param.PaymentRecordParam;
+import cn.com.cdboost.collect.param.PaymentRecordresponseParam;
+import cn.com.cdboost.collect.service.CustomerInfoService;
+import cn.com.cdboost.collect.service.PaymentRecordService;
+import cn.com.cdboost.collect.vo.Result;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+
+
+/**
+ * @author wt
+ * @desc
+ * @create in  2018/5/4
+ **/
+@Service
+public class PaymentRecordServiceImpl implements PaymentRecordService {
+    @Autowired
+    FeePayMapper feePayMapper;
+    @Autowired
+    CustomerInfoService customerInfoService;
+
+    @Override
+    public PageInfo queryPaymentRecord(PaymentRecordParam paymentRecordParam) {
+        CustomerInfo customerInfo = new CustomerInfo();
+        customerInfo.setPropertyName(paymentRecordParam.getAddrCode());
+        customerInfo = customerInfoService.selectOne(customerInfo);
+        if(customerInfo==null){
+            throw new BusinessException(100, Result.errorType.datenotexist.getdesc());
+        }
+        Condition condition = new Condition(FeePay.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("customerNo", customerInfo.getCustomerNo());
+        criteria.andBetween("payDate", paymentRecordParam.getStartDate(), paymentRecordParam.getEndDate() + "23:59:59");
+        List list = Lists.newArrayList();
+        PageHelper.orderBy("pay_date asc");
+        List<FeePay> listFeePay = feePayMapper.selectByCondition(condition);
+        if(listFeePay==null||listFeePay.size()==0){
+            throw new BusinessException(100, Result.errorType.datenotexist.getdesc());
+        }
+        for (FeePay feePay : listFeePay) {
+            PaymentRecordresponseParam paymentRecordresponseParam = new PaymentRecordresponseParam();
+            paymentRecordresponseParam.setBalance(feePay.getRemainAmount().floatValue());
+            paymentRecordresponseParam.setPayCount(feePay.getPayCount());
+            paymentRecordresponseParam.setPayDate(feePay.getPayDate());
+            paymentRecordresponseParam.setPayMoney(feePay.getPayMoney().floatValue());
+            list.add(paymentRecordresponseParam);
+        }
+        PageInfo pageInfo=new PageInfo(list);
+        return pageInfo;
+    }
+}

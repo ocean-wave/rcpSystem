@@ -1,0 +1,52 @@
+package cn.com.cdboost.collect.dto.param;
+
+/**
+ * 充电桩IC卡查询vo
+ */
+public class ChargerICCardQueryVo  extends PageQueryVo {
+    //卡号
+    private String cardId;
+    //ic卡状态 0初始、1 -启用、2-停用
+    private Integer cardState;
+
+    private String startDate;
+
+    private String endDate;
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+
+    public Integer getCardState() {
+        return cardState;
+    }
+
+    public void setCardState(Integer cardState) {
+        this.cardState = cardState;
+    }
+
+    @Override
+    public Integer getPageIndex() {
+        return (this.getPageNumber()-1)*this.getPageSize();
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+}

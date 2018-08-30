@@ -1,0 +1,21 @@
+{
+	"data": [{
+		"customerName": "张三",
+		"meterUserNo": "32312312313",
+		"deviceNo": "3231",
+		"cno": "3231",
+		"installAddr": "china",
+		"buildNo": "1栋",
+		"transformerNo": "434234234234"
+	}, {
+		"customerName": "李四",
+		"meterUserNo": "32312312313",
+		"deviceNo": "3561",
+		"cno": "3561",
+		"installAddr": "china",
+		"buildNo": "1栋",
+		"transformerNo": "434234234234"
+	}],
+	"message": "success",
+	"code": 1
+}

@@ -1,0 +1,160 @@
+package cn.com.cdboost.collect.util;
+
+import cn.com.cdboost.collect.enums.DeviceType;
+import com.alibaba.fastjson.JSON;
+import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+
+public class CNoUtil {
+	public static  String CreateCNo(String deviceType,String deviceNo) {
+		String newNo= "000000000000000000000000000000".concat(deviceNo);
+		String substring = newNo.substring(newNo.length() - 28, newNo.length());
+		return deviceType.concat(substring);
+	}
+
+	/**
+	 * 创建水表真实表号
+	 * @param waterType 水表类型，2位
+	 * @param deviceNo 用户前端输入的设备编号，一共14位，前端可能输入不足14位，所以此处需要补齐14
+	 * @return
+	 */
+	public static String createWaterDeviceNo(String waterType, String deviceNo) {
+		// 真实表号16位 = 水表类型2位 + 前端可能输入不足14位，所以此处前面补0
+		String newNo= "00000000000000".concat(deviceNo);
+		String substring = newNo.substring(newNo.length() - 14, newNo.length());
+		return waterType.concat(substring);
+	}
+
+	/**
+	 * 创建气表真实表号
+	 * @param gasType 气表类型，2位
+	 * @param deviceNo 用户前端输入的设备编号，一共14位，前端可能输入不足14位，所以此处需要补齐14
+	 * @return
+	 */
+	public static String createGasDeviceNo(String gasType, String deviceNo) {
+		// 真实表号16位 = 气表类型2位 + 前端可能输入不足14位，所以此处前面补0
+		String newNo= "00000000000000".concat(deviceNo);
+		String substring = newNo.substring(newNo.length() - 14, newNo.length());
+		return gasType.concat(substring);
+	}
+	/**
+	 * 创建真实表号
+	 * @param gasType 气表类型，2位
+	 * @param deviceNo 用户前端输入的设备编号，一共14位，前端可能输入不足14位，所以此处需要补齐14
+	 * @return
+	 */
+	public static String createDeviceNo(String gasType, String deviceNo) {
+		// 真实表号16位 = 气表类型2位 + 前端可能输入不足14位，所以此处前面补0
+		String newNo= "00000000000000".concat(deviceNo);
+		String substring = newNo.substring(newNo.length() - 14, newNo.length());
+		return gasType.concat(substring);
+	}
+	/**
+	 * 将字符串长度补足16位
+	 * @param deviceNo
+	 * @return
+	 */
+	public static String fillStrLengthTo16(String deviceNo) {
+		String newNo= "0000000000000000".concat(deviceNo);
+		return newNo.substring(newNo.length() - 16);
+	}
+
+	/**
+	 * 将字符串长度补足12位
+	 * @param deviceNo
+	 * @return
+	 */
+	public static String fillStrLengthTo12(String deviceNo) {
+		if(deviceNo==null||"".equals(deviceNo)){
+			deviceNo="0";
+		}
+		String newNo= "000000000000".concat(deviceNo);
+		return newNo.substring(newNo.length() - 12);
+	}
+
+	/**
+	 * 根据cno获取表号，电表返回12位，水表、气表返回16位
+	 * @param cno
+	 * @return
+	 */
+	public static String getDeviceNoByCno(String cno) {
+		String type = cno.substring(0, 2);
+		int length = cno.length();
+		String deviceNo = null;
+		if (DeviceType.ELECTRIC_METER.getCode().equals(type)) {
+			deviceNo = cno.substring(length -12);
+		} else if (DeviceType.WATER_METER.getCode().equals(type)) {
+			deviceNo = cno.substring(length - 16);
+		} else if (DeviceType.GAS_METER.getCode().equals(type)) {
+			deviceNo = cno.substring(length - 16);
+		} else if(DeviceType.JZQ.getCode().equals(type)){
+			deviceNo=cno.substring(length-9);
+		} else if(DeviceType.CJQ.getCode().equals(type)){
+			deviceNo=cno.substring(length-16);
+		} else if (DeviceType.CONVERTER.getCode().equals(type)) {
+			deviceNo = cno.substring(2).replaceAll("^0*","");
+		}
+		return deviceNo;
+	}
+
+	public static String getJzqNoByJzqCno(String jzqCno) {
+		int length = jzqCno.length();
+		String temp = jzqCno.substring(length - 9);
+		return temp;
+	}
+
+	public static  String getNo(String cno) {
+		if(!StringUtils.isEmpty(cno)){
+			if (cno.length() != 30) {
+				return "";
+			} else {
+				return cno.substring(2).replaceAll("^0*","");
+			}
+		}else {
+			return "";
+		}
+	}
+
+	public static void main(String[] args) {
+//		String waterDeviceNo = createWaterDeviceNo("22", "12");
+//		System.out.println(waterDeviceNo);
+//
+//		String gasDeviceNo = createGasDeviceNo("33", "12345678901234");
+//		System.out.println(gasDeviceNo);
+//
+//		String jzqNoByJzqCno = getJzqNoByJzqCno("040000000000000000000545531531");
+//		System.out.println(jzqNoByJzqCno);
+
+//		String gasDeviceNo = getDeviceNoByCno("090000000000003012345678999999");
+//		System.out.println(gasDeviceNo);
+//
+//		String electricDeviceNo = getDeviceNoByCno("070000000000000000000000000123");
+//		System.out.println(electricDeviceNo);
+//
+//		BigDecimal temp = new BigDecimal("1.2356");
+//		String s = temp.setScale(2, BigDecimal.ROUND_HALF_UP).toString();
+//		System.out.println(s);
+//		BigDecimal one = new BigDecimal(temp.setScale(2,BigDecimal.ROUND_HALF_UP).toString());
+//		System.out.println(temp.toString());
+//
+//		DecimalFormat df = new DecimalFormat("#0.00");
+//		String format = df.format(temp);
+//		System.out.println(format);
+
+		String s = fillStrLengthTo16("3232332547896541");
+		System.out.println(s);
+
+		String s1 = fillStrLengthTo12("5445254687458");
+		System.out.println(s1);
+
+		BigDecimal zero = BigDecimal.ZERO;
+		BigDecimal temp = new BigDecimal(zero.setScale(2,BigDecimal.ROUND_HALF_UP).toString());
+
+		BigDecimal a = new BigDecimal("52");
+		BigDecimal b = new BigDecimal(a.setScale(2,BigDecimal.ROUND_HALF_UP).toString());
+		System.out.println(JSON.toJSONString(temp));
+		System.out.println(JSON.toJSONString(b));
+
+	}
+}

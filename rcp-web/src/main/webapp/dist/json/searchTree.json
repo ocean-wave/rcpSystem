@@ -1,0 +1,57 @@
+{
+    "code": 1,
+    "message": "success",
+    "data": [{
+        "open": true,
+        "hasChild": true,
+        "nodeName": "小区1",
+        "nodeType": 1,
+        "pNodeId": "0",
+        "nodeId": "01",
+        "selected": false,
+        "children": [{
+            "open": true,
+            "hasChild": true,
+            "nodeName": "总表1",
+            "pNodeId": "01",
+            "nodeId": "011",
+            "selected": false,
+            "children": [{
+                "open": true,
+                "hasChild": false,
+                "nodeName": "子表1",
+                "pNodeId": "011",
+                "nodeId": "0111",
+                "selected": false
+            }, {
+                "open": true,
+                "hasChild": false,
+                "nodeName": "子表2",
+                "pNodeId": "011",
+                "nodeId": "0112",
+                "selected": false
+            }]
+        }]
+    }, {
+        "open": false,
+        "hasChild": true,
+        "nodeName": "小区2",
+        "nodeType": 1,
+        "pNodeId": 0,
+        "isDepart": true,
+        "nodeId": "02",
+        "children": [],
+        "selected": false
+    }, {
+        "open": false,
+        "hasChild": false,
+        "nodeName": "小区3",
+        "nodeType": 1,
+        "pNodeId": 0,
+        "isDepart": false,
+        "nodeId": "03",
+        "children": [],
+        "selected": false
+    }],
+    "total": 30
+}

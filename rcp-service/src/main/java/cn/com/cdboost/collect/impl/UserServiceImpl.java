@@ -1,0 +1,357 @@
+package cn.com.cdboost.collect.impl;
+
+
+import cn.com.cdboost.collect.cache.OrgCacheVo;
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.constant.RedisKeyConstant;
+import cn.com.cdboost.collect.constant.UserConstant;
+import cn.com.cdboost.collect.dao.UserMapper;
+import cn.com.cdboost.collect.dto.WorkRuntorNameOrgInfo;
+import cn.com.cdboost.collect.dto.param.UserGetQueryVo;
+import cn.com.cdboost.collect.dto.response.UserQueryInfo;
+import cn.com.cdboost.collect.enums.UserServiceEnum;
+import cn.com.cdboost.collect.exception.BusinessException;
+import cn.com.cdboost.collect.model.Org;
+import cn.com.cdboost.collect.model.User;
+import cn.com.cdboost.collect.model.UserOrg;
+import cn.com.cdboost.collect.model.UserRole;
+import cn.com.cdboost.collect.service.*;
+import cn.com.cdboost.collect.util.CryptographyUtil;
+import cn.com.cdboost.collect.util.RedisUtil;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * 用户服务接口实现类
+ */
+@Service("userService")
+public class UserServiceImpl extends BaseServiceImpl<User> implements UserService {
+	private static final String SALT = "cdboost";
+
+	@Autowired
+	private UserMapper userMapper;
+	@Autowired
+	private UserRoleService userRoleService;
+	@Autowired
+	private OrgService orgService;
+	@Autowired
+	private UserOrgService userOrgService;
+	@Autowired
+	private RedisUtil redisUtil;
+	@Autowired
+	private RedisService redisService;
+
+	@Override
+	@Transactional(propagation= Propagation.REQUIRED,rollbackFor=RuntimeException.class)
+	public void addUserInfo(User user,List<Long> dataOrgList, Integer roleId) throws BusinessException{
+		// 检查登录名是否存在
+		Boolean loginNameExist = this.isLoginNameExist(user.getLoginName());
+		if (loginNameExist) {
+			throw new BusinessException(UserServiceEnum.LOGIN_NAME_IS_EXIST.getMessage());
+		}
+
+		// 检查手机号是否存在
+		Boolean userMobileExist = this.isUserMobileExist(user.getUserMobile());
+		if (userMobileExist) {
+			throw new BusinessException(UserServiceEnum.USER_MOBILE_IS_EXIST.getMessage());
+		}
+
+		// 密码加密
+		String md5Password = CryptographyUtil.md5(user.getUserPassword(), SALT);
+		user.setUserPassword(md5Password);
+		// 添加用户表记录
+		userMapper.insertSelective(user);
+		// 添加用户-角色表记录
+		UserRole userRole = new UserRole();
+		userRole.setUserId(Long.valueOf(user.getId()));
+		userRole.setRoleId(Long.valueOf(roleId));
+		userRoleService.insertSelective(userRole);
+
+		// 添加用户数据权限表记录
+		List<UserOrg> userOrgs = Lists.newArrayList();
+		for (Long orgNo : dataOrgList) {
+			UserOrg userOrg = new UserOrg();
+			userOrg.setOrgNo(orgNo);
+			userOrg.setUserId(user.getId());
+			userOrgs.add(userOrg);
+		}
+		userOrgService.insertList(userOrgs);
+	}
+
+	@Override
+	@Transactional(propagation= Propagation.REQUIRED, rollbackFor=RuntimeException.class)
+	public void batchDeleteByIds(Set<Integer> ids, Integer currentUserId) throws BusinessException {
+		// 判断集合中是否存在当前用户
+		if (ids.contains(currentUserId)) {
+			throw new BusinessException(UserServiceEnum.CANNOT_DELETE_YOURSELF.getMessage());
+		}
+
+		// 批量查询用户
+		String join = Joiner.on(",").join(ids);
+		List<User> users = userMapper.selectByIds(join);
+		// 判断是否存在预置数据
+		for (User user : users) {
+			Integer isSystem = user.getIsSystem();
+			if (UserConstant.IsSystem.ISSYSTEM.getStatus().equals(isSystem)) {
+				throw new BusinessException(user.getUserName() + "是预置数据，不允许删除");
+			}
+		}
+
+		//设置删除条件
+		Condition userCond = new Condition(User.class);
+		Example.Criteria userCriteria = userCond.createCriteria();
+		userCriteria.andIn("id",ids);
+		User user = new User();
+		user.setIsEnabled(UserConstant.EnableStatus.UNENABLE.getStatus());
+		userMapper.updateByConditionSelective(user,userCond);
+
+		// 删除redis
+		Set<String> keys = Sets.newHashSet();
+		for (Integer id : ids) {
+			String key = RedisKeyConstant.USER_ORGS_PREFIX + id;
+			keys.add(key);
+		}
+		redisUtil.batchDeleteKeys(keys);
+	}
+
+	@Override
+	@Transactional(propagation= Propagation.REQUIRED,rollbackFor=RuntimeException.class)
+	public void updateUserInfo(User user, List<Long> dataOrgList, int roleId) throws BusinessException{
+		// 查询用户原始信息
+		User oldUser = userMapper.selectByPrimaryKey(user.getId());
+		if (oldUser == null) {
+			throw new BusinessException("更新的用户不存在");
+		}
+		if (UserConstant.IsSystem.ISSYSTEM.getStatus().equals(oldUser.getIsSystem())) {
+			throw new BusinessException("系统预置数据不允许修改");
+		}
+
+		// 更新的手机号是否在系统中存在
+		String oldUserMobile = oldUser.getUserMobile();
+		String userMobile = user.getUserMobile();
+		if (!oldUserMobile.equals(userMobile)) {
+			Boolean mobileExist = this.isUserMobileExist(userMobile);
+			if (mobileExist) {
+				throw new BusinessException(UserServiceEnum.USER_MOBILE_IS_EXIST.getMessage());
+			}
+		}
+
+		// 更新用户表记录
+		userMapper.updateByPrimaryKeySelective(user);
+
+		// 查询用户原始角色
+		UserRole userRole = userRoleService.queryByUserId(Long.valueOf(oldUser.getId()));
+		if (userRole == null) {
+			throw new BusinessException("更新用户的原始角色表记录不存在");
+		}
+
+		if (userRole.getRoleId().intValue() != roleId) {
+			// 更新用户-角色表记录
+			UserRole param = new UserRole();
+			param.setRoleId(Long.valueOf(roleId));
+			userRoleService.updateSelectiveByUserId(Long.valueOf(user.getId()),param);
+		}
+
+		// 删除之前的用户数据权限表信息
+		int i = userOrgService.deleteByUserId(user.getId());
+
+		// 新增最新的用户数据权限表信息
+		List<UserOrg> userOrgs = Lists.newArrayList();
+		for (Long orgNo : dataOrgList) {
+			UserOrg userOrg = new UserOrg();
+			userOrg.setUserId(user.getId());
+			userOrg.setOrgNo(orgNo);
+			userOrgs.add(userOrg);
+		}
+		userOrgService.insertList(userOrgs);
+
+		// 删除redis
+		String key = RedisKeyConstant.USER_ORGS_PREFIX + user.getId();
+		redisUtil.del(key);
+	}
+
+	@Override
+	public List<UserQueryInfo> query(UserGetQueryVo queryVo) {
+		String userName = queryVo.getUserName();
+		if (userName == null) {
+			queryVo.setUserName("");
+		}
+		String userMobile = queryVo.getUserMobile();
+		if (userMobile == null) {
+			queryVo.setUserMobile("");
+		}
+		String roleName = queryVo.getRoleName();
+		if (roleName == null) {
+			queryVo.setRoleName("");
+		}
+		List<UserQueryInfo> list = userMapper.query(queryVo);
+
+		// 设置用户数据权限
+		if (!CollectionUtils.isEmpty(list)) {
+			Set<Integer> userIdSet = Sets.newHashSet();
+			for (UserQueryInfo info : list) {
+				userIdSet.add(info.getId());
+			}
+			// 查询用户对应的数据权限列表
+			List<UserOrg> userOrgs = userOrgService.batchQueryByUserIds(userIdSet);
+			Set<Long> orgNoSet = Sets.newHashSet();
+			for (UserOrg userOrg : userOrgs) {
+				orgNoSet.add(userOrg.getOrgNo());
+			}
+
+			// 查询redis缓存
+			List<OrgCacheVo> orgCacheVoList = redisService.queryOrgCacheList(orgNoSet);
+			// 分组
+			ImmutableMap<Long, OrgCacheVo> orgMap = Maps.uniqueIndex(orgCacheVoList, new Function<OrgCacheVo, Long>() {
+				@Nullable
+				@Override
+				public Long apply(@Nullable OrgCacheVo orgCacheVo) {
+					return orgCacheVo.getOrgNo();
+				}
+			});
+
+			// 按用户id分组
+			ImmutableListMultimap<Integer, UserOrg> userOrgMap = Multimaps.index(userOrgs, new Function<UserOrg, Integer>() {
+				@Nullable
+				@Override
+				public Integer apply(@Nullable UserOrg userOrg) {
+					return userOrg.getUserId();
+				}
+			});
+
+			for (UserQueryInfo info : list) {
+				Integer id = info.getId();
+				ImmutableList<UserOrg> dataOrgs = userOrgMap.get(id);
+				List<Long> dataOrgList = Lists.newArrayList();
+				List<String> dataOrgNameList = Lists.newArrayList();
+				for (UserOrg dataOrg : dataOrgs) {
+					dataOrgList.add(dataOrg.getOrgNo());
+					OrgCacheVo orgCacheVo = orgMap.get(dataOrg.getOrgNo());
+					dataOrgNameList.add(orgCacheVo.getOrgName());
+				}
+				info.setDataOrgList(dataOrgList);
+				info.setDataOrgNameList(dataOrgNameList);
+			}
+		}
+		return list;
+	}
+
+	@Override
+	public boolean validatePassword(Integer userId, String password) {
+		User user = userMapper.selectByPrimaryKey(userId);
+
+		// 密码加密
+		String md5Password = CryptographyUtil.md5(password, SALT);
+		if (!md5Password.equals(user.getUserPassword())) {
+			return false;
+		}
+		return true;
+	}
+   
+	//修改用户密码
+	@Override
+	@Transactional
+	public void changeUserPassword(Integer userId, String password) {
+		// 密码加密
+		String md5Password = CryptographyUtil.md5(password,SALT);
+		User user = new User();
+		user.setId(userId);
+		user.setUserPassword(md5Password);
+		userMapper.updateByPrimaryKeySelective(user);
+	}
+	//根据登录名获取用户，登录验证
+	@Override
+	public User getUserByLoginName(String LoginName) {
+		User user = new User();
+		user.setLoginName(LoginName);
+		user.setIsEnabled(UserConstant.EnableStatus.ENABLE.getStatus());
+		return userMapper.selectOne(user);
+	}
+
+	@Override
+	public long getRoleIdByUserID(long userId) {
+		UserRole userRole = userRoleService.queryByUserId(userId);
+		return userRole.getRoleId();
+	}
+
+	@Override
+	public List<WorkRuntorNameOrgInfo> queryUsersByUserName(String userName) {
+		List<WorkRuntorNameOrgInfo> list = Lists.newArrayList();
+		Condition condition = new Condition(User.class);
+		Example.Criteria criteria = condition.createCriteria();
+		criteria.andLike("userName","%"+userName+"%");
+		criteria.andEqualTo("isEnabled",1);
+		List<User> users = userMapper.selectByCondition(condition);
+		if (CollectionUtils.isEmpty(users)) {
+			return list;
+		}
+
+		Set<Long> orgNoSet = Sets.newHashSet();
+		for (User user : users) {
+			orgNoSet.add(user.getOrgNo());
+		}
+
+		// 批量查询组织机构
+		List<Long> orgNos = Lists.newArrayList(orgNoSet);
+		List<Org> orgs = orgService.batchQueryByOrgNos(orgNos);
+		Map<Long,Org> orgMap = Maps.newHashMap();
+		for (Org org : orgs) {
+			orgMap.put(org.getOrgNo(),org);
+		}
+
+		for (User user: users){
+			Long orgNo = user.getOrgNo();
+			WorkRuntorNameOrgInfo info = new WorkRuntorNameOrgInfo();
+			info.setUserId(user.getId());
+			info.setText("姓名：" + user.getUserName() + "|部门：" + orgMap.get(orgNo).getOrgName());
+
+			list.add(info);
+		}
+		return list;
+	}
+
+	@Override
+	public Boolean isLoginNameExist(String loginName) throws BusinessException {
+		User param = new User();
+		param.setLoginName(loginName);
+		param.setIsEnabled(UserConstant.EnableStatus.ENABLE.getStatus());
+		User user = userMapper.selectOne(param);
+		if (user != null) {
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	@Override
+	public Boolean isUserMobileExist(String userMobile) throws BusinessException {
+		User param = new User();
+		param.setUserMobile(userMobile);
+		param.setIsEnabled(UserConstant.EnableStatus.ENABLE.getStatus());
+		User user = userMapper.selectOne(param);
+		if (user != null) {
+			return Boolean.TRUE;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	@Override
+	public List<User> batchQueryByIds(List<Integer> ids) {
+		String joinStr = Joiner.on(",").join(ids);
+		return userMapper.selectByIds(joinStr);
+	}
+}

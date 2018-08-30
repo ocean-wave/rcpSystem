@@ -1,0 +1,21 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.common.BaseService;
+import cn.com.cdboost.collect.dto.param.AccountOperateVo;
+import cn.com.cdboost.collect.model.ChargingCst;
+
+/**
+ * 客户信息接口服务
+ */
+public interface ChargingCstService extends BaseService<ChargingCst> {
+    ChargingCst queryByOpenId(String openId);
+    //根据openId和联系电话查询用户
+    ChargingCst queryByOpenIdAndPnone(String openId,String phoneNumber);
+    //根据openId更新客户电话
+    Integer updateCustomer(String openId,String phoneNumber);
+
+    // 账户变动更新操作
+    void updateAccount(AccountOperateVo accountOperateVo);
+
+    void updateAccountNew(ChargingCst param,AccountOperateVo accountOperateVo);
+}

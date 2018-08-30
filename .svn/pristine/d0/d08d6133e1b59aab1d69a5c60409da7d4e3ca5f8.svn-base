@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.cdboost.collect.dao.QuerySchemeMapper">
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.QueryScheme">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="scheme_name" jdbcType="VARCHAR" property="schemeName" />
+    <result column="user_count" jdbcType="INTEGER" property="userCount" />
+    <result column="scheme_flag" jdbcType="VARCHAR" property="schemeFlag" />
+    <result column="scheme_type" jdbcType="INTEGER" property="schemeType" />
+    <result column="on_date" jdbcType="DATE" property="onDate" />
+    <result column="on_time" jdbcType="TIME" property="onTime" />
+    <result column="off_date" jdbcType="DATE" property="offDate" />
+    <result column="off_time" jdbcType="TIME" property="offTime" />
+    <result column="is_cycle_run" jdbcType="INTEGER" property="isCycleRun" />
+    <result column="create_user_id" jdbcType="INTEGER" property="createUserId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="scheme_remark" jdbcType="VARCHAR" property="schemeRemark" />
+  </resultMap>
+
+  <resultMap id="querySchemeDtoMap" type="cn.com.cdboost.collect.dto.QuerySchemeDto">
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="scheme_name" jdbcType="VARCHAR" property="schemeName" />
+    <result column="user_count" jdbcType="INTEGER" property="userCount" />
+    <result column="scheme_flag" jdbcType="VARCHAR" property="schemeFlag" />
+    <result column="scheme_type" jdbcType="INTEGER" property="schemeType" />
+    <result column="on_date" jdbcType="DATE" property="onDate" />
+    <result column="on_time" jdbcType="TIME" property="onTime" />
+    <result column="off_date" jdbcType="DATE" property="offDate" />
+    <result column="off_time" jdbcType="TIME" property="offTime" />
+    <result column="is_cycle_run" jdbcType="INTEGER" property="isCycleRun" />
+    <result column="create_user_id" jdbcType="INTEGER" property="createUserId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="scheme_remark" jdbcType="VARCHAR" property="schemeRemark" />
+  </resultMap>
+
+  <resultMap id="queryDeviceCountMap" type="cn.com.cdboost.collect.dto.DeviceCountDbDto">
+    <result column="on_date" jdbcType="DATE" property="startDate" />
+    <result column="on_time" jdbcType="TIME" property="startTime" />
+    <result column="off_date" jdbcType="DATE" property="endDate" />
+    <result column="off_time" jdbcType="TIME" property="endTime" />
+  </resultMap>
+  <resultMap id="queryDeviceUserListMap" type="cn.com.cdboost.collect.dto.DeviceUserListDto">
+      <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+      <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+      <result column="device_no" jdbcType="VARCHAR" property="deviceNo" />
+      <result column="cno" jdbcType="VARCHAR" property="cno" />
+      <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+      <result column="transformer_no" jdbcType="VARCHAR" property="transformerNo" />
+      <result column="building_no" jdbcType="VARCHAR" property="buildNo" />
+      <result column="install_addr" jdbcType="VARCHAR" property="installAddr" />
+  </resultMap>
+
+  <sql id="QUERY-COMMON">
+    <where>
+      t1.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="schemeType != null and schemeType != ''">
+        AND t.scheme_type = #{schemeType}
+      </if>
+      <if test="schemeName != null and schemeName != ''">
+        AND t.scheme_name LIKE CONCAT('%',#{schemeName},'%')
+      </if>
+      <if test="remark != null and remark != ''">
+        AND t.scheme_remark LIKE CONCAT('%',#{remark},'%')
+      </if>
+    </where>
+  </sql>
+<!--分页查询方案-->
+  <select id="queryList" parameterType="cn.com.cdboost.collect.dto.param.QuerySchemeVo" resultMap="querySchemeDtoMap">
+      SELECT t.id,t.scheme_name,t.user_count number,t.scheme_flag,t.scheme_type,
+      t.on_date startDate,t.on_time startTime,t.off_date endDate,t.off_time endTime,
+      t1.user_name creator,t.create_time,t.scheme_remark,t1.org_no
+      FROM em_d_query_scheme t LEFT JOIN em_b_user t1 ON t.create_user_id=t1.id
+      <include refid="QUERY-COMMON" />
+      limit #{start},#{pageSize}
+</select>
+  <!--增加项目详情-->
+  <insert id="saveSchememet" parameterType="cn.com.cdboost.collect.dto.param.AddSchemeNodeParam">
+      insert into em_d_query_schememet(scheme_flag,customer_no,meter_user_no,cno,create_user_id,create_time)
+      values(#{schemeFlg},#{customerNo},#{meterUserNo},#{cno},#{createUserId},#{createTime})
+  </insert>
+  <!--查询方案总数-->
+  <select id="selectTotal" parameterType="cn.com.cdboost.collect.dto.param.QuerySchemeVo" resultType="java.lang.Long">
+    SELECT COUNT(*) FROM em_d_query_scheme t INNER JOIN em_b_user t1 ON t.create_user_id=t1.id
+    <include refid="QUERY-COMMON" />
+  </select>
+  <!--方案设备统计-->
+  <select id="queryDeviceCount" parameterType="cn.com.cdboost.collect.dto.param.DeviceCountVo" resultMap="queryDeviceCountMap">
+    select t2.on_date,t2.on_time,t2.off_date,t2.off_time from em_d_query_schememet t1 left join em_d_query_scheme t2 on t1.scheme_flag = t2.scheme_flag
+    where cno = #{cno}
+  </select>
+  <!--设备关联用户列表查询-->
+  <select id="queryDeviceUserList" parameterType="cn.com.cdboost.collect.dto.param.DeviceUserListVo" resultMap="queryDeviceUserListMap">
+     select t1.install_addr,t3.customer_name,t2.meter_user_no,t2.customer_no,t1.device_no,t1.cno,t2.building_no,t2.transformer_no
+    from em_d_deviceinfo t1
+    LEFT JOIN em_d_customerdevmap t2 on t1.cno = t2.cno
+    LEFT JOIN em_d_customerinfo t3 on t2.customer_no = t3.customer_no
+       <where>
+         t1.org_no IN
+         <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+           #{item,jdbcType=BIGINT}
+         </foreach>
+         <if test="deviceNo!=null and deviceNo!= ''">
+            and t1.device_no like CONCAT('%',#{deviceNo},'%')
+         </if>
+         and t2.is_change =0
+       </where>
+       limit #{pageIndex},#{pageSize}
+  </select>
+  <select id="queryDeviceTotal" parameterType="cn.com.cdboost.collect.dto.param.DeviceUserListVo" resultType="java.lang.Long">
+    select count(*) as total  from em_d_deviceinfo t1
+    LEFT JOIN em_d_customerdevmap t2 on t1.cno = t2.cno
+    LEFT JOIN em_d_customerinfo t3 on t2.customer_no = t3.customer_no
+    <where>
+      t1.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="deviceNo!=null and deviceNo!= ''">
+        and t1.device_no like CONCAT('%',#{deviceNo},'%')
+      </if>
+      and t2.is_change =0
+    </where>
+  </select>
+
+  <!-- 根据id，批量更新电表数量-->
+  <update id="updateUserCountByIds" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      UPDATE em_d_query_scheme
+      SET user_count = #{item.userCount,jdbcType=INTEGER}
+      WHERE id = #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+</mapper>

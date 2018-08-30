@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<import resource="classpath:spring-service.xml"></import>
+	<import resource="classpath:spring-job.xml"></import>
+	<import resource="classpath:spring-dubbo.xml"/>
+	<import resource="classpath:application-rabbitmq.xml"/>
+	<context:component-scan base-package="cn.com.cdboost.collect">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+
+	<bean class="cn.com.cdboost.collect.listener.InitSocketMiddlewareListener">
+		<property name="sysConfigService" ref="sysConfigService"></property>
+		<property name="aFN04ResultDataBackLisener" ref="aFN04ResultDataBackLisener"></property>
+		<property name="aFN08ResultDataBackLisener" ref="aFN08ResultDataBackLisener"></property>
+		<property name="aFN14ResultDataBackLisener" ref="aFN14ResultDataBackLisener"></property>
+		<property name="aFN07ResultDataBackLisener" ref="aFN07ResultDataBackLisener"></property>
+		<property name="aFN15ResultDataBackLisener" ref="aFN15ResultDataBackLisener"></property>
+		<property name="aFN09ResultDataBackLisener" ref="aFN09ResultDataBackLisener"></property>
+		<property name="aFN20ResultDataBackLisener" ref="aFN20ResultDataBackLisener"></property>
+		<property name="aFN19ResultDataBackLisener" ref="aFN19ResultDataBackLisener"></property>
+		<property name="aFN21ResultDataBackLisener" ref="aFN21ResultDataBackLisener"></property>
+		<property name="aFN22ResultDataBackLisener" ref="aFN22ResultDataBackLisener"></property>
+		<property name="aFN23ResultDataBackLisener" ref="aFN23ResultDataBackLisener"></property>
+	</bean>
+
+	<!-- 安全管理器 本地测试用-->
+	<!--<bean id="securityManager" class="org.apache.shiro.mgt.DefaultSecurityManager">-->
+	<!--<property name="realm" ref="customRealm"/>-->
+	<!--</bean>-->
+
+	<!-- 安全管理器 正式环境用-->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="customRealm"/>
+	</bean>
+
+	<!-- Shiro过滤器 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<!-- Shiro的核心安全接口,这个属性是必须的 -->
+		<property name="securityManager" ref="securityManager"/>
+		<!-- 身份认证失败，则跳转到登录页面的配置 -->
+		<property name="loginUrl" value="/index.html"/>
+		<!-- Shiro连接约束配置,即过滤链的定义 -->
+		<property name="filterChainDefinitions">
+			<value>
+				<!-- 对静态资源设置匿名访问 -->
+				/dist/** = anon
+				/wePay/** = anon
+				/login = anon
+				/android/** = anon
+				/appPay/** = anon
+				/appCharger/** = anon
+				/back/** = anon
+				/chargePay/** = anon
+				/system/querySystemConfig/** = anon
+				<!-- 注销 -->
+				/logout = anon
+				/websocket = anon
+				<!-- 通过认证可以访问 -->
+				/**=authc
+			</value>
+		</property>
+	</bean>
+
+	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+	<bean id="springWebSocketHandler" class="cn.com.cdboost.collect.handler.SpringWebSocketHandler"/>
+</beans>

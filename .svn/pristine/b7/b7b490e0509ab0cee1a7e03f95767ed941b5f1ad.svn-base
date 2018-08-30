@@ -1,0 +1,354 @@
+package cn.com.cdboost.collect.model;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+@Table(name = "em_d_charging_pay")
+public class ChargingPay implements Serializable {
+    /**
+     * 标识id
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * ic卡号
+     */
+    @Column(name = "card_id")
+    private String cardId;
+
+    /**
+     * 微信号
+     */
+    @Column(name = "webchar_no")
+    private String webcharNo;
+
+    /**
+     * 充值类别 1-购买次数  2-包月充值
+     */
+    @Column(name = "pay_category")
+    private Integer payCategory;
+
+    /**
+     * 充值包月数 pay_category=2时有效
+     */
+    @Column(name = "num_months")
+    private Integer numMonths;
+
+    /**
+     * 实际支付金额
+     */
+    @Column(name = "pay_money")
+    private BigDecimal payMoney;
+
+    /**
+     * 账户余额充值金额（pay_category=4时跟pay_money可能不一致）
+     */
+    @Column(name = "account_charge_money")
+    private BigDecimal accountChargeMoney;
+
+    /**
+     * 支付成功后，账户余额需要扣减金额
+     */
+    @Column(name = "account_deduct_money")
+    private BigDecimal accountDeductMoney;
+
+    /**
+     * 充值次数
+     */
+    @Column(name = "buy_cnt")
+    private Integer buyCnt;
+
+    /**
+     * 应充时长
+     */
+    @Column(name = "charging_time")
+    private Integer chargingTime;
+
+    /**
+     * 充值流水号
+     */
+    @Column(name = "serial_num")
+    private String serialNum;
+
+    @Column(name = "pay_flag")
+    private String payFlag;
+
+    /**
+     * 创建时间
+     */
+    @Column(name = "create_time")
+    private Date createTime;
+
+    /**
+     * 支付状态 0-待支付 1-支付成功
+     */
+    @Column(name = "pay_state")
+    private Integer payState;
+    /**
+     * 客户唯一标识
+     */
+    @Column(name="customer_guid")
+    private String customerGuid;
+
+    /**
+     * 充值后剩余金额
+     */
+    @Column(name="after_remain_amount")
+    private BigDecimal afterRemainAmount;
+
+    /**
+     * 更新时间
+     */
+    @Column(name="update_time")
+    private Date updateTime;
+
+    /**
+     * 支付类别（充电时购买，月卡页面购买，活动页面购买）
+     */
+    @Column(name="type")
+    private Integer type;
+
+    /**
+     * 充值方式 1-微信 2-支付宝 3-现金 4-余额
+     */
+    @Column(name="pay_way")
+    private Integer payWay;
+
+    public String getCustomerGuid() {
+        return customerGuid;
+    }
+
+    public void setCustomerGuid(String customerGuid) {
+        this.customerGuid = customerGuid;
+    }
+
+    /**
+     * 获取标识id
+     *
+     * @return id - 标识id
+     */
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * 设置标识id
+     *
+     * @param id 标识id
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+
+    /**
+     * 获取微信号
+     *
+     * @return webchar_no - 微信号
+     */
+    public String getWebcharNo() {
+        return webcharNo;
+    }
+
+    /**
+     * 设置微信号
+     *
+     * @param webcharNo 微信号
+     */
+    public void setWebcharNo(String webcharNo) {
+        this.webcharNo = webcharNo;
+    }
+
+    /**
+     * 获取充值类别 1-购买次数  2-包月充值
+     *
+     * @return pay_category - 充值类别 1-购买次数  2-包月充值
+     */
+    public Integer getPayCategory() {
+        return payCategory;
+    }
+
+    /**
+     * 设置充值类别 1-购买次数  2-包月充值
+     *
+     * @param payCategory 充值类别 1-购买次数  2-包月充值
+     */
+    public void setPayCategory(Integer payCategory) {
+        this.payCategory = payCategory;
+    }
+
+    /**
+     * 获取充值包月数 pay_category=2时有效
+     *
+     * @return num_months - 充值包月数 pay_category=2时有效
+     */
+    public Integer getNumMonths() {
+        return numMonths;
+    }
+
+    /**
+     * 设置充值包月数 pay_category=2时有效
+     *
+     * @param numMonths 充值包月数 pay_category=2时有效
+     */
+    public void setNumMonths(Integer numMonths) {
+        this.numMonths = numMonths;
+    }
+
+    /**
+     * @return pay_money
+     */
+    public BigDecimal getPayMoney() {
+        return payMoney;
+    }
+
+    /**
+     * @param payMoney
+     */
+    public void setPayMoney(BigDecimal payMoney) {
+        this.payMoney = payMoney;
+    }
+
+    /**
+     * 获取充值次数
+     *
+     * @return buy_cnt - 充值次数
+     */
+    public Integer getBuyCnt() {
+        return buyCnt;
+    }
+
+    /**
+     * 设置充值次数
+     *
+     * @param buyCnt 充值次数
+     */
+    public void setBuyCnt(Integer buyCnt) {
+        this.buyCnt = buyCnt;
+    }
+
+    /**
+     * 获取充值流水号
+     *
+     * @return serial_num - 充值流水号
+     */
+    public String getSerialNum() {
+        return serialNum;
+    }
+
+    /**
+     * 设置充值流水号
+     *
+     * @param serialNum 充值流水号
+     */
+    public void setSerialNum(String serialNum) {
+        this.serialNum = serialNum;
+    }
+
+    /**
+     * @return pay_flag
+     */
+    public String getPayFlag() {
+        return payFlag;
+    }
+
+    /**
+     * @param payFlag
+     */
+    public void setPayFlag(String payFlag) {
+        this.payFlag = payFlag;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return create_time - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Integer getPayState() {
+        return payState;
+    }
+
+    public void setPayState(Integer payState) {
+        this.payState = payState;
+    }
+
+    public Integer getChargingTime() {
+        return chargingTime;
+    }
+
+    public void setChargingTime(Integer chargingTime) {
+        this.chargingTime = chargingTime;
+    }
+
+    public BigDecimal getAfterRemainAmount() {
+        return afterRemainAmount;
+    }
+
+    public void setAfterRemainAmount(BigDecimal afterRemainAmount) {
+        this.afterRemainAmount = afterRemainAmount;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public BigDecimal getAccountChargeMoney() {
+        return accountChargeMoney;
+    }
+
+    public void setAccountChargeMoney(BigDecimal accountChargeMoney) {
+        this.accountChargeMoney = accountChargeMoney;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public BigDecimal getAccountDeductMoney() {
+        return accountDeductMoney;
+    }
+
+    public void setAccountDeductMoney(BigDecimal accountDeductMoney) {
+        this.accountDeductMoney = accountDeductMoney;
+    }
+
+    public Integer getPayWay() {
+        return payWay;
+    }
+
+    public void setPayWay(Integer payWay) {
+        this.payWay = payWay;
+    }
+}

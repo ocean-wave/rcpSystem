@@ -1,0 +1,14 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.dto.param.DayElectricInfoResponseParam;
+import cn.com.cdboost.collect.param.DayElectricInfoParam;
+
+import java.util.List;
+
+/**
+ * 查询当日用电信息
+ */
+public interface DayElectricInfoService {
+
+    List<DayElectricInfoResponseParam> queryDayElectricInfo(DayElectricInfoParam dayElectricInfoParam);
+}

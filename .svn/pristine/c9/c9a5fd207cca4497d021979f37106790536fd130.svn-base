@@ -1,0 +1,42 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.constant.ChargeConstant;
+import cn.com.cdboost.collect.dao.ChargingPayChemeMapper;
+import cn.com.cdboost.collect.model.ChargingPayCheme;
+import cn.com.cdboost.collect.service.ChargingPayChemeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+
+/**
+ * 充值方案信息表接口实现类
+ */
+@Service
+public class ChargingPayChemeServiceImpl extends BaseServiceImpl<ChargingPayCheme> implements ChargingPayChemeService {
+
+    @Autowired
+    private ChargingPayChemeMapper chargingPayChemeMapper;
+
+    @Override
+    public List<ChargingPayCheme> querySchemeList(String projectGuid) {
+        Condition condition = new Condition(ChargingPayCheme.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("projectGuid",projectGuid);
+        criteria.andNotEqualTo("payCategory", ChargeConstant.SchemePayCategory.BALANCE_RECHARGE.getType());
+        condition.setOrderByClause("sort_no ASC");
+        return chargingPayChemeMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public List<ChargingPayCheme> queryMonthSchemeList() {
+        Condition condition = new Condition(ChargingPayCheme.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("payCategory", ChargeConstant.SchemePayCategory.MONTH_RECHARGE.getType());
+        condition.setOrderByClause("sort_no ASC");
+        return chargingPayChemeMapper.selectByCondition(condition);
+    }
+}

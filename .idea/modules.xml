@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/rcp-appapi/rcp-appapi.iml" filepath="$PROJECT_DIR$/rcp-appapi/rcp-appapi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rcp-common/rcp-common.iml" filepath="$PROJECT_DIR$/rcp-common/rcp-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rcp-dao/rcp-dao.iml" filepath="$PROJECT_DIR$/rcp-dao/rcp-dao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rcp-dubbo/rcp-dubbo.iml" filepath="$PROJECT_DIR$/rcp-dubbo/rcp-dubbo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rcp-facade/rcp-facade.iml" filepath="$PROJECT_DIR$/rcp-facade/rcp-facade.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rcp-service/rcp-service.iml" filepath="$PROJECT_DIR$/rcp-service/rcp-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rcp-system.iml" filepath="$PROJECT_DIR$/rcp-system.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rcp-web/rcp-web.iml" filepath="$PROJECT_DIR$/rcp-web/rcp-web.iml" />
+    </modules>
+  </component>
+</project>

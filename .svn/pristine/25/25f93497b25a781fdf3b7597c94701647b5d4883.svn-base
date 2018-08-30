@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<context:property-placeholder location="classpath:dubbo.properties" ignore-unresolvable="true" file-encoding="UTF-8" />
+
+	<!-- 配置当前应用模块名称 -->
+	<dubbo:application name="rcp-appapi"/>
+	<!-- 配置注册中心位置 -->
+	<dubbo:consumer check="false"/>
+	<dubbo:registry address="${zookeeper.address}" protocol="zookeeper" />
+	<!-- 配置Dubbo客户端的访问端口 -->
+	<dubbo:protocol name="dubbo" port="20880"/>
+	<!-- 配置提供服务的接口类型 -->
+	<dubbo:reference id="customerOnOffService" interface="cn.com.cdboost.collect.service.CustomerOnOffService"
+					 version="1.0" timeout="3000"/>
+
+	<!-- 配置提供服务的接口类型 -->
+	<dubbo:reference id="dayElectricInfoService" interface="cn.com.cdboost.collect.service.DayElectricInfoService"
+					 version="1.0" timeout="3000"/>
+	<!-- 配置提供服务的接口类型 -->
+	<dubbo:reference id="historyElectricAmountService" interface="cn.com.cdboost.collect.service.HistoryElectricAmountService"
+					 version="1.0" timeout="3000"/>
+	<!-- 配置提供服务的接口类型 -->
+	<dubbo:reference id="paymentRecordService" interface="cn.com.cdboost.collect.service.PaymentRecordService"
+					 version="1.0" timeout="3000"/>
+	<!-- 配置提供服务的接口类型 -->
+	<dubbo:reference id="remainAmountService" interface="cn.com.cdboost.collect.service.RemainAmountService"
+					 version="1.0" timeout="3000"/>
+</beans>

@@ -1,0 +1,63 @@
+{
+  "data": [
+    {
+      "customerName":"张三",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"李四",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"王五",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"二麻子",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"烟台",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"四川",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"编辑",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    },{
+      "customerName":"即可烦你",
+      "electDeviceNo":"001100",
+      "elect":50,
+      "startCode": "10001",
+      "endCode":"20001",
+      "collectTime": "2018-7-11 16:44:47"
+    }
+  ],
+  "message": "success",
+  "code": 1
+}

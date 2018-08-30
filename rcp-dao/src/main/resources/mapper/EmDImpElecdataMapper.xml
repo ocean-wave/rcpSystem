@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.EmDImpElecdataMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.EmDImpElecdata" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="active_total" property="activeTotal" jdbcType="DECIMAL" />
+    <result column="unactive_total" property="unactiveTotal" jdbcType="DECIMAL" />
+    <result column="re_active_total" property="reActiveTotal" jdbcType="DECIMAL" />
+    <result column="re_unactive_total" property="reUnactiveTotal" jdbcType="DECIMAL" />
+    <result column="active_total_value" property="activeTotalValue" jdbcType="DECIMAL" />
+    <result column="power" property="power" jdbcType="DECIMAL" />
+    <result column="un_power" property="unPower" jdbcType="DECIMAL" />
+    <result column="voltage_a" property="voltageA" jdbcType="DECIMAL" />
+    <result column="voltage_b" property="voltageB" jdbcType="DECIMAL" />
+    <result column="voltage_c" property="voltageC" jdbcType="DECIMAL" />
+    <result column="current_a" property="currentA" jdbcType="DECIMAL" />
+    <result column="current_b" property="currentB" jdbcType="DECIMAL" />
+    <result column="current_c" property="currentC" jdbcType="DECIMAL" />
+    <result column="current_z" property="currentZ" jdbcType="DECIMAL" />
+    <result column="collect_time" property="collectTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="data_type" property="dataType" jdbcType="INTEGER" />
+    <result column="queue_guid" property="queueGuid" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <resultMap id="KeyCollectDTO" type="cn.com.cdboost.collect.dto.KeyCollectDTO">
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR"/>
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR"/>
+    <result column="device_no" property="customerAddr" jdbcType="VARCHAR"/>
+    <result column="install_addr" property="InstallAddr" jdbcType="VARCHAR"/>
+    <result column="collect_time" property="collectTime" jdbcType="VARCHAR"/>
+    <result column="cno" property="cNo" jdbcType="VARCHAR"/>
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR"/>
+    <result column="active_total" property="activeTotal" jdbcType="VARCHAR"/>
+    <result column="comm_collection_no" property="collectNo" jdbcType="VARCHAR"/>
+    <result column="current_a" property="currentA" jdbcType="DECIMAL"/>
+    <result column="voltage_a" property="voltageA" jdbcType="DECIMAL"/>
+    <result column="current_b" property="currentB" jdbcType="DECIMAL"/>
+    <result column="voltage_b" property="voltageB" jdbcType="DECIMAL"/>
+    <result column="voltage_c" property="voltageC" jdbcType="DECIMAL"/>
+    <result column="current_v" property="currentC" jdbcType="DECIMAL"/>
+  </resultMap>
+
+  <select id="queryKeyCollectSucc" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.param.KeyCollectVo" resultMap="KeyCollectDTO">
+    <![CDATA[
+       {call PRC_W_D_ImpCurSuccList(
+          #{queueGuid, mode=IN, jdbcType=VARCHAR},
+          #{pageSize, mode=IN, jdbcType=INTEGER},
+          #{pageNumber, mode=IN, jdbcType=INTEGER},
+         #{collectDate,mode=IN,jdbcType=TIMESTAMP},
+          #{rowCount, mode=OUT, jdbcType=VARCHAR}
+       )}
+    ]]>
+  </select>
+
+  <select id="queryKeyCollectFail" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.param.KeyCollectVo" resultMap="KeyCollectDTO">
+    <![CDATA[
+       {call PRC_W_D_ImpCurFailList(
+          #{queueGuid, mode=IN, jdbcType=VARCHAR},
+          #{pageSize, mode=IN, jdbcType=INTEGER},
+          #{pageNumber, mode=IN, jdbcType=INTEGER},
+          #{collectDate,mode=IN,jdbcType=TIMESTAMP},
+          #{rowCount, mode=OUT, jdbcType=VARCHAR}
+       )}
+    ]]>
+  </select>
+</mapper>

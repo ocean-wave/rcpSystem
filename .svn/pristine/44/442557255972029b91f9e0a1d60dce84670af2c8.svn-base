@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.MeterCollectGroupMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.MeterCollectGroup">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="cno" jdbcType="VARCHAR" property="cno" />
+    <result column="collect_date" jdbcType="DATE" property="collectDate" />
+    <result column="collect_time" jdbcType="TIMESTAMP" property="collectTime" />
+    <result column="group_guid" jdbcType="VARCHAR" property="groupGuid" />
+    <result column="is_real_time" jdbcType="INTEGER" property="isRealTime" />
+    <result column="data_src" jdbcType="INTEGER" property="dataSrc" />
+    <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="read_value1" jdbcType="DECIMAL" property="readValue1" />
+    <result column="read_value2" jdbcType="DECIMAL" property="readValue2" />
+    <result column="read_value3" jdbcType="DECIMAL" property="readValue3" />
+    <result column="read_value4" jdbcType="DECIMAL" property="readValue4" />
+    <result column="read_value" jdbcType="DECIMAL" property="readValue" />
+    <result column="remain_amount" jdbcType="DECIMAL" property="remainAmount" />
+    <result column="total_amount" jdbcType="DECIMAL" property="totalAmount" />
+    <result column="pay_count" jdbcType="INTEGER" property="payCount" />
+    <result column="queue_guid" jdbcType="VARCHAR" property="queueGuid" />
+    <result column="round" jdbcType="INTEGER" property="round" />
+  </resultMap>
+
+  <sql id="QUERY-COMMON">
+    <where>
+      t.calc_data_type=0 AND
+      t1.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="startDate != null and startDate != ''">
+        AND t.local_data_time &gt;= #{startDate}
+      </if>
+      <if test="endDate != null and endDate != ''">
+        AND t.local_data_time &lt;= #{endDate}
+      </if>
+    </where>
+  </sql>
+
+  <select id="queryPr0" parameterType="cn.com.cdboost.collect.dto.param.QueryPr0Vo" resultType="cn.com.cdboost.collect.dto.MeterCollectGroupDto">
+    SELECT
+    t.meter_user_no meterUserNo,
+    t1.customer_name customerName,
+    t1.customer_contact customerContact,
+    t1.customer_addr customerAddr,
+    t1.property_name propertyName,
+    --     t2.install_addr InstallAddr,
+    t.local_data_time collectDate,
+    right(t.cno,12) deviceNo,
+    t.read_value activeTotal,
+    t3.remain_amount remainAmount
+    FROM
+    em_d_cost_calculate t
+    LEFT JOIN em_d_customerinfo t1 ON t.customer_no = t1.customer_no
+    INNER JOIN em_d_fee_autodeduct t3 ON t.id=t3.calculate_id
+    <include refid="QUERY-COMMON" /> ORDER BY t.id DESC
+    limit #{start},#{pageSize}
+  </select>
+
+  <select id="queryTotal" parameterType="cn.com.cdboost.collect.dto.param.QueryPr0Vo" resultType="java.lang.Integer">
+    SELECT count(*)
+    FROM em_d_cost_calculate t
+    INNER JOIN em_d_customerinfo t1 ON t.customer_no = t1.customer_no
+    INNER JOIN em_d_fee_autodeduct t3 ON t.id=t3.calculate_id
+    <include refid="QUERY-COMMON" />
+  </select>
+</mapper>

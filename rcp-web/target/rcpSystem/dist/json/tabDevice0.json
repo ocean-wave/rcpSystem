@@ -1,0 +1,40 @@
+{
+	"data": [{
+		"state": "1",
+		"percent": "40%",
+		"remainTime": "20分钟",
+		"payCategory": 1,
+		"deviceNo": "323",
+		"carCategory": 1
+	}, {
+		"state": "1",
+		"percent": "18%",
+		"remainTime": "20分钟",
+		"payCategory": 2,
+		"deviceNo": "23",
+		"carCategory": 2
+	}, {
+		"state": "1",
+		"percent": "40%",
+		"remainTime": "20分钟",
+		"payCategory": 2,
+		"deviceNo": "3",
+		"carCategory": 2
+	}, {
+		"state": "1",
+		"percent": "10%",
+		"remainTime": "20分钟",
+		"deviceNo": "323",
+		"payCategory": 1,
+		"carCategory": 1
+	}, {
+		"state": "1",
+		"percent": "40%",
+		"remainTime": "20分钟",
+		"deviceNo": "3",
+		"payCategory": 1,
+		"carCategory": 1
+	}],
+	"message": "success",
+	"code": 1
+}

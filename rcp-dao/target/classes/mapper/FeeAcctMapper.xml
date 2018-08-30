@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FeeAcctMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeeAcct" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="update_param" property="updateParam" jdbcType="INTEGER" />
+    <result column="ic_card_type" property="icCardType" jdbcType="VARCHAR" />
+    <result column="cur_tranf_rto" property="curTranfRto" jdbcType="INTEGER" />
+    <result column="vol_tranf_rto" property="volTranfRto" jdbcType="INTEGER" />
+    <result column="alert_fee1" property="alertFee1" jdbcType="DECIMAL" />
+    <result column="alert_fee2" property="alertFee2" jdbcType="DECIMAL" />
+    <result column="overdraft_fee" property="overdraftFee" jdbcType="DECIMAL" />
+    <result column="corner_fee" property="cornerFee" jdbcType="DECIMAL" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_user_id" property="updateUserId" jdbcType="BIGINT" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="re_wrt_time" property="reWrtTime" jdbcType="TIMESTAMP" />
+    <result column="error_cnt" property="errorCnt" jdbcType="INTEGER" />
+    <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+  </resultMap>
+
+  <resultMap id="acctInfo" type="cn.com.cdboost.collect.dto.AcctInfo">
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="VARCHAR" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="price_sols_code" property="priceSolsCode" jdbcType="VARCHAR" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL"/>
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="acct_datetime" property="acctDatetime" jdbcType="VARCHAR"/>
+    <result column="card_id" property="cardId" jdbcType="BIGINT"/>
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- IC卡查询 -->
+  <select id="query" resultMap="acctInfo"
+          parameterType="cn.com.cdboost.collect.dto.param.FeeAcctGetQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_AcctGet(
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{status,mode=IN,jdbcType=INTEGER},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{pageSize,mode=IN,jdbcType=INTEGER},
+    #{pageNumber,mode=IN,jdbcType=INTEGER},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="acctDetailInfo" type="cn.com.cdboost.collect.dto.AcctDetailInfo">
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="VARCHAR"/>
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="price_sols_code" property="priceSolsCode" jdbcType="VARCHAR" />
+    <result column="effective_date" property="effectiveDate" jdbcType="DATE"/>
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="pay_count" property="payCount" jdbcType="INTEGER" />
+    <result column="alert_fee1" property="alertFee1" jdbcType="DECIMAL" />
+    <result column="alert_fee2" property="alertFee2" jdbcType="DECIMAL" />
+    <result column="overdraft_fee" property="overdraftFee" jdbcType="DECIMAL" />
+    <result column="corner_fee" property="cornerFee" jdbcType="DECIMAL" />
+    <result column="vol_tranf_rto" property="volTranfRto" jdbcType="INTEGER" />
+    <result column="cur_tranf_rto" property="curTranfRto" jdbcType="INTEGER" />
+    <result column="change_count" property="changeCount" jdbcType="INTEGER" />
+    <result column="init_amount" property="initAmount" jdbcType="DECIMAL" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+    <result column="payment" property="payment" jdbcType="DECIMAL" />
+    <result column="pay_date" property="payDate" jdbcType="TIMESTAMP" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="pay_guid" property="payGuid" jdbcType="VARCHAR" />
+    <result column="ratio" property="ratio" jdbcType="INTEGER" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="user_name" property="chargeUserName" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 查询开户详细资料 -->
+  <select id="queryDetail" resultMap="acctDetailInfo">
+    Select
+    t.customer_no,t.customer_name,t.customer_contact,t.customer_addr,t.property_name,
+    t0.cno,t0.init_amount,t0.is_account,t0.remain_amount,t0.meter_user_no,
+    t1.dict_item_name,t1.dict_item_value,t.is_enabled,
+    t2.price_sols_code,t2.effective_date,
+    td.card_id,td.alert_fee1,td.alert_fee2,td.overdraft_fee,
+    td.corner_fee,td.vol_tranf_rto,td.cur_tranf_rto,
+    tc.meter_type,tp.pay_money,tp.payment,tp.pay_date,tp.pay_guid,tp.pay_count,tx.ratio,
+    (select count(*)
+    from em_d_fee_changeiccard tc
+    where tc.cno=t0.cno and tc.customer_no=t0.customer_no) as change_count,
+    d.device_no
+    from em_d_customerinfo as t
+    inner join em_d_customerdevmap  as t0  on t.customer_no=t0.customer_no
+    inner JOIN em_d_deviceinfo as d ON  d.cno= t0.cno
+    inner join em_d_devicemeterparam as tx on t0.cno=tx.cno and tx.comm_point_code>0
+    INNER JOIN em_d_device_meter_config tc ON tx.param_flag = tc.param_flag
+    inner join em_d_fee_pricesols t2 on t2.dict_item_value=tx.dict_item_value and t2.is_enabled=1
+    inner join em_s_dictitem t1 on tx.dict_item_value=t1.dict_item_value AND t1.dict_code IN (1,10,11)
+    left join  em_d_fee_acct as td  on t0.cno=td.cno and  t0.customer_no=td.customer_no
+    LEFT JOIN ( select cno,customer_no,pay_money,payment,pay_guid,pay_date,pay_count
+    from em_d_fee_pay
+    where customer_no=#{customerNo}
+    and cno=#{cno}
+    and is_valid=1 and is_repeat_card=1
+    order by id desc
+    limit 0,1
+    ) tp on t0.cno=tp.cno and t0.customer_no=tp.customer_no
+    where t0.customer_no=#{customerNo}  and t0.cno=#{cno} AND t0.is_change=0
+  </select>
+
+  <!-- 开户查询 -->
+  <select id="queryAccount" resultMap="acctDetailInfo">
+    Select
+    t.customer_no,t.customer_name,t.customer_contact,t.customer_addr,t.is_enabled,
+    t0.cno,
+    t0.is_account,
+    t0.remain_amount,
+    t0.meter_user_no,
+    t1.dict_item_name,t1.dict_item_value,
+    t2.price_sols_code,t2.effective_date,
+    td.card_id,td.alert_fee1,td.alert_fee2,td.overdraft_fee,
+    td.corner_fee,td.vol_tranf_rto,td.cur_tranf_rto,
+    tc.meter_type,
+    if(#{flag}=3,0,tp.pay_money) as pay_money,
+    if(#{flag}=3,0,tp.payment) as payment,
+    if(#{flag}=3,NULL,tp.pay_date) as pay_date,
+    if(#{flag}=3,'',tp.pay_guid) as pay_guid,
+    if(#{flag}=3,1,tp.pay_count) as pay_count,
+    if(#{flag}=3,t0.init_amount-t0.adjus_amount,IFNULL(tp.adjus_amount,t0.init_amount-t0.adjus_amount)) as init_amount,
+    tx.ratio,tp.user_name
+    from em_d_customerinfo as t
+    inner join em_d_customerdevmap  as t0  on t.customer_no=t0.customer_no
+    inner join em_d_devicemeterparam as tx on t0.cno=tx.cno and tx.comm_point_code>0
+    INNER JOIN em_d_device_meter_config tc ON tx.param_flag = tc.param_flag
+    inner join em_d_fee_pricesols t2 on t2.dict_item_value=tx.dict_item_value and t2.is_enabled=1
+    inner join em_s_dictitem t1 on tx.dict_item_value=t1.dict_item_value AND t1.dict_code IN (1,10,11)
+    left join  em_d_fee_acct as td  on t0.cno=td.cno and  t0.customer_no=td.customer_no
+    LEFT JOIN ( select t.cno,t.customer_no,t.pay_money,t.payment,t.pay_guid,t.pay_date,t.pay_count,t.adjus_amount,tx0.user_name
+    from em_d_fee_pay t
+    inner join em_b_user tx0 on t.create_user_id=tx0.id
+    where t.customer_no=#{customerNo}
+    and t.cno=#{cno}
+    and t.pay_count=1 and t.is_valid=1 and t.is_repeat_card=1
+    order by t.id desc
+    limit 0,1
+    ) tp on t0.cno=tp.cno and t0.customer_no=tp.customer_no
+    where t0.customer_no=#{customerNo}  and t0.cno=#{cno} AND t0.is_change=0
+
+  </select>
+
+
+  <!-- 获取补写售电卡记录 -->
+  <select  id="queryRepectPay"  resultMap="acctDetailInfo">
+    Select
+    t.customer_no,t.customer_name,t.customer_contact,t.customer_addr,
+    t0.cno,t0.is_account,t0.remain_amount,t0.meter_user_no,
+    td.card_id,td.alert_fee1,td.alert_fee2,td.overdraft_fee,
+    td.corner_fee,td.vol_tranf_rto,td.cur_tranf_rto,
+    tc.meter_type,
+    tp.pay_money,
+    tp.payment,
+    tp.pay_date,
+    tp.pay_guid,
+    tp.pay_count,
+    tp.adjus_amount as init_amount,
+    tx0.user_name
+    from em_d_customerinfo as t
+    inner join em_d_customerdevmap  as t0  on t.customer_no=t0.customer_no
+    inner join em_d_devicemeterparam as tx on t0.cno=tx.cno and tx.comm_point_code>0
+    INNER JOIN em_d_device_meter_config tc ON tx.param_flag = tc.param_flag
+    inner join  em_d_fee_acct as td  on t0.cno=td.cno and  t0.customer_no=td.customer_no
+    inner join em_d_fee_pay tp on t0.cno=tp.cno and t0.customer_no=tp.customer_no
+    inner join em_b_user tx0 on tp.create_user_id=tx0.id
+    where t0.customer_no=#{customerNo}  and t0.cno=#{cno} AND t0.is_change=0
+    and tp.pay_guid=#{payGuid}
+    and tp.is_valid=1 and  is_repeat_card=1
+  </select>
+</mapper>

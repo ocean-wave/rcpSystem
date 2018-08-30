@@ -1,0 +1,57 @@
+{
+  "data": [
+    {
+      "platform":"国网成都分公司",
+      "electDeviceAmount":100,
+      "powerSupply":10,
+      "electSale": 0.1,
+      "electLoss":20,
+      "occupation": 0.2
+    },{
+      "platform":"国网成都分公司",
+      "electDeviceAmount":100,
+      "powerSupply":10,
+      "electSale": 0.1,
+      "electLoss":20,
+      "occupation": 0.2
+    },{
+      "platform":"国网重庆分公司",
+      "electDeviceAmount":100,
+      "powerSupply":10,
+      "electSale": 0.1,
+      "electLoss":20,
+      "occupation": 0.2
+    },{
+      "platform":"国网延安分公司",
+      "electDeviceAmount":100,
+      "powerSupply":10,
+      "electSale": 0.1,
+      "electLoss":20,
+      "occupation": 0.2
+    },{
+      "platform":"国网乐山分公司",
+      "electDeviceAmount":100,
+      "powerSupply":10,
+      "electSale": 0.1,
+      "electLoss":20,
+      "occupation": 0.2
+    },{
+      "platform":"国网乐山分公司",
+      "electDeviceAmount":100,
+      "powerSupply":10,
+      "electSale": 0.1,
+      "electLoss":20,
+      "occupation": 0.2
+    },{
+      "platform":"国网乐山分公司",
+      "electDeviceAmount":100,
+      "powerSupply":10,
+      "electSale": 0.1,
+      "electLoss":20,
+      "occupation": 0.2
+    }
+  ],
+  "total": 5,
+  "message": "success",
+  "code": 1
+}

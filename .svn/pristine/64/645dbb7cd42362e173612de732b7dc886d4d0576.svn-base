@@ -1,0 +1,372 @@
+package cn.com.cdboost.collect.handler;
+
+import cn.com.cdboost.collect.constant.ClientConstant;
+import cn.com.cdboost.collect.constant.CustomerInfoConstant;
+import cn.com.cdboost.collect.constant.WebSocketConstant;
+import cn.com.cdboost.collect.dto.param.WebSocketRequest;
+import cn.com.cdboost.collect.dto.response.*;
+import cn.com.cdboost.collect.enums.GlobalConstant;
+import cn.com.cdboost.collect.service.HistoricalDataService;
+import cn.com.cdboost.collect.service.InstructService;
+import cn.com.cdboost.collect.util.CNoUtil;
+import com.alibaba.fastjson.JSON;
+import com.example.clienttest.client.AFN07Object;
+import com.example.clienttest.client.AFN14Object;
+import com.example.clienttest.client.AbsBaseDataObject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+public class SpringWebSocketHandler extends TextWebSocketHandler {
+    private static final Logger logger = LoggerFactory.getLogger(SpringWebSocketHandler.class);
+
+    private static CopyOnWriteArraySet<WebSocketSession> users = new CopyOnWriteArraySet<WebSocketSession>();
+    // app端用户集合,key=openId
+    private static ConcurrentMap<String,WebSocketSession> appUsers = new ConcurrentHashMap<>();
+    // app端扫描设备后websocket连接集合，key= deviceNo
+    private static ConcurrentMap<String,WebSocketSession> deviceApp = new ConcurrentHashMap<>();
+
+    @Autowired
+    private HistoricalDataService historicalDataService;
+    @Autowired
+    private InstructService instructService;
+
+    public SpringWebSocketHandler() {
+
+    }
+
+    /**
+     * 连接成功时候，会触发页面上onopen方法
+     */
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        users.add(session);
+        String username = (String) session.getAttributes().get(GlobalConstant.WEB_SOCKET_USERNAME);
+        String clientIP = (String) session.getAttributes().get(GlobalConstant.CLIENT_REAL_IP);
+//        logger.info("用户[" + username + "],clientIP[" + clientIP + "]连接建立成功，当前数量:" + users.size());
+    }
+
+    /**
+     * 关闭连接时触发
+     */
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+        users.remove(session);
+        String username = (String) session.getAttributes().get("WEB_SOCKET_USERNAME");
+        String clientIP = (String) session.getAttributes().get(GlobalConstant.CLIENT_REAL_IP);
+//        logger.info("用户[" + username + "],clientIP[" + clientIP + "]已退出！");
+//        logger.info("剩余在线用户" + users.size());
+    }
+
+    private void closeSession(WebSocketSession session) throws IOException {
+        if (session.isOpen()) {
+            session.close();
+        }
+        boolean flag = users.remove(session);
+//        logger.info("user集合中删除session：flag=" + flag);
+    }
+
+    /**
+     * js调用websocket.send时候，会调用该方法
+     */
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        // 判断session是否失效
+        Map<String, Object> attributes = session.getAttributes();
+        Object sessionTimeout = attributes.get(GlobalConstant.SESSION_TIMEOUT);
+        if (sessionTimeout != null) {
+            WebSocketResponse<Boolean> webSocketResponse = new WebSocketResponse<>();
+            webSocketResponse.setDataFlag(WebSocketConstant.DataFlagEnum.LINK_CHECK.getFlag());
+            // session失效
+            webSocketResponse.setData(Boolean.TRUE);
+            this.sendMessage(session,JSON.toJSONString(webSocketResponse));
+            // 删除无效的session
+            this.closeSession(session);
+        } else {
+            String payload = message.getPayload();
+//            logger.info("appUser数量" + appUsers.size());
+            if(StringUtils.isNotBlank(payload)){
+//                logger.info("接收前端参数payload=" + payload);
+                if (StringUtils.isNumeric(payload)) {
+                    // 告警时，前端传userId
+                    long userId = Long.parseLong(payload);
+                    int alarmUserCount = historicalDataService.getAlarmUserCount(userId);
+                    WebSocketResponse<Integer> webSocketResponse = new WebSocketResponse<>();
+                    webSocketResponse.setDataFlag(WebSocketConstant.DataFlagEnum.ALARM.getFlag());
+                    webSocketResponse.setData(alarmUserCount);
+                    this.sendMessage(session,JSON.toJSONString(webSocketResponse));
+                } else {
+                    Map map = JSON.parseObject(payload);
+//                    logger.info(JSON.toJSONString(map));
+                    if(!StringUtils.isEmpty((String)map.get("openId"))){
+                        // 说明是APP端建立websocket后，发送的数据
+                        appUsers.put((String)map.get("openId"),session);
+                        boolean remove = users.remove(session);
+//                        if (remove) {
+//                            logger.info("从user集合中删除APP端登录session成功");
+//                        }
+
+                        String deviceNo = (String) map.get("deviceNo");
+                        deviceApp.put(deviceNo,session);
+                    } else {
+                        WebSocketRequest webSocketRequest = JSON.parseObject(payload, WebSocketRequest.class);
+                        logger.info("转换后WebSocketRequest打印：" + JSON.toJSONString(webSocketRequest));
+                        this.handleStatusQuery(session,webSocketRequest);
+                    }
+                }
+            } else {
+                // 链路检查，前端不传数据
+                WebSocketResponsehandler webSocketResponse = new WebSocketResponsehandler();
+                webSocketResponse.setDataFlag(WebSocketConstant.DataFlagEnum.LINK_CHECK.getFlag());
+                // session未失效
+                webSocketResponse.setData(Boolean.FALSE);
+                webSocketResponse.setSysdate(new Date());
+                this.sendMessage(session,JSON.toJSONString(webSocketResponse));
+            }
+        }
+    }
+
+    /**
+     * 统一处理前端任务状态查询
+     * @param session
+     * @param webSocketRequest
+     * @throws Exception
+     */
+    private void handleStatusQuery(WebSocketSession session,WebSocketRequest webSocketRequest) throws Exception {
+        String dataFlag = webSocketRequest.getDataFlag();
+        String guid = webSocketRequest.getGuid();
+        if (WebSocketConstant.DataFlagEnum.COLLECT_DATA_STATUS.getFlag().equals(dataFlag)) {
+            // 查询抄表任务状态
+            this.processCollectDataStatus(guid,session);
+        } else if (WebSocketConstant.DataFlagEnum.ON_OFF_STATUS.getFlag().equals(dataFlag)) {
+            // 查询通断任务状态
+            this.processOnOffStatus(guid,session);
+        } else if (WebSocketConstant.DataFlagEnum.JZQ_READ_CUSTOMER_INFO_STATUS.getFlag().equals(dataFlag)) {
+            // 查询集中器读取客户档案信息任务状态
+            this.processJzqReadCstStatus(guid,session);
+        } else if (WebSocketConstant.DataFlagEnum.JZQ_HEART_BEAT_SEND_STATUS.getFlag().equals(dataFlag)) {
+            // 集中器心跳下发任务状态查询
+            this.processJzqHeartBeatSendStatus(guid,session);
+        } else if (WebSocketConstant.DataFlagEnum.JZQ_HEART_BEAT_READ_STATUS.getFlag().equals(dataFlag)) {
+            // 集中器心跳读取任务状态查询
+            this.processJzqHeartBeatReadStatus(guid,session);
+        }
+    }
+
+    /**
+     * 处理实时抄表状态查询
+     * @param guid
+     * @param session
+     * @throws Exception
+     */
+    private void processCollectDataStatus(String guid,WebSocketSession session) throws Exception {
+        logger.info("处理实时抄表状态查询guid=" + guid);
+        int status = instructService.queryBatchTaskStatus(guid);
+        WebSocketStatusResponse response = new WebSocketStatusResponse();
+        response.setDataFlag(WebSocketConstant.DataFlagEnum.COLLECT_DATA_STATUS.getFlag());
+        response.setState(status);
+        this.sendMessage(session,JSON.toJSONString(response));
+    }
+
+    /**
+     * 处理通断状态查询
+     * @param guid
+     * @param session
+     * @throws Exception
+     */
+    private void processOnOffStatus(String guid,WebSocketSession session) throws Exception {
+        logger.info("处理通断状态查询guid=" + guid);
+        int status = instructService.queryBatchTaskStatus(guid);
+        WebSocketStatusResponse response = new WebSocketStatusResponse();
+        response.setDataFlag(WebSocketConstant.DataFlagEnum.ON_OFF_STATUS.getFlag());
+        response.setState(status);
+        this.sendMessage(session,JSON.toJSONString(response));
+    }
+
+    /**
+     * 处理集中器读取客户档案状态查询
+     * @param guid
+     * @param session
+     */
+    private void processJzqReadCstStatus(String guid,WebSocketSession session) throws Exception {
+        logger.info("处理集中器读取客户档案状态查询guid=" + guid);
+        AbsBaseDataObject dataObject = instructService.querySingleTaskStatus(guid);
+        int status = dataObject.getStatus();
+        if (status != 101) {
+            int state = ClientConstant.TaskProcessStatus.YES.getStatus();
+            if (status == ClientConstant.FrontProcessorReturnCode.SUCCESS.getCode()) {
+                // 有数据
+                AFN14Object afn14Object = (AFN14Object) dataObject;
+                AFN14Response afn14Response = new AFN14Response();
+                afn14Response.setJzqNo(afn14Object.getJzqAddr());
+                afn14Response.setCommSetupSn(Integer.valueOf(afn14Object.getJld()));
+                afn14Response.setCommPointCode(Integer.valueOf(afn14Object.getCld()));
+                Integer rate = CustomerInfoConstant.CommBaudrateEnum.getRateByValue(Integer.valueOf(afn14Object.getBaudrate()));
+                afn14Response.setCommBaudrate(rate);
+                String descByCommPort = ClientConstant.DataCollectPort.getDescByCommPort(Integer.valueOf(afn14Object.getPort()));
+                afn14Response.setCommPort(descByCommPort);
+                String descByCommRule = ClientConstant.CommRuleDescEnum.getDescByCommRule(Integer.valueOf(afn14Object.getGy()));
+                afn14Response.setCommRule(descByCommRule);
+                String deviceNo = afn14Object.getDbdz();
+                afn14Response.setDeviceNo(CNoUtil.getNo(deviceNo));
+                afn14Response.setFeeRateNum(Integer.valueOf(afn14Object.getFlnum()));
+                afn14Response.setCjqNo(afn14Object.getCjq());
+
+                WebSocketStatusResponse<AFN14Response> response = new WebSocketStatusResponse<>();
+                response.setState(state);
+                response.setData(afn14Response);
+                response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_READ_CUSTOMER_INFO_STATUS.getFlag());
+                this.sendMessage(session,JSON.toJSONString(response));
+            } else {
+                WebSocketStatusResponse<AFN14Response> response = new WebSocketStatusResponse<>();
+                response.setState(state);
+                response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_READ_CUSTOMER_INFO_STATUS.getFlag());
+                this.sendMessage(session,JSON.toJSONString(response));
+            }
+        } else {
+            WebSocketStatusResponse<AFN14Response> response = new WebSocketStatusResponse<>();
+            response.setState(ClientConstant.TaskProcessStatus.NO.getStatus());
+            response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_READ_CUSTOMER_INFO_STATUS.getFlag());
+            this.sendMessage(session,JSON.toJSONString(response));
+        }
+    }
+
+    /**
+     * 处理集中器心跳下发任务状态查询
+     * @param guid
+     * @param session
+     * @throws Exception
+     */
+    private void processJzqHeartBeatSendStatus(String guid,WebSocketSession session) throws Exception {
+        logger.info("处理集中器心跳下发任务状态查询guid=" + guid);
+        AbsBaseDataObject dataObject = instructService.querySingleTaskStatus(guid);
+        int status = dataObject.getStatus();
+        if (status != 101) {
+            WebSocketStatusResponse<String> response = new WebSocketStatusResponse<>();
+            // TODO 跟赵确认下是不是这几个状态
+            String message = ClientConstant.FrontProcessorReturnCode.getDescByCode(status);
+            response.setState(ClientConstant.TaskProcessStatus.YES.getStatus());
+            response.setData(message);
+            response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_HEART_BEAT_SEND_STATUS.getFlag());
+            this.sendMessage(session,JSON.toJSONString(response));
+        } else {
+            WebSocketStatusResponse<String> response = new WebSocketStatusResponse<>();
+            response.setState(ClientConstant.TaskProcessStatus.NO.getStatus());
+            response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_HEART_BEAT_SEND_STATUS.getFlag());
+            this.sendMessage(session,JSON.toJSONString(response));
+        }
+    }
+
+    /**
+     * 处理集中器心跳读取任务状态
+     * @param guid
+     * @param session
+     * @throws Exception
+     */
+    private void processJzqHeartBeatReadStatus(String guid,WebSocketSession session) throws Exception {
+        logger.info("处理集中器心跳读取任务状态guid=" + guid);
+        AbsBaseDataObject dataObject = instructService.querySingleTaskStatus(guid);
+        int status = dataObject.getStatus();
+        if (status != 101) {
+            int state = ClientConstant.TaskProcessStatus.YES.getStatus();
+            if (status == ClientConstant.FrontProcessorReturnCode.SUCCESS.getCode()) {
+                // 有数据
+                AFN07Object afn07Object = (AFN07Object) dataObject;
+                AFN07Response afn07Response = new AFN07Response();
+                afn07Response.setStatus(status);
+                afn07Response.setHbCycle(afn07Object.getHeartbeat());
+                String message = ClientConstant.FrontProcessorReturnCode.getDescByCode(status);
+                afn07Response.setMessage(message);
+
+                WebSocketStatusResponse<AFN07Response> response = new WebSocketStatusResponse<>();
+                response.setState(state);
+                response.setData(afn07Response);
+                response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_HEART_BEAT_READ_STATUS.getFlag());
+                this.sendMessage(session,JSON.toJSONString(response));
+            } else {
+                WebSocketStatusResponse<AFN07Response> response = new WebSocketStatusResponse<>();
+                response.setState(state);
+                response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_HEART_BEAT_READ_STATUS.getFlag());
+                this.sendMessage(session,JSON.toJSONString(response));
+            }
+        } else {
+            WebSocketStatusResponse<AFN07Response> response = new WebSocketStatusResponse<>();
+            response.setState(ClientConstant.TaskProcessStatus.NO.getStatus());
+            response.setDataFlag(WebSocketConstant.DataFlagEnum.JZQ_HEART_BEAT_READ_STATUS.getFlag());
+            this.sendMessage(session,JSON.toJSONString(response));
+        }
+    }
+
+    /**
+     * 发送消息
+     * @param session
+     * @param jsonStr
+     * @throws Exception
+     */
+    private void sendMessage(WebSocketSession session,String jsonStr) throws Exception {
+        try {
+//            logger.info("webSocket send message:" + jsonStr);
+            session.sendMessage(new TextMessage(jsonStr));
+        }catch (Exception e){
+            this.afterConnectionClosed(session, CloseStatus.SESSION_NOT_RELIABLE);
+        }
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+        if (session.isOpen()) {
+            session.close();
+        }
+        users.remove(session);
+//        logger.info("服务端websocket连接关闭");
+    }
+
+    @Override
+    public boolean supportsPartialMessages() {
+        return false;
+    }
+
+    public static CopyOnWriteArraySet<WebSocketSession> getUsers() {
+        return users;
+    }
+
+    public static ConcurrentMap<String,WebSocketSession> getAppUsers() {
+        return appUsers;
+    }
+
+    public static void setUsers(CopyOnWriteArraySet<WebSocketSession> users) {
+        SpringWebSocketHandler.users = users;
+    }
+
+    public static void setAppUsers(ConcurrentMap<String,WebSocketSession> appUsers) {
+        SpringWebSocketHandler.appUsers = appUsers;
+    }
+
+    public HistoricalDataService getHistoricalDataService() {
+        return historicalDataService;
+    }
+
+    public void setHistoricalDataService(HistoricalDataService historicalDataService) {
+        this.historicalDataService = historicalDataService;
+    }
+
+    public static ConcurrentMap<String, WebSocketSession> getDeviceApp() {
+        return deviceApp;
+    }
+
+    public static void setDeviceApp(ConcurrentMap<String, WebSocketSession> deviceApp) {
+        SpringWebSocketHandler.deviceApp = deviceApp;
+    }
+}

@@ -1,0 +1,1 @@
+INSERT INTO `em_b_user` (`user_name`, `login_name`, `user_password`, `user_mobile`, `user_mail`, `is_enabled`, `create_user_id`, `remark`, `org_no`, `is_system`) VALUES ('系统管理员', 'admin', 'e60d4b85258759b4e0d3142fc5c6662b', '13612345678', '123@163.com', '0', '0', '', '1000', '1');

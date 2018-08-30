@@ -1,0 +1,50 @@
+{
+  "data": [
+    {
+      "day":"2018-7-11 17:34:33",
+      "electDeviceAmount":"001100",
+      "succeedAmount":50,
+      "failAmount": "10001",
+      "succeedRate":"20001"
+    },{
+      "day":"2018-7-12 17:34:33",
+      "electDeviceAmount":"001100",
+      "succeedAmount":50,
+      "failAmount": "10001",
+      "succeedRate":"20001"
+    },{
+      "day":"2018-7-13 17:34:33",
+      "electDeviceAmount":"001100",
+      "succeedAmount":50,
+      "failAmount": "10001",
+      "succeedRate":"20001"
+    },{
+      "day":"2018-7-14 17:34:33",
+      "electDeviceAmount":"001100",
+      "succeedAmount":50,
+      "failAmount": "10001",
+      "succeedRate":"20001"
+    },{
+      "day":"2018-7-15 17:34:33",
+      "electDeviceAmount":"001100",
+      "succeedAmount":50,
+      "failAmount": "10001",
+      "succeedRate":"20001"
+    },{
+      "day":"2018-7-15 17:34:33",
+      "electDeviceAmount":"001100",
+      "succeedAmount":50,
+      "failAmount": "10001",
+      "succeedRate":"20001"
+    },{
+      "day":"2018-7-15 17:34:33",
+      "electDeviceAmount":"001100",
+      "succeedAmount":50,
+      "failAmount": "10001",
+      "succeedRate":"20001"
+    }
+  ],
+  "total": 7,
+  "message": "success",
+  "code": 1
+}

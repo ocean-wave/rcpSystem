@@ -1,0 +1,1 @@
+INSERT INTO `em_b_org` (`id`, `org_no`, `org_name`, `p_org_no`, `first_pinyin`, `full_pinyin`, `level_code`, `level`, `sort_no`, `is_enabled`, `create_user_id`, `is_sys`) VALUES ('1', '1000', '中天集团', '0', 'cdbg', 'chengdubogao', '/1000', '1', '0', '1', '1', '1');

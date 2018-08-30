@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.UserMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.User" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="login_name" property="loginName" jdbcType="VARCHAR" />
+    <result column="user_password" property="userPassword" jdbcType="VARCHAR" />
+    <result column="user_mobile" property="userMobile" jdbcType="VARCHAR" />
+    <result column="user_mail" property="userMail" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="is_system" property="isSystem" jdbcType="INTEGER" />
+  </resultMap>
+
+
+  <resultMap id="userQueryInfoResultMap" type="cn.com.cdboost.collect.dto.response.UserQueryInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="login_name" property="loginName" jdbcType="VARCHAR" />
+    <result column="user_password" property="userPassword" jdbcType="VARCHAR" />
+    <result column="user_mobile" property="userMobile" jdbcType="VARCHAR" />
+    <result column="user_mail" property="userMail" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="role_name" property="roleName" />
+    <result column="role_id" property="roleId" />
+    <result column="org_name" property="orgName" />
+  </resultMap>
+
+  <!-- 查询用户资料调用的存储过程 -->
+  <select id="query" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.param.UserGetQueryVo" resultMap="userQueryInfoResultMap">
+    <![CDATA[
+       {call PRC_W_B_UserGet(
+          #{userName, mode=IN, jdbcType=VARCHAR},
+          #{userMobile, mode=IN, jdbcType=VARCHAR},
+          #{roleName, mode=IN, jdbcType=VARCHAR},
+          #{userId, mode=IN, jdbcType=VARCHAR},
+          #{pageSize, mode=IN, jdbcType=INTEGER},
+          #{pageNumber, mode=IN, jdbcType=INTEGER},
+          #{rowCount, mode=OUT, jdbcType=INTEGER}
+       )}
+    ]]>
+  </select>
+</mapper>

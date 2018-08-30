@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FeeOnOffMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeeOnOff" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="on_off" property="onOff" jdbcType="INTEGER" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="queue_guid" property="queueGuid" jdbcType="VARCHAR" />
+    <result column="send_flag" property="sendFlag" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!-- 相关dto -->
+  <resultMap id="feeOnOffInfo" type="cn.com.cdboost.collect.dto.FeeOnOffInfo">
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR"  />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR"  />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="is_on" property="isOn" jdbcType="INTEGER" />
+    <result column="last_on_off_time" property="lastOnOffTime" jdbcType="TIMESTAMP" />
+    <result column="last_on_off_user_name" property="lastOnOffUserName" jdbcType="VARCHAR" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="read_status" property="status" jdbcType="INTEGER" />
+    <result column="jzq_cno" property="jzqCno" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="on_off" property="onOff" jdbcType="INTEGER" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="query" parameterType="cn.com.cdboost.collect.dto.param.CstOnOffGetQueryVo"
+          resultMap="feeOnOffInfo" statementType="CALLABLE">
+    {call PRC_W_D_CstOnOffGet(
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{onOff,mode=IN,jdbcType=INTEGER},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{pageSize,mode=IN,jdbcType=INTEGER},
+    #{pageNumber,mode=IN,jdbcType=INTEGER},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+  <select id="queryNew" parameterType="cn.com.cdboost.collect.dto.param.CstOnOffGetQueryNewVo"
+          resultMap="feeOnOffInfo" statementType="CALLABLE">
+    {call PRC_W_D_CstOnOffGet(
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{onOff,mode=IN,jdbcType=INTEGER},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{importGuid,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=INTEGER},
+    #{pageNumber,mode=IN,jdbcType=INTEGER},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <!-- 通断结果查询 -->
+  <select id="queryResult" resultMap="feeOnOffInfo"
+          parameterType="cn.com.cdboost.collect.dto.param.CstOnOffOptRstGetQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_CstOnOffOptRstGet(
+    #{guid,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{dataFlag,mode=IN,jdbcType=VARCHAR},
+    #{date,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=INTEGER},
+    #{pageNumber,mode=IN,jdbcType=INTEGER},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <!-- 通断历史查询 -->
+  <select id="queryHistory" resultMap="feeOnOffInfo"
+          parameterType="cn.com.cdboost.collect.dto.param.CstOnOffByNoGetQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_CstOnOffByNoGet(
+    #{customerNo,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=INTEGER},
+    #{pageNumber,mode=IN,jdbcType=INTEGER},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <select id="queryByGuid" resultMap="feeOnOffInfo">
+    select m.meter_cno as cno,m.read_status,d.is_on,c2.customer_no,c2.customer_name,
+    c2.customer_contact,c2.customer_addr,c1.meter_user_no from em_d_meterreadqueue AS m
+    LEFT JOIN em_d_deviceinfo AS d ON(m.meter_cno = d.cno)
+    INNER JOIN em_d_customerdevmap AS c1 ON(m.meter_cno = c1.cno)
+    LEFT JOIN em_d_customerinfo AS c2 ON (c1.customer_no=c2.customer_no)
+    where m.queue_guid=#{guid} AND m.read_status=#{status} AND m.create_time=#{createTime}
+    AND c1.is_change=0
+  </select>
+</mapper>

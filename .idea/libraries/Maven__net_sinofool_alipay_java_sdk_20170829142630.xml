@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: net.sinofool:alipay-java-sdk:20170829142630">
+    <CLASSES>
+      <root url="jar://D:/repository/net/sinofool/alipay-java-sdk/20170829142630/alipay-java-sdk-20170829142630.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://D:/repository/net/sinofool/alipay-java-sdk/20170829142630/alipay-java-sdk-20170829142630-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://D:/repository/net/sinofool/alipay-java-sdk/20170829142630/alipay-java-sdk-20170829142630-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

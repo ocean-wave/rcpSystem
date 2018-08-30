@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.CustomerDevMapMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.CustomerDevMap" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="CHAR" />
+    <result column="last_send_sms_time" property="lastSendSmsTime" jdbcType="TIMESTAMP" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="acct_datetime" property="acctDatetime" jdbcType="TIMESTAMP" />
+    <result column="init_amount" property="initAmount" jdbcType="DECIMAL" />
+    <result column="wirte_card_time" property="wirteCardTime" jdbcType="TIMESTAMP" />
+    <result column="repet_count" property="repetCount" jdbcType="INTEGER" />
+    <result column="adjus_amount" property="adjusAmount" jdbcType="DECIMAL" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="transformer_no" property="transformerNo" jdbcType="VARCHAR" />
+    <result column="building_no" property="buildingNo" jdbcType="VARCHAR" />
+    <result column="is_change" property="isChange" jdbcType="INTEGER" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL" />
+    <result column="alarm_threshold1" property="alarmThreshold1" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <resultMap id="customerInfo4App" type="cn.com.cdboost.collect.dto.CustomerInfo4App">
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!--根据cno列表查询对应的用户信息-->
+  <select id="selectCustomerInfosByCnos" resultMap="customerInfo4App">
+    SELECT m.cno,n.customer_no,n.customer_name,n.customer_addr,n.customer_contact
+    FROM em_d_customerdevmap m
+    INNER JOIN em_d_customerinfo n ON m.customer_no = n.customer_no
+    WHERE m.cno IN
+    <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+    AND m.is_change=0
+  </select>
+
+  <resultMap id="deviceMapCacheVo" type="cn.com.cdboost.collect.cache.DeviceMapCacheVo">
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="transformer_no" property="transformerNo" jdbcType="VARCHAR" />
+    <result column="building_no" property="buildingNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="queryAll" resultMap="deviceMapCacheVo">
+    select customer_no,cno,meter_user_no,transformer_no,building_no
+    from em_d_customerdevmap where is_change=0
+  </select>
+
+</mapper>

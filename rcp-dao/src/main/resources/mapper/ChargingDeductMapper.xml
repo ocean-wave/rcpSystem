@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingDeductMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingDeduct" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_guid" property="customerGuid" jdbcType="CHAR" />
+    <result column="charging_guid" property="chargingGuid" jdbcType="CHAR" />
+    <result column="deduct_money" property="deductMoney" jdbcType="DECIMAL" />
+    <result column="deduct_cnt" property="deductCnt" jdbcType="INTEGER" />
+    <result column="deduct_before" property="deductBefore" jdbcType="DECIMAL" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="deduct_remain_cnt" property="deductRemainCnt" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="CHAR" />
+    <result column="serial_num" property="serialNum" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

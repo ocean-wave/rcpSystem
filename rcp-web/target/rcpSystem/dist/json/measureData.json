@@ -1,0 +1,65 @@
+{
+	"message": "成功",
+	"total": "1",
+	"code": 1,
+	"data": [{
+		"cno": "070000000000000000010095448860",
+		"collectDate": "2018-05-06",
+		"flag": 0,
+		"readValue": "100",
+		"readValue1": "0",
+		"readValue2": "30",
+		"readValue3": "60",
+		"readValue4": "10"
+	}, {
+
+		"cno": "070000000000000000010095448860",
+		"collectDate": "2018-05-05",
+		"flag": 1,
+		"readValue": "",
+		"readValue1": "",
+		"readValue2": "",
+		"readValue3": "",
+		"readValue4": ""
+	}, {
+
+		"cno": "070000000000000000010095448860",
+		"collectDate": "2018-05-03",
+		"flag": 0,
+		"readValue": "120",
+		"readValue1": "10",
+		"readValue2": "30",
+		"readValue3": "70",
+		"readValue4": "10"
+	}, {
+
+		"cno": "070000000000000000201606000674",
+		"collectDate": "2018-05-04",
+		"flag": 0,
+		"readValue": "100",
+		"readValue1": "0",
+		"readValue2": "30",
+		"readValue3": "60",
+		"readValue4": "10"
+	}, {
+
+		"cno": "070000000000000000201606000674",
+		"collectDate": "2018-05-03",
+		"flag": 1,
+		"readValue": "",
+		"readValue1": "",
+		"readValue2": "",
+		"readValue3": "",
+		"readValue4": ""
+	}, {
+
+		"cno": "070000000000000000201606000674",
+		"collectDate": "2018-05-01",
+		"flag": 0,
+		"readValue": "100",
+		"readValue1": "0",
+		"readValue2": "30",
+		"readValue3": "60",
+		"readValue4": "10"
+	}]
+}

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.cdboost.collect.dao.CostCalculateMapper">
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.CostCalculate">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="cno" jdbcType="VARCHAR" property="cno" />
+    <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+    <result column="price_sols_code" jdbcType="VARCHAR" property="priceSolsCode" />
+    <result column="rate_index" jdbcType="INTEGER" property="rateIndex" />
+    <result column="step_index" jdbcType="INTEGER" property="stepIndex" />
+    <result column="account_date" jdbcType="DATE" property="accountDate" />
+    <result column="last_data_time" jdbcType="TIMESTAMP" property="lastDataTime" />
+    <result column="read_value1" jdbcType="DECIMAL" property="readValue1" />
+    <result column="read_value2" jdbcType="DECIMAL" property="readValue2" />
+    <result column="read_value3" jdbcType="DECIMAL" property="readValue3" />
+    <result column="read_value4" jdbcType="DECIMAL" property="readValue4" />
+    <result column="read_value" jdbcType="DECIMAL" property="readValue" />
+    <result column="eq_value1" jdbcType="DECIMAL" property="eqValue1" />
+    <result column="eq_value2" jdbcType="DECIMAL" property="eqValue2" />
+    <result column="eq_value3" jdbcType="DECIMAL" property="eqValue3" />
+    <result column="eq_value4" jdbcType="DECIMAL" property="eqValue4" />
+    <result column="eq_value" jdbcType="DECIMAL" property="eqValue" />
+    <result column="local_data_time" jdbcType="TIMESTAMP" property="localDataTime" />
+    <result column="day_eq_value1" jdbcType="DECIMAL" property="dayEqValue1" />
+    <result column="day_eq_value2" jdbcType="DECIMAL" property="dayEqValue2" />
+    <result column="day_eq_value3" jdbcType="DECIMAL" property="dayEqValue3" />
+    <result column="day_eq_value4" jdbcType="DECIMAL" property="dayEqValue4" />
+    <result column="day_eq_value" jdbcType="DECIMAL" property="dayEqValue" />
+    <result column="calc_data" jdbcType="DATE" property="calcData" />
+    <result column="calc_money" jdbcType="DECIMAL" property="calcMoney" />
+    <result column="calc_data_type" jdbcType="INTEGER" property="calcDataType" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_user_id" jdbcType="INTEGER" property="createUserId" />
+    <result column="day_calc_money" jdbcType="DECIMAL" property="dayCalcMoney" />
+    <result column="last_day_read_value" jdbcType="DECIMAL" property="lastDayReadValue" />
+      <result column="day_money" jdbcType="DECIMAL" property="dayMoney" />
+  </resultMap>
+  <select id="queryByUserOrgCurrent" parameterType="Map" resultMap="BaseResultMap" >
+    select * from em_d_cost_calculate t
+    INNER JOIN em_d_deviceinfo d on t.cno=d.cno
+    where
+    t.calc_data = #{daySettlementParam.balanceDay}
+    and t.is_month_settlement=1
+    AND d.org_no IN
+    <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=BIGINT}
+    </foreach>
+  </select>
+  <select id="queryByUserOrgDay" parameterType="Map" resultMap="BaseResultMap" >
+    SELECT * FROM  em_d_cost_calculate t  INNER JOIN (select max(t.id) id1 from em_d_cost_calculate t
+    INNER JOIN em_d_deviceinfo d on t.cno=d.cno
+    INNER JOIN em_d_customerinfo h on t.customer_no=h.customer_no
+    where
+    t.calc_data BETWEEN #{daySettlementParam.startDate} and #{daySettlementParam.endDate}
+    AND d.org_no IN
+    <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=BIGINT}
+    </foreach>
+    group by t.cno) temp on t.id=temp.id1
+  </select>
+  <select id="queryByUserOrgMonth" parameterType="Map" resultMap="BaseResultMap" >
+    SELECT * FROM em_d_cost_calculate t
+    INNER JOIN em_d_deviceinfo d on t.cno=d.cno
+    INNER JOIN em_d_customerinfo h on t.customer_no=h.customer_no
+    where
+    t.calc_data BETWEEN #{daySettlementParam.startDate} and #{daySettlementParam.endDate}
+    and t.is_month_settlement=1
+    AND d.org_no IN
+    <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+      #{item,jdbcType=BIGINT}
+    </foreach>
+  </select>
+  <select id="queryCustomerHistoryElectric" parameterType="Map" resultType="java.math.BigDecimal">
+     SELECT sum(day_eq_value) power FROM em_d_cost_calculate where calc_data BETWEEN #{startDate} and #{endDate};
+  </select>
+  <select id="electDetail" parameterType="Map" resultMap="BaseResultMap" >
+    SELECT
+    eq_value,
+    calc_money
+    FROM
+    em_d_cost_calculate tc
+    INNER JOIN (
+    SELECT
+    max(id) AS max_id
+    FROM
+    em_d_cost_calculate t
+    WHERE
+    t.calc_data <![CDATA[>=]]>  #{lastBanlance}
+    AND t.calc_data<![CDATA[<]]>  #{banlanceDay}
+    AND customer_no = #{customerNo}
+    GROUP BY cno
+    ) t ON tc.id = t.max_id;
+  </select>
+  <select id="electDetailList" parameterType="cn.com.cdboost.collect.dto.ElectDetailParamDto" resultType="cn.com.cdboost.collect.dto.ElectDetailDto" statementType="CALLABLE">
+    {call PRC_W_D_CstDeductGet(
+    #{customerNo,jdbcType=VARCHAR},
+    #{meterUserNo,jdbcType=VARCHAR},
+    #{deviceNo,jdbcType=VARCHAR},
+    #{startDate,jdbcType=VARCHAR},
+    #{endDate,jdbcType=VARCHAR},
+    #{pageSize,jdbcType=VARCHAR},
+    #{pageNumber,jdbcType=VARCHAR},
+    #{electricTotal,mode=OUT,jdbcType=DECIMAL},
+    #{feePayMoney,mode=OUT,jdbcType=DECIMAL},
+    #{total,mode=OUT,jdbcType=VARCHAR}
+    )}
+  </select>
+</mapper>

@@ -1,0 +1,98 @@
+{
+  "message":"成功",
+  "total":"10",
+  "code":1,
+  "data":[
+    {
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    },{
+      "customerName":"张三",
+      "meterNo":"100010",
+      "power":"365",
+      "powerAddr":"成都博高信息公示",
+      "userTotal":"1000",
+      "orgName":"1",
+      "projectNo":"00a000004f581b37",
+      "meterUserNo": "1000321"
+    }
+  ]
+}

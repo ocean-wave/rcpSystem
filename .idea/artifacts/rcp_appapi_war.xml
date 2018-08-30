@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="rcp-appapi:war">
+    <output-path>$PROJECT_DIR$/rcp-appapi/target</output-path>
+    <root id="archive" name="rcp-appapi.war">
+      <element id="artifact" artifact-name="rcp-appapi:war exploded" />
+    </root>
+  </artifact>
+</component>

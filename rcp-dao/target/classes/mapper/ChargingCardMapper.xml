@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingCardMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingCard" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="project_guid" property="projectGuid" jdbcType="CHAR" />
+    <result column="customer_guid" property="customerGuid" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="card_state" property="cardState" jdbcType="INTEGER" />
+    <result column="use_cnt" property="useCnt" jdbcType="INTEGER" />
+    <result column="init_amount" property="initAmount" jdbcType="DECIMAL" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="queryList" parameterType="cn.com.cdboost.collect.dto.param.ChargerICCardQueryVo" resultType="cn.com.cdboost.collect.dto.ChargingICCardDto">
+    SELECT
+    t.card_state cardState,
+    t.card_id cardId,
+    t.use_cnt useCnt,
+    t.create_time createTime,
+    t.update_time updateTime,
+    t.remark remark,
+    t.customer_name customerName,
+    t.customer_contact customerContact,
+    t.remain_amount icRemainAmount,
+    t.init_amount initAmount,
+    t1.customer_guid customerGuid,
+    t1.remain_amount remainAmount,
+    t1.webchar_no webcharNo,
+    t1.alipay_user_id alipayUserId
+    FROM
+        em_d_charging_card t
+    LEFT JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+    <where>
+    <if test="cardId!=null and cardId!=''">
+      AND t.card_id like CONCAT('%',#{cardId},'%')
+    </if>
+    <if test="cardState!=null">
+      AND t.card_state = #{cardState}
+    </if>
+    </where>
+    <choose>
+      <when test="sortName !=null and sortName != '' and sortName != 'pay_cnt'">
+        ORDER BY ${sortName} ${sortOrder}
+      </when>
+      <otherwise>
+        ORDER BY t.card_state,t.update_time DESC
+      </otherwise>
+    </choose>
+    limit #{pageIndex},#{pageSize}
+  </select>
+  <select id="queryListTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerICCardQueryVo" resultType="java.lang.Integer">
+    SELECT
+    COUNT(*)
+    FROM
+    em_d_charging_card t
+    <where>
+      <if test="cardId!=null and cardId!=''">
+        AND t.card_id like CONCAT('%',#{cardId},'%')
+      </if>
+      <if test="cardState!=null">
+        AND t.card_state = #{cardState}
+      </if>
+    </where>
+  </select>
+
+</mapper>

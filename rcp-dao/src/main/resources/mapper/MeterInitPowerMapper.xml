@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.MeterInitPowerMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.MeterInitPower" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="price_sols_code" property="priceSolsCode" jdbcType="VARCHAR" />
+    <result column="rate_index" property="rateIndex" jdbcType="INTEGER" />
+    <result column="step_index" property="stepIndex" jdbcType="INTEGER" />
+    <result column="comm_factor_cnt" property="commFactorCnt" jdbcType="INTEGER" />
+    <result column="account_date" property="accountDate" jdbcType="DATE" />
+    <result column="read_value1" property="readValue1" jdbcType="DECIMAL" />
+    <result column="read_value2" property="readValue2" jdbcType="DECIMAL" />
+    <result column="read_value3" property="readValue3" jdbcType="DECIMAL" />
+    <result column="read_value4" property="readValue4" jdbcType="DECIMAL" />
+    <result column="read_value" property="readValue" jdbcType="DECIMAL" />
+    <result column="local_data_time" property="localDataTime" jdbcType="TIMESTAMP" />
+    <result column="calc_data" property="calcData" jdbcType="DATE" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+</mapper>

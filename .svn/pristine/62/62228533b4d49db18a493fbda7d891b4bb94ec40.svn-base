@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FeePayMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeePay" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="pay_count" property="payCount" jdbcType="INTEGER" />
+    <result column="pay_date" property="payDate" jdbcType="TIMESTAMP" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="pay_model" property="payModel" jdbcType="INTEGER" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="write_meter" property="writeMeter" jdbcType="INTEGER" />
+    <result column="wit_met_time" property="witMetTime" jdbcType="TIMESTAMP" />
+    <result column="pay_guid" property="payGuid" jdbcType="VARCHAR" />
+    <result column="payment" property="payment" jdbcType="DECIMAL" />
+    <result column="adjus_amount" property="adjusAmount" jdbcType="DECIMAL" />
+    <result column="is_valid" property="isValid" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="is_repeat_card" property="isRepeatCard" jdbcType="INTEGER" />
+    <result column="device_type" property="deviceType" jdbcType="CHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="pay_method" property="payMethod" jdbcType="INTEGER" />
+    <result column="serial_num" property="serialNum" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <resultMap id="resultProcMap" type="cn.com.cdboost.collect.dto.QueryProcDTO">
+    <result column="cno" property="cno" jdbcType="VARCHAR"/>
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR"/>
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR"/>
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR"/>
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR"/>
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL"/>
+    <result column="pay_count" property="payCount" jdbcType="INTEGER"/>
+    <result column="pay_date" property="payDate" jdbcType="TIMESTAMP"/>
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="pay_model" property="payModel" jdbcType="INTEGER"/>
+    <result column="write_meter" property="writeMeter" jdbcType="INTEGER"/>
+    <result column="wit_met_time" property="writeMeterTime" jdbcType="TIMESTAMP"/>
+    <result column="create_user_id" property="createUserId" jdbcType="VARCHAR"/>
+    <result column="create_user_name" property="createUserName" jdbcType="VARCHAR"/>
+    <result column="payment" property="payment" jdbcType="DECIMAL"/>
+    <result column="adjus_amount" property="adjustAmount" jdbcType="DECIMAL"/>
+    <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+    <result column="pay_guid" property="payGuid" jdbcType="VARCHAR"/>
+    <result column="is_valid" property="isValid" jdbcType="INTEGER"/>
+    <result column="is_repeat_card" property="isRepeatCard" jdbcType="INTEGER"/>
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER"/>
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR"/>
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR"/>
+    <result column="is_change" property="isChange" jdbcType="INTEGER"/>
+    <result column="pay_method" property="payMethod" jdbcType="VARCHAR"/>
+    <result column="serial_num" property="serialNum" jdbcType="VARCHAR"/>
+  </resultMap>
+
+  <!-- 查询并返回用户充值信息记录 -->
+  <select id="queryByProc" statementType="CALLABLE" parameterType="java.util.Map" resultMap="resultProcMap">
+    <![CDATA[
+       {call PRC_W_D_PayGet(
+          #{customerNo, mode=IN, jdbcType=VARCHAR},
+          #{customerName, mode=IN, jdbcType=VARCHAR},
+          #{customerAddr, mode=IN, jdbcType=VARCHAR},
+          #{customerContact, mode=IN, jdbcType=VARCHAR},
+          #{writeMeter, mode=IN, jdbcType=VARCHAR},
+          #{sdate, mode=IN, jdbcType=TIMESTAMP},
+          #{edate, mode=IN, jdbcType=TIMESTAMP},
+          #{payModel, mode=IN, jdbcType=VARCHAR},
+          #{pageSize, mode=IN, jdbcType=INTEGER},
+          #{pageNumber, mode=IN, jdbcType=INTEGER},
+          #{userId, mode=IN, jdbcType=BIGINT},
+          #{payMethod, mode=IN, jdbcType=VARCHAR},
+          #{propertyName, mode=IN, jdbcType=VARCHAR},
+          #{sumPayment, mode=OUT, jdbcType=VARCHAR},
+          #{sumPayMoney, mode=OUT, jdbcType=VARCHAR},
+          #{sumAdjust, mode=OUT, jdbcType=VARCHAR},
+          #{rowCount, mode=OUT, jdbcType=VARCHAR}
+       )}
+       ]]>
+  </select>
+
+  <!-- 充值缴费调用的存储过程 -->
+  <select id="rechargePayment" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.param.RechargePaymentParam" resultType="java.lang.Integer">
+    <![CDATA[
+       {call PRC_W_D_Pay(
+          #{payMoney, mode=IN, jdbcType=VARCHAR},
+          #{payCount, mode=IN, jdbcType=VARCHAR},
+          #{payModel, mode=IN, jdbcType=VARCHAR},
+          #{customerNo, mode=IN, jdbcType=VARCHAR},
+          #{cno, mode=IN, jdbcType=VARCHAR},
+          #{payGuid, mode=IN, jdbcType=VARCHAR},
+          #{createUserId, mode=IN, jdbcType=VARCHAR},
+          #{payMethod, mode=IN, jdbcType=INTEGER},
+          #{serialNum, mode=IN, jdbcType=VARCHAR},
+          #{result, mode=OUT, jdbcType=INTEGER},
+          #{afterAmunt, mode=OUT, jdbcType=DECIMAL}
+       )}
+    ]]>
+  </select>
+
+  <resultMap id="feePayDetailDto" type="cn.com.cdboost.collect.dto.response.FeePayDetailDto" >
+    <result column="pay_count" property="payCount" jdbcType="INTEGER" />
+    <result column="pay_date" property="payDate" jdbcType="TIMESTAMP" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="payment" property="payment" jdbcType="DECIMAL" />
+    <result column="is_valid" property="isValid" jdbcType="INTEGER" />
+    <result column="pay_method" property="payMethodValue" jdbcType="INTEGER" />
+    <result column="serial_num" property="serialNum" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" jdbcType="VARCHAR" property="customerAddr" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL" />
+    <result column="alarm_threshold1" property="alarmThreshold1" jdbcType="DECIMAL" />
+    <result column="alarm_threshold2" property="alarmThreshold2" jdbcType="DECIMAL" />
+    <result column="overdraft_amount" property="overdraftAmount" jdbcType="INTEGER" />
+    <result column="user_name" property="chargeUserName" jdbcType="VARCHAR" />
+    <result column="cancel_user_name" property="cancelUserName" jdbcType="VARCHAR" />
+    <result column="cancel_time" property="cancelTime" jdbcType="TIMESTAMP" />
+    <result column="reason" property="reason" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="selectByPayGuid" resultMap="feePayDetailDto" parameterType="java.lang.String" >
+    select
+    t.pay_count,
+    t.pay_date,
+    t.pay_money,
+    t.payment,
+    t.is_valid,
+    t.pay_method,
+    t.serial_num,
+    t0.customer_no,
+    t0.customer_name,
+    t0.customer_contact,
+    t0.customer_addr,
+    t0.is_enabled,
+    t0.property_name,
+    c.alarm_threshold,
+    c.alarm_threshold1,
+    c.alarm_threshold2,
+    c.overdraft_amount,
+    IF(t.create_user_id=0,'自助缴费',u.user_name) as user_name,
+    u2.user_name as cancel_user_name,
+    f.create_time as cancel_time,
+    f.remark as reason
+    from em_d_fee_pay t
+    inner join em_d_customerinfo t0 on t.customer_no = t0.customer_no
+    INNER JOIN em_d_customerinfo_cost c ON c.customer_no = t0.customer_no
+    LEFT JOIN em_b_user AS u ON (t.create_user_id = u.id)
+    LEFT JOIN em_d_fee_payopt AS f ON (t.pay_guid = f.pay_guid)
+    LEFT JOIN em_b_user AS u2 ON (f.create_user_id = u2.id)
+    where t.pay_guid = #{payGuid}
+  </select>
+
+  <select id="disablePay" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.param.DisablePayVo" resultType="java.lang.Integer">
+    {call PRC_W_D_PayCencel(
+    #{payGuid, mode=IN, jdbcType=VARCHAR},
+    #{reason, mode=IN, jdbcType=VARCHAR},
+    #{userId, mode=IN, jdbcType=VARCHAR},
+    #{result, mode=OUT, jdbcType=INTEGER}
+    )}
+  </select>
+
+  <select id="getLastNFeePay" resultMap="BaseResultMap">
+    SELECT * from em_d_fee_pay WHERE
+    cno = #{cno} AND is_valid=1 ORDER BY pay_date desc LIMIT #{n}
+  </select>
+
+  <sql id="QUERY-COMMON">
+    <where>
+      t1.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="startDate != null and startDate != ''">
+        AND t.pay_date &gt;= #{startDate}
+      </if>
+      <if test="endDate != null and endDate != ''">
+        AND t.pay_date &lt;= #{endDate}
+      </if>
+    </where>
+  </sql>
+
+  <select id="queryRechargeRecord" parameterType="cn.com.cdboost.collect.dto.param.QueryPr0Vo" resultType="cn.com.cdboost.collect.dto.QueryRechargeRecordDto">
+    SELECT
+    t.meter_user_no meterUserNo,
+    t1.customer_name customerName,
+    t1.customer_contact customerContact,
+    t1.customer_addr customerAddr,
+    t1.property_name propertyName,
+    right(t.cno,12) deviceNo,
+    t.pay_money payMoney,
+    t.pay_date payDate
+    FROM em_d_fee_pay t LEFT JOIN em_d_customerinfo t1 ON t.customer_no = t1.customer_no
+    --     INNER JOIN em_d_deviceinfo t2 ON t.cno = t2.cno
+    <include refid="QUERY-COMMON" /> ORDER BY t.id DESC
+    limit #{start},#{pageSize}
+  </select>
+
+  <select id="queryTotal" parameterType="cn.com.cdboost.collect.dto.param.QueryPr0Vo" resultType="java.lang.Integer">
+    SELECT count(*) FROM em_d_fee_pay t INNER JOIN em_d_customerinfo t1 ON t.customer_no = t1.customer_no
+    INNER JOIN em_d_deviceinfo t2 ON t.cno = t2.cno
+    <include refid="QUERY-COMMON" />
+  </select>
+
+  <select id="queryPayMoneyTotal" parameterType="cn.com.cdboost.collect.dto.param.QueryPr0Vo" resultType="java.math.BigDecimal">
+    SELECT sum(t.pay_money) FROM em_d_fee_pay t INNER JOIN em_d_customerinfo t1 ON t.customer_no = t1.customer_no
+    INNER JOIN em_d_deviceinfo t2 ON t.cno = t2.cno
+    <include refid="QUERY-COMMON" />
+  </select>
+
+  <!-- 充值成功后，发送取消拉闸指令，查询用户需要发送拉闸指令的表信息 -->
+  <select id="queryCancelOffMap" parameterType="java.lang.String" resultType="cn.com.cdboost.collect.dto.response.CancelOffResponse">
+    select d.cno as cno,d.jzq_cno as jzqCno
+    from em_d_customerdevmap m
+    INNER JOIN em_d_devicemeterparam d ON d.cno = m.cno
+    where m.customer_no=#{customerNo,jdbcType=VARCHAR}
+    AND m.is_change=0 AND d.comm_point_code > 0
+  </select>
+</mapper>

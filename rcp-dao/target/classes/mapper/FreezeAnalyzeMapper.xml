@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FreezeAnalyzeMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FreezeAnalyze" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="freeze_day" property="freezeDay" jdbcType="DATE" />
+    <result column="collection_no" property="collectionNo" jdbcType="VARCHAR" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="meter_count" property="meterCount" jdbcType="INTEGER" />
+    <result column="min_round" property="minRound" jdbcType="INTEGER" />
+    <result column="max_round" property="maxRound" jdbcType="INTEGER" />
+    <result column="run_round" property="runRound" jdbcType="INTEGER" />
+    <result column="install_time" property="installTime" jdbcType="TIMESTAMP" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="anal_time" property="analTime" jdbcType="TIMESTAMP" />
+    <result column="jzq_no" property="jzqNo" jdbcType="CHAR" />
+    <result column="succ_count" property="succCount" jdbcType="INTEGER" />
+  </resultMap>
+
+  <resultMap id="collectRecordDTO" type="cn.com.cdboost.collect.dto.CollectRecordDTO">
+    <id column="collect_date" property="collectDate" jdbcType="VARCHAR" />
+    <result column="customer_count" property="customerCount" jdbcType="INTEGER" />
+    <result column="success_rate" property="successRate" jdbcType="VARCHAR" />
+    <result column="success_count" property="successCount" jdbcType="INTEGER" />
+    <result column="portion_fail_count" property="portionFailCount" jdbcType="INTEGER" />
+    <result column="fail_count" property="failCount" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <!-- 查询日冻结抄收率曲线 -->
+  <select id="queryFreezeRate" resultMap="collectRecordDTO"
+          parameterType="java.util.Map" statementType="CALLABLE">
+    {call PRC_W_D_FreeDaySumGet(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="MoteAnalyzeInfoMap" type="cn.com.cdboost.collect.dto.MoteAnalyzeInfo">
+    <result column="collect_no" property="moteEui" jdbcType="VARCHAR" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="fail_count" property="failCount" jdbcType="INTEGER" />
+    <result column="customer_count" property="meterCount" jdbcType="INTEGER" />
+    <result column="min_round" property="startRound" jdbcType="INTEGER" />
+    <result column="max_round" property="endRound" jdbcType="INTEGER" />
+    <result column="run_round" property="runRound" jdbcType="INTEGER" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <select id="queryFreezeGroupByCjq" resultMap="MoteAnalyzeInfoMap"
+          parameterType="cn.com.cdboost.collect.dto.param.FreeDayByCollGetQueryVo" statementType="CALLABLE">
+    {call PRC_W_D_FreeDayByCollGet(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{updateTime,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{sortName,mode=IN,jdbcType=VARCHAR},
+    #{sortOrder,mode=IN,jdbcType=VARCHAR},
+    #{collectNo,mode=IN,jdbcType=VARCHAR},
+    #{rowCount,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <resultMap id="roundDataInfo" type="cn.com.cdboost.collect.dto.response.RoundDataInfo">
+    <result column="run_round" property="runRound" jdbcType="INTEGER" />
+    <result column="mote_cnt" property="moteCnt" jdbcType="INTEGER" />
+    <result column="meter_cnt" property="meterCnt" jdbcType="INTEGER" />
+  </resultMap>
+
+  <select id="queryRoundPercent" resultMap="roundDataInfo">
+    select run_round, count(*) as mote_cnt, sum(succ_count) as meter_cnt from em_d_freeze_analyze
+    where freeze_day = #{freezeDate} and jzq_no = #{jzqNo}
+    group by run_round
+  </select>
+
+  <resultMap id="sucRateByCjqMap" type="cn.com.cdboost.collect.dto.response.SucRateByCjqInfo">
+    <result column="meter_count" property="meterCount" jdbcType="INTEGER" />
+    <result column="run_round" property="runRound" jdbcType="INTEGER" />
+    <result column="freeze_day" property="freezeDay" jdbcType="DATE" />
+    <result column="succ_count" property="succCount" jdbcType="INTEGER" />
+  </resultMap>
+
+  <select id="querySucRateByCjq" resultMap="sucRateByCjqMap" parameterType="java.lang.String">
+    select  meter_count, run_round, freeze_day, succ_count  from em_d_freeze_analyze
+    where collection_no = #{moteEui} and freeze_day >= #{freezeDate} and jzq_no = #{jzqNo}
+    order by freeze_day ASC
+  </select>
+</mapper>

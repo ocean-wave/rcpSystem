@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.UseEnergyStatisticsMapper" >
+
+  <resultMap id="buildingUseEnergyMap" type="cn.com.cdboost.collect.dto.response.BuildingUseEnergyData" >
+    <result column="building_no" property="buildingNo" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <!--检查根据客户编号获取设备 -->
+  <select id="statisticsByBuildingNo" resultMap="buildingUseEnergyMap">
+      select tp.building_no as building_no,SUM(ta.read_value) as amount
+      from em_d_customerdevmap tp
+      INNER JOIN em_d_customerinfo tc
+      ON tc.customer_no=tp.customer_no
+      AND tc.org_no=#{orgNo,jdbcType=BIGINT} AND tp.device_type=#{deviceType,jdbcType=VARCHAR}
+      LEFT JOIN em_d_metercollectdata ta ON tp.cno=ta.cno
+      where ta.read_type=11 AND ta.is_real_time=0 AND ta.collect_date=#{queryDate,jdbcType=VARCHAR}
+      AND tp.is_change=0
+      GROUP BY building_no
+  </select>
+</mapper>

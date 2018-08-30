@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.OrgMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.Org" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="p_org_no" property="pOrgNo" jdbcType="BIGINT" />
+    <result column="first_pinyin" property="firstPinyin" jdbcType="VARCHAR" />
+    <result column="full_pinyin" property="fullPinyin" jdbcType="VARCHAR" />
+    <result column="level_code" property="levelCode" jdbcType="VARCHAR" />
+    <result column="level" property="level" jdbcType="INTEGER" />
+    <result column="sort_no" property="sortNo" jdbcType="INTEGER" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+  </resultMap>
+
+  <!-- 根据用户ID获取组织结构 -->
+  <select id="selectByUserId" resultMap="BaseResultMap">
+    select
+    t0.org_no, t0.org_name, t0.p_org_no, t0.first_pinyin,
+    t0.full_pinyin, t0.level_code, t0.level, t0.sort_no,
+    t0.is_enabled, t0.create_time, t0.create_user_id
+    from em_b_org as t0
+    inner join em_b_org as t on t0.level_code like CONCAT(t.level_code,'%')
+    inner join em_b_user as t1 on t.org_no=t1.org_no
+    where t1.id=#{userId}  AND t0.is_enabled=1
+    order by t0.level
+  </select>
+
+  <select id="insertOrg" parameterType="cn.com.cdboost.collect.dto.param.OrgInforVo" statementType="CALLABLE"  >
+   {call PRC_W_B_AddOrg (
+   #{porgNo,jdbcType=VARCHAR},
+   #{orgName,jdbcType=VARCHAR},
+   #{id,jdbcType=VARCHAR},
+   #{result,mode=OUT,jdbcType=INTEGER}
+   )
+   }
+  </select>
+
+  <update id="updateOrg" parameterType="Map">
+    UPDATE  em_b_org t
+    <set>
+      <if test="orgNo!=null and orgNo!=''"> t.orgNo=#{orgNo},</if>
+      <if test="orgName!=null and orgName!=''">  t.orgNo=#{orgNo},</if>
+      <if test="id!=null and id!=''">  t.orgNo=#{orgNo},</if>
+      <if test="pOrgNo!=null and pOrgNo!=''">  t.orgNo=#{orgNo},</if>
+    </set>
+ WHERE
+
+  </update>
+  <!-- 批量更新 -->
+  <update id="batchUpdate" parameterType="java.util.List">
+    update em_b_org
+    <set>
+      is_enabled=0
+    </set>
+    where org_no IN
+    <foreach separator="," index="index" item="item" collection="list" close=")" open="(">
+       #{item, jdbcType=BIGINT}
+    </foreach>
+  </update>
+</mapper>

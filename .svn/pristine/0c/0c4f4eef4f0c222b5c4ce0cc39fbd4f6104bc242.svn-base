@@ -1,0 +1,431 @@
+package cn.com.cdboost.collect.constant;
+
+/**
+ * 充电app常量枚举类
+ */
+public class ChargeAppConstant {
+
+    /**
+     * 提现状态枚举
+     */
+    public enum WithdrawCashStatus {
+        SUCCESS(1,"提现成功"),FAIL(2,"提现失败");
+
+        /**
+         * 状态
+         */
+        private Integer status;
+        /**
+         * 描述
+         */
+        private String desc;
+
+        WithdrawCashStatus(Integer status, String desc) {
+            this.status = status;
+            this.desc = desc;
+        }
+
+        public Integer getStatus() {
+            return status;
+        }
+
+        public void setStatus(Integer status) {
+            this.status = status;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+    }
+
+    /**
+     * 用户注册状态
+     */
+    public enum RegisterState{
+        REGISTER_FAIL(0,"注册失败"),
+        REGISTER_SUCCESS(1,"注册成功"),
+        REGISTER_HAVED(2,"手机号已被注册");
+        /**
+         * 状态
+         */
+        private Integer state;
+        /**
+         * 描述
+         */
+        private String desc;
+
+        RegisterState(Integer state, String desc) {
+            this.state = state;
+            this.desc = desc;
+        }
+
+        public Integer getState() {
+            return state;
+        }
+
+        public void setState(Integer state) {
+            this.state = state;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+    }
+
+    /**
+     * 用户是否可购买月卡
+     */
+    public enum IsCHargeCardOfMonth{
+         CHARGE_CARD_ENABLE(1,"用户可购买月卡"),
+         CHARGE_CARD_UNABLE(0,"用户还有剩余次数且未过期");
+        /**
+         * 状态
+         */
+        private Integer state;
+        /**
+         * 描述
+         */
+        private String desc;
+
+        IsCHargeCardOfMonth(Integer state, String desc) {
+            this.state = state;
+            this.desc = desc;
+        }
+
+        public Integer getState() {
+            return state;
+        }
+
+        public void setState(Integer state) {
+            this.state = state;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+    }
+
+    /**
+     * 是否更新电话号码
+     */
+    public enum UpdatePhone{
+        UPDATE_SUCCESS(1,"修改成功"),
+        UPDATE_FAILE(0,"修改失败"),
+        UPDATE_REGISTER_HAVED(2,"手机号已被注册");
+        /**
+         * 状态
+         */
+        private Integer state;
+        /**
+         * 描述
+         */
+        private String desc;
+
+        UpdatePhone(Integer state, String desc) {
+            this.state = state;
+            this.desc = desc;
+        }
+
+        public Integer getState() {
+            return state;
+        }
+
+        public void setState(Integer state) {
+            this.state = state;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+    }
+
+    /**
+     * 是否认证
+     */
+    public enum  IsAuthentication{
+        IS_AUTHENTICATION_HAVED(1,"已认证"),
+        IS_AUTHENTICATION_NULL(0,"未认证");
+
+        /**
+         * 状态
+         */
+        private Integer state;
+        /**
+         * 描述
+         */
+        private String desc;
+
+        IsAuthentication(Integer state, String desc) {
+            this.state = state;
+            this.desc = desc;
+        }
+
+        public Integer getState() {
+            return state;
+        }
+
+        public void setState(Integer state) {
+            this.state = state;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+    }
+
+    /**
+     * 用户类型
+     */
+    public enum  UserType{
+        USER_MONTH(2,"包月用户"),
+        USER_COMMON(1,"普通用户");
+        /**
+         * 状态
+         */
+        private Integer type;
+        /**
+         * 描述
+         */
+        private String typeDesc;
+
+        UserType(Integer type, String typeDesc) {
+            this.type = type;
+            this.typeDesc = typeDesc;
+        }
+
+        public Integer getType() {
+            return type;
+        }
+
+        public void setType(Integer type) {
+            this.type = type;
+        }
+
+        public String getTypeDesc() {
+            return typeDesc;
+        }
+
+        public void setTypeDesc(String typeDesc) {
+            this.typeDesc = typeDesc;
+        }
+    }
+    /**
+     * 消息类型
+     */
+    public enum MessageType{
+        MESSAGE_ALARM(1,"警告"),
+        MESSAGE_CHARGE_STOP(-1,"充电结束"),
+        MESSAGE_LEVEL(0,"正常");
+        /**
+         * 状态
+         */
+        private Integer type;
+        /**
+         * 描述
+         */
+        private String typeDesc;
+
+        MessageType(Integer type, String typeDesc) {
+            this.type = type;
+            this.typeDesc = typeDesc;
+        }
+
+        public Integer getType() {
+            return type;
+        }
+
+        public void setType(Integer type) {
+            this.type = type;
+        }
+
+        public String getTypeDesc() {
+            return typeDesc;
+        }
+
+        public void setTypeDesc(String typeDesc) {
+            this.typeDesc = typeDesc;
+        }
+    }
+
+    /**
+     * 支付方式
+     */
+    public enum PayWay{
+        PAY_MONTH_CNT(1,"月卡次数扣减"),
+        PAY_USER_BALANCE(2,"账户余额扣减");
+
+        /**
+         * 状态
+         */
+        private Integer payWay;
+        /**
+         * 描述
+         */
+        private String payWayDesc;
+
+        PayWay(Integer payWay, String payWayDesc) {
+            this.payWay = payWay;
+            this.payWayDesc = payWayDesc;
+        }
+
+        public Integer getPayWay() {
+            return payWay;
+        }
+
+        public void setPayWay(Integer payWay) {
+            this.payWay = payWay;
+        }
+
+        public String getPayWayDesc() {
+            return payWayDesc;
+        }
+
+        public void setPayWayDesc(String payWayDesc) {
+            this.payWayDesc = payWayDesc;
+        }
+    }
+
+    /**
+     * 设备信号强度
+     */
+    public enum SingalState{
+        SINGAL_MIN("1","弱"),
+        SINGAL_MID("2","中等"),
+        SINGAL_MAX("3","强");
+        /**
+         * 状态
+         */
+        private String state;
+        /**
+         * 描述
+         */
+        private String stateDesc;
+
+        SingalState(String state, String stateDesc) {
+            this.state = state;
+            this.stateDesc = stateDesc;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
+        public String getStateDesc() {
+            return stateDesc;
+        }
+
+        public void setStateDesc(String stateDesc) {
+            this.stateDesc = stateDesc;
+        }
+
+        /**
+         * 根据状态查询状态描述信息
+         * @param state
+         * @return
+         */
+        public static String getStateDescByState(String state) {
+            for (SingalState singalState : SingalState.values()) {
+                if (singalState.getState().equals(state)) {
+                    return singalState.getStateDesc();
+                }
+            }
+            return "";
+        }
+    }
+
+    /**
+     * 计费方式
+     */
+    public enum ChargingWay{
+        CHARGING_ELECTRIC(1,"电量计量"),
+        CHARGING_TIME(2,"时间计量"),
+        CHARGING_TIME_ELECTRIC(3,"电量时间计量");
+        /**
+         * 状态
+         */
+        private Integer way;
+        /**
+         * 描述
+         */
+        private String wayDesc;
+
+        ChargingWay(Integer way, String wayDesc) {
+            this.way = way;
+            this.wayDesc = wayDesc;
+        }
+
+        public Integer getWay() {
+            return way;
+        }
+
+        public void setWay(Integer way) {
+            this.way = way;
+        }
+
+        public String getWayDesc() {
+            return wayDesc;
+        }
+
+        public void setWayDesc(String wayDesc) {
+            this.wayDesc = wayDesc;
+        }
+    }
+
+    public enum IsPay{
+        PAY_ENABLE(1,"余额不足调用微信支付"),
+        PAY_UNABLE(0,"余额足够,扣减余额");
+        /**
+         * 状态
+         */
+        private Integer pay;
+        /**
+         * 描述
+         */
+        private String payDesc;
+
+        IsPay(Integer pay, String payDesc) {
+            this.pay = pay;
+            this.payDesc = payDesc;
+        }
+
+        public Integer getPay() {
+            return pay;
+        }
+
+        public void setPay(Integer pay) {
+            this.pay = pay;
+        }
+
+        public String getPayDesc() {
+            return payDesc;
+        }
+
+        public void setPayDesc(String payDesc) {
+            this.payDesc = payDesc;
+        }
+    }
+}

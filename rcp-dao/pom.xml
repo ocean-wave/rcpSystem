@@ -1,0 +1,251 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>rcp-system</artifactId>
+        <groupId>cn.com.cdboost</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>rcp-dao</artifactId>
+    <packaging>jar</packaging>
+
+    <name>rcp-dao</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mybatis.version>3.4.1</mybatis.version>
+        <mybatis-spring.version>1.3.0</mybatis-spring.version>
+        <tk.mybatis.mapper.version>3.4.4</tk.mybatis.mapper.version>
+        <druid.version>1.1.2</druid.version>
+        <mysql-connector-java.version>6.0.6</mysql-connector-java.version>
+        <pagehelper_version>5.1.2</pagehelper_version>
+
+        <!--  MyBatis Generator  -->
+        <!--  Java接口和实体类  -->
+        <targetJavaProject>${basedir}/src/main/java</targetJavaProject>
+        <targetMapperPackage>cn.com.cdboost.collect.dao</targetMapperPackage>
+        <targetModelPackage>cn.com.cdboost.collect.model</targetModelPackage>
+        <!--  XML生成路径  -->
+        <targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
+        <targetXMLPackage>mapper</targetXMLPackage>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.com.cdboost</groupId>
+            <artifactId>rcp-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!--Spring配置开始-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+        </dependency>
+        <!--Spring配置结束-->
+
+        <!--Mybatis配置开始-->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>${mybatis.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>${mybatis-spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper</artifactId>
+            <version>${tk.mybatis.mapper.version}</version>
+        </dependency>
+        <!--Mybatis配置结束-->
+
+        <!--数据库配置开始-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>${druid.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql-connector-java.version}</version>
+        </dependency>
+        <!--数据库配置结束-->
+
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+            <version>${pagehelper_version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <!-- 本地开发环境 -->
+        <profile>
+            <id>dev-250</id>
+            <properties>
+                <env>dev-250</env>
+            </properties>
+        </profile>
+
+        <!-- 123中天开发环境 -->
+        <profile>
+            <id>zt-123</id>
+            <properties>
+                <env>zt-123</env>
+            </properties>
+        </profile>
+
+        <!-- 250测试环境 -->
+        <profile>
+            <id>test-250</id>
+            <properties>
+                <env>test-250</env>
+            </properties>
+        </profile>
+
+        <!-- 250中天环境 -->
+        <profile>
+            <id>zt-250</id>
+            <properties>
+                <env>zt-250</env>
+            </properties>
+            <activation>
+                <!-- 默认激活这个配置 -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+
+        <!-- 251压力测试环境 -->
+        <profile>
+            <id>yl-251</id>
+            <properties>
+                <env>yl-251</env>
+            </properties>
+        </profile>
+
+        <!-- 251客户演示环境 -->
+        <profile>
+            <id>ys-251</id>
+            <properties>
+                <env>ys-251</env>
+            </properties>
+        </profile>
+
+        <!-- 正式发布版 -->
+        <profile>
+            <id>release</id>
+            <properties>
+                <env>release</env>
+            </properties>
+            <build>
+                <filters>
+                    <filter>src/main/resources/config/db-${env}.properties</filter>
+                </filters>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                        <excludes>
+                            <exclude>*.properties</exclude>
+                            <exclude>config/*</exclude>
+                            <exclude>generator/*</exclude>
+                            <exclude>sql/*</exclude>
+                        </excludes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <filters>
+            <filter>src/main/resources/config/db-${env}.properties</filter>
+        </filters>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>config/*</exclude>
+                    <exclude>generator/*</exclude>
+                    <exclude>sql/*</exclude>
+                    <exclude>db4generator.properties</exclude>
+                    <!--<exclude>db.properties</exclude>-->
+                </excludes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.mybatis.generator</groupId>
+                <artifactId>mybatis-generator-maven-plugin</artifactId>
+                <version>1.3.2</version>
+                <configuration>
+                    <configurationFile>${basedir}/src/main/resources/generator/generatorConfig.xml</configurationFile>
+                    <overwrite>true</overwrite>
+                    <verbose>true</verbose>
+                    <!--<jdbcDriver>com.mysql.cj.jdbc.Driver</jdbcDriver>-->
+                    <!--<jdbcURL>jdbc:mysql://10.10.1.250:3306/sm_metercollect_design?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia%2FShanghai&amp;useSSL=true&amp;allowMultiQueries=true</jdbcURL>-->
+                    <!--<jdbcUserId>sa_pda</jdbcUserId>-->
+                    <!--<jdbcPassword>emerp@250.123</jdbcPassword>-->
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>${mysql-connector-java.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>tk.mybatis</groupId>
+                        <artifactId>mapper</artifactId>
+                        <version>${tk.mybatis.mapper.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+</project>

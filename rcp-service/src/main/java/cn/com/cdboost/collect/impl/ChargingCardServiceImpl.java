@@ -1,0 +1,402 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.constant.ChargeCardConstant;
+import cn.com.cdboost.collect.dao.ChargingCardListMapper;
+import cn.com.cdboost.collect.dao.ChargingCardMapper;
+import cn.com.cdboost.collect.dao.ChargingDeviceMapper;
+import cn.com.cdboost.collect.dao.ChargingPayMapper;
+import cn.com.cdboost.collect.dto.ChargingDeviceDto;
+import cn.com.cdboost.collect.dto.ChargingICCardDto;
+import cn.com.cdboost.collect.dto.CustomerBatchImportInfo;
+import cn.com.cdboost.collect.dto.param.*;
+import cn.com.cdboost.collect.exception.BusinessException;
+import cn.com.cdboost.collect.model.*;
+import cn.com.cdboost.collect.service.ChargingCardService;
+import cn.com.cdboost.collect.util.FileUtil;
+import cn.com.cdboost.collect.util.StringUtil;
+import com.alibaba.druid.pool.DruidDataSource;
+import com.csvreader.CsvWriter;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimaps;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpSession;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Service
+public class ChargingCardServiceImpl extends BaseServiceImpl<ChargingCard> implements ChargingCardService{
+    private static final Logger logger = LoggerFactory.getLogger(ChargingCardServiceImpl.class);
+
+    @Autowired
+    private ChargingCardMapper chargingCardMapper;
+    @Autowired
+    private ChargingPayMapper chargingPayMapper;
+    @Autowired
+    private DruidDataSource dataSource;
+    @Autowired
+    private ChargingCardListMapper chargingCardListMapper;
+    @Autowired
+    private ChargingDeviceMapper chargingDeviceMapper;
+
+    @Override
+    public List<ChargingICCardDto> queryList(ChargerICCardQueryVo queryVo) {
+        //驼峰转下划线
+        queryVo.setSortName(StringUtil.camelToUnderline(queryVo.getSortName()));
+        if ("ic_remain_amount".equals(queryVo.getSortName())){
+            queryVo.setSortName("t.remain_amount");
+        }
+        if ("update_time".equals(queryVo.getSortName())){
+            queryVo.setSortName("t.update_time");
+        }
+        List<ChargingICCardDto> chargingICCardDtos = chargingCardMapper.queryList(queryVo);
+        //查询总数
+        Integer total = chargingCardMapper.queryListTotal(queryVo);
+        queryVo.setTotal(total.longValue());
+
+        List<String> cardIds = Lists.newArrayList();
+        for (ChargingICCardDto chargingICCardDto : chargingICCardDtos) {
+            cardIds.add(chargingICCardDto.getCardId());
+            if (chargingICCardDto.getWebcharNo() != null){
+                chargingICCardDto.setCustomerType("微信");
+            } else if (chargingICCardDto.getAlipayUserId() != null){
+                chargingICCardDto.setCustomerType("支付宝");
+            }
+            if (chargingICCardDto.getWebcharNo() != null && chargingICCardDto.getAlipayUserId() != null){
+                chargingICCardDto.setCustomerType("微信、支付宝");
+            }
+        }
+
+        //统计IC卡充值次数
+        Condition condition = new Condition(ChargingPay.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        criteria.andIn("cardId",cardIds);
+        List<ChargingPay> chargingPays = chargingPayMapper.selectByCondition(condition);
+        ImmutableListMultimap<String, ChargingPay> multimap = Multimaps.index(chargingPays, new Function<ChargingPay, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable ChargingPay chargingPay) {
+                return chargingPay.getCardId();
+            }
+        });
+
+        for (ChargingICCardDto chargingICCardDto : chargingICCardDtos) {
+            if (!CollectionUtils.isEmpty(multimap.get(chargingICCardDto.getCardId()))){
+                Integer payCnt = multimap.get(chargingICCardDto.getCardId()).size();
+                chargingICCardDto.setPayCnt(payCnt);
+            }
+        }
+        if ("pay_cnt".equals(queryVo.getSortName())){
+            if ("asc".equals(queryVo.getSortOrder())){
+                Collections.sort(chargingICCardDtos, new Comparator<ChargingICCardDto>() {
+                    @Override
+                    public int compare(ChargingICCardDto o1, ChargingICCardDto o2) {
+                        int i = o1.getPayCnt() - o2.getPayCnt();
+                        return i;
+                    }
+                });
+            }else {
+                Collections.sort(chargingICCardDtos, new Comparator<ChargingICCardDto>() {
+                    @Override
+                    public int compare(ChargingICCardDto o1, ChargingICCardDto o2) {
+                        int i = o2.getPayCnt() - o1.getPayCnt();
+                        return i;
+                    }
+                });
+            }
+        }
+        return chargingICCardDtos;
+    }
+
+    @Override
+    @Transactional
+    public void addCard(ChargerICCardAddParam param, Integer id) {
+        ChargingCard card = new ChargingCard();
+        card.setCardId(param.getCardId());
+        List<ChargingCard> select = chargingCardMapper.select(card);
+        if (select.size() > 0){
+            throw new BusinessException("卡号不能重复!");
+        }
+        BeanUtils.copyProperties(param,card);
+        card.setCustomerName(param.getCustomerName());
+        card.setRemainAmount(param.getInitAmount());
+        //添加IC卡信息
+        chargingCardMapper.insertSelective(card);
+
+        //查出所有设备信息
+        ChargerDeviceQueryVo queryVo = new ChargerDeviceQueryVo();
+        queryVo.setPageNumber(1);
+        queryVo.setPageSize(99999999);
+        List<ChargingDeviceDto> chargingDeviceDtos = chargingDeviceMapper.deviceList(queryVo);
+        //添加ic卡list表信息
+        //TODO 设备编号暂时添加所有设备
+        List<ChargingCardList> cardLists = Lists.newArrayList();
+        for (ChargingDeviceDto chargingDeviceDto : chargingDeviceDtos) {
+            ChargingCardList chargingCardList = new ChargingCardList();
+            chargingCardList.setDeviceNo(chargingDeviceDto.getDeviceNo());
+            chargingCardList.setCommNo(chargingDeviceDto.getCommNo());
+            chargingCardList.setCardId(param.getCardId());
+            chargingCardList.setState(ChargeCardConstant.State.NORMAL.getStatus());
+            chargingCardList.setWriteTime(new Date());
+            chargingCardList.setSendFlag(0);
+            cardLists.add(chargingCardList);
+        }
+        chargingCardListMapper.insertList(cardLists);
+    }
+
+    @Override
+    @Transactional
+    public void editCard(ChargerICCardEditParam param, Integer id) {
+        //修改ic卡表
+        ChargingCard card = new ChargingCard();
+        BeanUtils.copyProperties(param,card);
+        card.setCustomerName(param.getCustomerName());
+        card.setUpdateTime(new Date());
+        Condition condition = new Condition(ChargingCard.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("cardId",card.getCardId());
+        chargingCardMapper.updateByConditionSelective(card,condition);
+    }
+
+    @Override
+    public void delete(List<String> cardIds, Integer id) {
+        //删除充电IC卡
+        Condition condition = new Condition(ChargingCard.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        criteria.andIn("cardId",cardIds);
+        List<ChargingCard> chargingCards = chargingCardMapper.selectByCondition(condition);
+        Iterator<ChargingCard> it = chargingCards.iterator();
+        String message = "";
+        while(it.hasNext()){
+            ChargingCard chargingCard = it.next();
+            if (chargingCard.getRemainAmount().compareTo(BigDecimal.ZERO) != 0){
+                it.remove();
+                cardIds.remove(chargingCard.getCardId());
+                message = "所选卡还有余额！";
+            }
+        }
+        if (!CollectionUtils.isEmpty(cardIds)){
+            criteria.andIn("cardId",cardIds);
+            chargingCardMapper.deleteByCondition(condition);
+
+            //修改ic卡list表信息
+            Condition condition2 = new Condition(ChargingCardList.class);
+            Condition.Criteria criteria2 = condition2.createCriteria();
+            criteria2.andIn("cardId",cardIds);
+            ChargingCardList cardList = new ChargingCardList();
+            cardList.setState(ChargeCardConstant.State.DEL.getStatus());
+            chargingCardListMapper.updateByConditionSelective(cardList,condition2);
+        }
+        if (!"".equals(message)){
+            throw new BusinessException(message);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void offOnCard(OffOnCardParam param, Integer id) {
+        ChargingCard card = new ChargingCard();
+        if (param.getOnOrOff() == 0){
+            card.setCardState(2);
+        }else if (param.getOnOrOff() == 1){
+            card.setCardState(1);
+        }
+        card.setUpdateTime(new Date());
+        //批量修改ic卡状态
+        Condition condition = new Condition(ChargingCard.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        criteria.andIn("cardId",param.getCardIds());
+        chargingCardMapper.updateByConditionSelective(card, condition);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = RuntimeException.class)
+    public CustomerBatchImportInfo excelImport(HttpSession session, String excelName, String uuid) {
+        logger.info("chargingCardServiceImpl-excelImport query: excelName: " + excelName + ", uuid: " + uuid);
+        String parentPath = session.getServletContext().getRealPath("/WEB-INF/upload");
+        File parentFile = new File(parentPath);
+        if (!parentFile.exists() || !parentFile.isDirectory()) {
+            parentFile.mkdirs();
+        }
+        //清理一天以前的文件
+        FileUtil.deleteFile(parentFile, 24 * 60);
+        User currentUser = (User) session.getAttribute("CURRENT_LOGIN_USER");
+        CustomerBatchImportInfo importInfo = new CustomerBatchImportInfo();
+        try {
+            List<ChargingCard> chargingCards = this.readXls(parentPath);
+            int i = chargingCardMapper.insertList(chargingCards);
+            if (i>0) {
+                importInfo.setResult(1);
+            }else {
+                importInfo.setResult(0);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return importInfo;
+    }
+
+    private Map<String,Object> excel2csv(Workbook wb, String csvPath, long createUserID,String importID) {
+        Map<String,Object> map = new HashMap<>();
+        List<Row> errorList = new ArrayList<>();
+        try {
+            // 创建CSV写对象
+            CsvWriter csvWriter = new CsvWriter(csvPath, ',', Charset.forName("UTF-8"));
+            Sheet sheet = wb.getSheetAt(0);
+            //int total=customerInfoService.checknull(sheet);
+
+            //map.put("total", total);
+            List<TmpCustomerInfo> dataList = Lists.newArrayList();
+
+            // 生成卡号
+            //setCustomerNo(dataList);
+
+            // 写csv文件
+            writeCsvFile(csvWriter,dataList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        map.put("errorList", errorList);
+        return map;
+    }
+
+    /**
+     * 写csv文件
+     * @param csvWriter
+     * @param dataList
+     * @throws Exception
+     */
+    private void writeCsvFile(CsvWriter csvWriter, List<TmpCustomerInfo> dataList) throws IOException, IllegalAccessException {
+        for (TmpCustomerInfo info : dataList) {
+            //通过反射获取属性字段的值并包装成字符数组写入csv文件
+            Class<? extends TmpCustomerInfo> cinfoCla = info.getClass();
+            Field[] fs = cinfoCla.getDeclaredFields();
+            String[] content = new String[fs.length - 1];
+            for (int i = 2; i < fs.length; i++) {
+                Field f = fs[i];
+                f.setAccessible(true); // 设置些属性是可以访问的
+                Object val = f.get(info);// 得到此属性的值
+                if (val == null) {
+                    content[i - 2] = "";
+                    continue;
+                }
+                if (val instanceof Date) {
+                    Date tempDate = (Date) val;
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    content[i - 2] = format.format(tempDate);
+                } else {
+                    content[i - 2] = val.toString();
+                }
+            }
+            csvWriter.writeRecord(content);
+        }
+        csvWriter.close();
+    }
+
+
+    public List<ChargingCard> readXls(String path) throws IOException {
+        InputStream is = new FileInputStream(path);
+        HSSFWorkbook hssfWorkbook = new HSSFWorkbook(is);
+        ChargingCard chargingCard = null;
+        List<ChargingCard> list = new ArrayList<ChargingCard>();
+        // 循环工作表Sheet
+        for (int numSheet = 0; numSheet < hssfWorkbook.getNumberOfSheets(); numSheet++) {
+            HSSFSheet hssfSheet = hssfWorkbook.getSheetAt(numSheet);
+            if (hssfSheet == null) {
+                continue;
+            }
+            // 循环行Row
+            for (int rowNum = 1; rowNum <= hssfSheet.getLastRowNum(); rowNum++) {
+                HSSFRow hssfRow = hssfSheet.getRow(rowNum);
+                if (hssfRow != null) {
+                    chargingCard = new ChargingCard();
+                    HSSFCell cardId = hssfRow.getCell(0);
+                    HSSFCell projectGuid = hssfRow.getCell(1);
+                    HSSFCell initAmount = hssfRow.getCell(2);
+                    HSSFCell customerName = hssfRow.getCell(3);
+                    HSSFCell customerContact = hssfRow.getCell(4);
+                    HSSFCell remark = hssfRow.getCell(5);
+                    chargingCard.setCardId(getValue(cardId));
+                    chargingCard.setProjectGuid(getValue(projectGuid));
+                    chargingCard.setInitAmount(new BigDecimal(getValue(initAmount)));
+                    chargingCard.setCustomerName(getValue(customerName));
+                    chargingCard.setCustomerContact(getValue(customerContact));
+                    chargingCard.setRemark(getValue(remark));
+
+                    chargingCard.setCardState(0);
+                    chargingCard.setUpdateTime(new Date());
+                    chargingCard.setCreateTime(new Date());
+                    list.add(chargingCard);
+                }
+            }
+        }
+        return list;
+    }
+
+    private String getValue(HSSFCell hssfCell) {
+        if (hssfCell.getCellType() == hssfCell.CELL_TYPE_BOOLEAN) {
+            // 返回布尔类型的值
+            return String.valueOf(hssfCell.getBooleanCellValue());
+        } else if (hssfCell.getCellType() == hssfCell.CELL_TYPE_NUMERIC) {
+            // 返回数值类型的值
+            return String.valueOf(hssfCell.getNumericCellValue());
+        } else {
+            // 返回字符串类型的值
+            return String.valueOf(hssfCell.getStringCellValue());
+        }
+    }
+
+    @Override
+    public ChargingCard queryByCardId(String cardId) {
+        ChargingCard param = new ChargingCard();
+        param.setCardId(cardId);
+        return chargingCardMapper.selectOne(param);
+    }
+
+    @Override
+    public ChargingCard queryByCardIdForUpdate(String cardId) {
+        Condition condition = new Condition(ChargingCard.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("cardId",cardId);
+        condition.setForUpdate(true);
+        List<ChargingCard> chargingCards = chargingCardMapper.selectByCondition(condition);
+        if (CollectionUtils.isEmpty(chargingCards)) {
+            return null;
+        }
+        ChargingCard chargingCard = chargingCards.get(0);
+        return chargingCard;
+    }
+
+    @Override
+    public List<ChargingCard> queryByCustomerGuid(String customerGuid) {
+        ChargingCard param = new ChargingCard();
+        param.setCustomerGuid(customerGuid);
+        return chargingCardMapper.select(param);
+    }
+}

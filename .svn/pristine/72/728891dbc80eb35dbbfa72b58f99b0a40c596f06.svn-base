@@ -1,0 +1,325 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.constant.ChargeConstant;
+import cn.com.cdboost.collect.dao.ChargingPayChemeMapper;
+import cn.com.cdboost.collect.dto.ChargingUseDetailedDto;
+import cn.com.cdboost.collect.dto.MonthlySchemeDto;
+import cn.com.cdboost.collect.dto.SchemePofitableDto;
+import cn.com.cdboost.collect.dto.TemporarySchemeDto;
+import cn.com.cdboost.collect.dto.param.ChargerSchemeEditParam;
+import cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo;
+import cn.com.cdboost.collect.dto.param.OffOnSchemeParam;
+import cn.com.cdboost.collect.dto.response.ChargingSchemeInfo;
+import cn.com.cdboost.collect.exception.BusinessException;
+import cn.com.cdboost.collect.model.ChargingPayCheme;
+import cn.com.cdboost.collect.service.ChargingPayChemeService;
+import cn.com.cdboost.collect.util.DateUtil;
+import cn.com.cdboost.collect.util.StringUtil;
+import cn.com.cdboost.collect.util.UuidUtil;
+import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * 充值方案信息表接口实现类
+ */
+@Service
+public class ChargingPayChemeServiceImpl extends BaseServiceImpl<ChargingPayCheme> implements ChargingPayChemeService {
+
+    @Autowired
+    private ChargingPayChemeMapper chargingPayChemeMapper;
+
+    @Override
+    public List<ChargingUseDetailedDto> shemeUseList(ChargerSchemeQueryVo queryVo) {
+        if (StringUtil.isEmpty(queryVo.getSchemeGuid())){
+            throw new BusinessException("schemeGuid为空");
+        }
+        //转换成开始和结束时间
+        this.getTime(queryVo);
+        List<ChargingUseDetailedDto> useDetailedDtos = chargingPayChemeMapper.shemeUseList(queryVo);
+
+        //查询总数
+        Integer total = chargingPayChemeMapper.queryTotal(queryVo);
+        queryVo.setTotal(total.longValue());
+        return useDetailedDtos;
+    }
+
+    @Override
+    public List<SchemePofitableDto> countPofitable(ChargerSchemeQueryVo queryVo) {
+        //转换成开始和结束时间
+        this.getTime(queryVo);
+        return chargingPayChemeMapper.countPofitable(queryVo);
+    }
+
+    /**
+     * 将前端传的统计类型转换成开始和结束时间
+     * @param queryVo
+     * @return
+     */
+    private ChargerSchemeQueryVo getTime(ChargerSchemeQueryVo queryVo){
+        Integer countType = queryVo.getCountType();
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
+        c.setTime(now);
+        queryVo.setEndTime(DateUtil.formatDate(now));
+        switch (countType){
+            case 1:
+                //过去七天
+                c.add(Calendar.DATE, - 7);
+                Date d = c.getTime();
+                String day = format.format(d);
+                queryVo.setBeginTime(day);
+                break;
+            case 2:
+                //过去一月
+                c.add(Calendar.MONTH, -1);
+                Date m = c.getTime();
+                String mon = format.format(m);
+                queryVo.setBeginTime(mon);
+                break;
+            case 3:
+                //过去三个月
+                c.add(Calendar.MONTH, -3);
+                Date m3 = c.getTime();
+                String mon3 = format.format(m3);
+                queryVo.setBeginTime(mon3);
+        }
+        return queryVo;
+    }
+
+    @Override
+    @Transactional
+    public void edit(ChargerSchemeEditParam param, Integer id) {
+        //处理包月方案
+        MonthlySchemeDto monthly = param.getMonthly();
+        if (monthly != null){
+            if (monthly.getFlag() == 1){//判断标识  0新增,1删除，2修改
+                this.updateSchemeIsEnable(monthly.getSchemeGuid(),ChargeConstant.SchemeIsEnable.UNABLE.getType());
+            }else if (monthly.getFlag() == 2){
+                //将旧方案设置为停用状态
+                this.updateSchemeIsEnable(monthly.getSchemeGuid(),ChargeConstant.SchemeIsEnable.UNABLE.getType());
+
+                ChargingPayCheme payCheme = new ChargingPayCheme();
+                payCheme.setPayCategory(ChargeConstant.SchemePayCategory.MONTH_RECHARGE.getType());
+                this.copyMonthlyBean(monthly,payCheme);
+                payCheme.setProjectGuid(param.getProjectGuid());
+                payCheme.setIsEnable(ChargeConstant.SchemeIsEnable.ABLE.getType());
+                //判断该项目下是否已有该方案
+                List<ChargingPayCheme> chargingPayChemes = chargingPayChemeMapper.select(payCheme);
+                if (chargingPayChemes.size() >0){
+                    throw new BusinessException("该项目下已有该包月方案！");
+                }
+                //插入新包月方案
+                payCheme.setSchemeGuid(UuidUtil.getUuid());
+                payCheme.setSortNo(1);
+                chargingPayChemeMapper.insertSelective(payCheme);
+            }else if (monthly.getFlag() == 0){
+                ChargingPayCheme payCheme = new ChargingPayCheme();
+                payCheme.setPayCategory(ChargeConstant.SchemePayCategory.MONTH_RECHARGE.getType());
+                this.copyMonthlyBean(monthly,payCheme);
+                payCheme.setProjectGuid(param.getProjectGuid());
+                payCheme.setIsEnable(ChargeConstant.SchemeIsEnable.ABLE.getType());
+                //判断该项目下是否已有该方案
+                List<ChargingPayCheme> chargingPayChemes = chargingPayChemeMapper.select(payCheme);
+                if (chargingPayChemes.size() >0){
+                    throw new BusinessException("该项目下已有该包月方案！");
+                }
+                //插入新包月方案
+                payCheme.setSchemeGuid(UuidUtil.getUuid());
+                payCheme.setSortNo(1);
+                chargingPayChemeMapper.insertSelective(payCheme);
+            }
+        }
+
+
+        //处理临充方案
+        List<TemporarySchemeDto> temporary = param.getTemporary();
+        if (!CollectionUtils.isEmpty(temporary)){
+            for (TemporarySchemeDto temporarySchemeDto : temporary) {
+                if (temporarySchemeDto.getFlag() == 1){
+                    this.updateSchemeIsEnable(temporarySchemeDto.getSchemeGuid(),ChargeConstant.SchemeIsEnable.UNABLE.getType());
+                }else if (temporarySchemeDto.getFlag() == 2){
+                    //将旧方案设置为停用状态
+                    this.updateSchemeIsEnable(temporarySchemeDto.getSchemeGuid(),ChargeConstant.SchemeIsEnable.UNABLE.getType());
+
+                    ChargingPayCheme payCheme = new ChargingPayCheme();
+                    if (temporarySchemeDto.getTime() == -1){//传-1标识一次充满
+                        payCheme.setPayCategory(ChargeConstant.SchemePayCategory.RECHARGE_FULL.getType());
+                        payCheme.setChargingTime(8);
+                    }else {
+                        payCheme.setPayCategory(ChargeConstant.SchemePayCategory.TEMPORARY_RECHARGE.getType());
+                        payCheme.setChargingTime(temporarySchemeDto.getTime());
+                    }
+                    payCheme.setProjectGuid(param.getProjectGuid());
+                    payCheme.setMoney(temporarySchemeDto.getPrice());
+                    payCheme.setIsEnable(ChargeConstant.SchemeIsEnable.ABLE.getType());
+                    payCheme.setPower(temporarySchemeDto.getPowerType());
+                    //判断该项目下是否已有该方案
+                    List<ChargingPayCheme> chargingPayChemes = chargingPayChemeMapper.select(payCheme);
+                    if (chargingPayChemes.size() >0){
+                        throw new BusinessException("该项目下已有该临充方案！");
+                    }
+                    //插入新临充方案
+                    payCheme.setSchemeGuid(UuidUtil.getUuid());
+                    payCheme.setSortNo(2);
+                    chargingPayChemeMapper.insertSelective(payCheme);
+                }else if (temporarySchemeDto.getFlag() == 0){
+                    ChargingPayCheme payCheme = new ChargingPayCheme();
+                    if (temporarySchemeDto.getTime() == -1){//传-1标识一次充满
+                        payCheme.setPayCategory(ChargeConstant.SchemePayCategory.RECHARGE_FULL.getType());
+                        payCheme.setChargingTime(8);
+                    }else {
+                        payCheme.setPayCategory(ChargeConstant.SchemePayCategory.TEMPORARY_RECHARGE.getType());
+                        payCheme.setChargingTime(temporarySchemeDto.getTime());
+                    }
+                    payCheme.setProjectGuid(param.getProjectGuid());
+                    payCheme.setMoney(temporarySchemeDto.getPrice());
+                    payCheme.setPower(temporarySchemeDto.getPowerType());
+                    payCheme.setIsEnable(ChargeConstant.SchemeIsEnable.ABLE.getType());
+                    //判断该项目下是否已有该方案
+                    List<ChargingPayCheme> chargingPayChemes = chargingPayChemeMapper.select(payCheme);
+                    if (chargingPayChemes.size() >0){
+                        throw new BusinessException("该项目下已有该临充方案！");
+                    }
+                    //插入新临充方案
+                    payCheme.setSchemeGuid(UuidUtil.getUuid());
+                    payCheme.setSortNo(2);
+                    chargingPayChemeMapper.insertSelective(payCheme);
+                }
+            }
+        }
+    }
+
+    /**
+     * 修改数据库方案状态
+     * @param schemeGuid 方案唯一标识
+     * @param isEnable
+     */
+    private void updateSchemeIsEnable(String schemeGuid, Integer isEnable){
+        ChargingPayCheme chargingPayCheme = new ChargingPayCheme();
+        chargingPayCheme.setIsEnable(isEnable);
+        Condition condition = new Condition(ChargingPayCheme.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("schemeGuid",schemeGuid);
+        chargingPayChemeMapper.updateByConditionSelective(chargingPayCheme, condition);
+    }
+
+    /**
+     * 转换bean
+     * @param monthly
+     * @param payCheme
+     */
+    private void copyMonthlyBean(MonthlySchemeDto monthly, ChargingPayCheme payCheme){
+        payCheme.setChargingCnt(monthly.getMonthlyCnt());
+        payCheme.setMoney(monthly.getMonthlyPrice().multiply(new BigDecimal(monthly.getMonthlyCnt())));
+        payCheme.setChargingTime(monthly.getMonthlyTime());
+        payCheme.setPower(monthly.getPowerType());
+    }
+
+    @Override
+    @Transactional
+    public void offOnScheme(OffOnSchemeParam param, Integer id) {
+        ChargingPayCheme payCheme = new ChargingPayCheme();
+        if (param.getOnOrOff() == 0){
+            payCheme.setIsEnable(ChargeConstant.SchemeIsEnable.ABLE.getType());
+        }else if (param.getOnOrOff() == 1){
+            payCheme.setIsEnable(ChargeConstant.SchemeIsEnable.UNABLE.getType());
+        }
+        //payCheme.setUpdateTime(new Date());
+        //批量修改充电方案状态
+        Condition condition = new Condition(ChargingPayCheme.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        criteria.andIn("schemeGuid",param.getSchemeGuids());
+        chargingPayChemeMapper.updateByConditionSelective(payCheme, condition);
+    }
+
+    @Override
+    public ChargingSchemeInfo queryDetailByProjectGuid(String projectGuid) {
+        //查询数据库
+        ChargingPayCheme chargingPayCheme = new ChargingPayCheme();
+        chargingPayCheme.setProjectGuid(projectGuid);
+        chargingPayCheme.setIsEnable(ChargeConstant.SchemeIsEnable.ABLE.getType());
+        List<ChargingPayCheme> chargingPayChemes = chargingPayChemeMapper.select(chargingPayCheme);
+
+        ChargingSchemeInfo chargingSchemeInfo = new ChargingSchemeInfo();
+        List<TemporarySchemeDto> temporary = Lists.newArrayList();
+        MonthlySchemeDto monthly = null;
+        //组装成前端需要对象
+        for (ChargingPayCheme payCheme : chargingPayChemes) {
+            if (payCheme.getPayCategory() == ChargeConstant.SchemePayCategory.TEMPORARY_RECHARGE.getType()
+                    || payCheme.getPayCategory() == ChargeConstant.SchemePayCategory.RECHARGE_FULL.getType()){
+                TemporarySchemeDto temporarySchemeDto = new TemporarySchemeDto();
+                temporarySchemeDto.setSchemeGuid(payCheme.getSchemeGuid());
+                temporarySchemeDto.setPrice(payCheme.getMoney());
+                temporarySchemeDto.setTime(payCheme.getChargingTime());
+                temporarySchemeDto.setPayCategory(payCheme.getPayCategory());
+                temporarySchemeDto.setPowerType(payCheme.getPower());
+                temporary.add(temporarySchemeDto);
+            }else if (payCheme.getPayCategory() == ChargeConstant.SchemePayCategory.MONTH_RECHARGE.getType()){
+                monthly = new MonthlySchemeDto();
+                monthly.setSchemeGuid(payCheme.getSchemeGuid());
+                monthly.setMonthlyPrice(payCheme.getMoney().divide(new BigDecimal(payCheme.getChargingCnt()), 2, RoundingMode.HALF_UP));
+                monthly.setMonthlyCnt(payCheme.getChargingCnt());
+                monthly.setMonthlyTime(payCheme.getChargingTime());
+                monthly.setPayCategory(payCheme.getPayCategory());
+                monthly.setPowerType(payCheme.getPower());
+            }
+        }
+        //包月对象
+        chargingSchemeInfo.setMonthly(monthly);
+        //临时充值对象
+        chargingSchemeInfo.setTemporary(temporary);
+        return chargingSchemeInfo;
+    }
+
+    @Override
+    public List<ChargingPayCheme> queryMonthSchemeList() {
+        Condition condition = new Condition(ChargingPayCheme.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("payCategory", ChargeConstant.SchemePayCategory.MONTH_RECHARGE.getType());
+        criteria.andEqualTo("isEnable",1);
+        condition.setOrderByClause("sort_no ASC");
+        return chargingPayChemeMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public List<ChargingPayCheme> querySchemeList4ChargePage(String projectGuid) {
+        Condition condition = new Condition(ChargingPayCheme.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("projectGuid", projectGuid);
+        criteria.andEqualTo("isEnable",1);
+        criteria.andNotEqualTo("payCategory", 4);
+        condition.setOrderByClause("sort_no,money ASC");
+        return chargingPayChemeMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public List<ChargingPayCheme> querySchemeList4ActivityPage() {
+        Condition condition = new Condition(ChargingPayCheme.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("payCategory",ChargeConstant.SchemePayCategory.BALANCE_RECHARGE.getType());
+        condition.setOrderByClause("money ASC");
+        return chargingPayChemeMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public ChargingPayCheme queryMonthCardScheme() {
+        ChargingPayCheme param = new ChargingPayCheme();
+        param.setPayCategory(ChargeConstant.SchemePayCategory.MONTH_RECHARGE.getType());
+        param.setIsEnable(1);
+        return chargingPayChemeMapper.selectOne(param);
+    }
+}

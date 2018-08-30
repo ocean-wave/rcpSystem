@@ -1,0 +1,46 @@
+{
+	"message": "成功",
+	"total": "1",
+	"code": 1,
+	"data": [{
+		"chargingPlieGuid": "070000000000000000010095448860",
+		"deviceNo": "10095448860",
+		"installDate": "2018-05-06 14:22:30",
+		"runState": 0,
+		"installAddr": "成都市武侯区",
+		"comMethod": 2,
+		"comMethodName": "本地通信",
+		"commNo": "323",
+		"remark": "测试数据"
+	}, {
+		"chargingPlieGuid": "07000000000000000001439544886",
+		"deviceNo": "1439544886",
+		"installDate": "2018-05-06 14:22:30",
+		"runState": -1,
+		"installAddr": "成都市武侯区",
+		"comMethod": 1,
+		"comMethodName": "远程通信",
+		"commNo": "323",
+		"remark": "测试数据"
+	}, {
+		"chargingPlieGuid": "070000000000000000095448",
+		"deviceNo": "95448",
+		"installDate": "2018-05-06 14:22:30",
+		"runState": 1,
+		"installAddr": "成都市武侯区",
+		"comMethod": 1,
+		"comMethodName": "远程通信",
+		"commNo": "323",
+		"remark": "测试数据"
+	}, {
+		"chargingPlieGuid": "07000000000000000004395",
+		"deviceNo": "4395",
+		"installDate": "2018-05-06 14:22:30",
+		"runState": 2,
+		"installAddr": "成都市武侯区",
+		"comMethod": 1,
+		"comMethodName": "远程通信",
+		"commNo": "323",
+		"remark": "测试数据"
+	}]
+}

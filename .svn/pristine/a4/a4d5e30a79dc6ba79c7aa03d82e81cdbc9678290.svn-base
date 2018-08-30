@@ -1,0 +1,214 @@
+package cn.com.cdboost.collect.util;
+
+import com.google.common.collect.Range;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+/**
+ * 数学相关工具类
+ */
+public final class MathUtil {
+
+    /**
+     * 设置精度,默认保留两位小数点
+     * @param a
+     * @return
+     */
+    public static final BigDecimal setPrecision(BigDecimal a) {
+        if (a == null) {
+            return null;
+        }
+        BigDecimal temp = new BigDecimal(a.setScale(2,BigDecimal.ROUND_HALF_UP).toString());
+        return temp;
+    }
+
+    /**
+     * 设置精度,保留number位小数点
+     * @param a
+     * @param number
+     * @return
+     */
+    public static final String setPrecision(String a, int number) {
+        if (a == null || "".equals(a)) {
+            return a;
+        }
+        BigDecimal decimal = new BigDecimal(a);
+        BigDecimal temp = new BigDecimal(decimal.setScale(number,BigDecimal.ROUND_HALF_UP).toString());
+        return temp.toString();
+    }
+
+    /**
+     * 比较大小
+     * @param one
+     * @param two
+     * @return
+     */
+    public static final int compareTo(BigDecimal one, BigDecimal two) {
+        int i = one.compareTo(two);
+        return i;
+    }
+
+    /**
+     * 相除，保留2位小数
+     * @param m
+     * @param n
+     * @return
+     */
+    public static final BigDecimal divide(BigDecimal m, BigDecimal n) {
+        BigDecimal zero = BigDecimal.ZERO;
+        BigDecimal divide = m.divide(n, 2, BigDecimal.ROUND_HALF_UP);
+        return divide;
+    }
+
+    /**
+     * 相除，保留2位小数
+     * @param m
+     * @param n
+     * @return
+     */
+    public static final BigDecimal divide(Integer m, Integer n) {
+        BigDecimal a = new BigDecimal(m);
+        BigDecimal b = new BigDecimal(n);
+        BigDecimal divide = a.divide(b, 2, BigDecimal.ROUND_HALF_UP);
+        return divide;
+    }
+
+
+    /**
+     * 两个数相减，并保留2位小数
+     * @param m
+     * @param n
+     * @return
+     */
+    public static final BigDecimal sub(BigDecimal m, BigDecimal n) {
+        BigDecimal subtract = m.subtract(n);
+        BigDecimal decimal = setPrecision(subtract);
+        return decimal;
+    }
+
+    /**
+     * 将金额分转换成元对应的字符串(保留2位小数)
+     * @param payMoney
+     * @return
+     */
+    public static final String fen2yuan(String payMoney) {
+        BigDecimal temp = new BigDecimal("100");
+        BigDecimal decimal = new BigDecimal(payMoney);
+        BigDecimal result = decimal.divide(temp,2,BigDecimal.ROUND_HALF_UP);
+        return result.toString();
+    }
+
+    /**
+     * 将元转分字符串
+     * @param payMoney
+     * @return
+     */
+    public static final String yuan2Fen(String payMoney) {
+        BigDecimal temp = new BigDecimal("100");
+        BigDecimal decimal = new BigDecimal(payMoney);
+        BigDecimal result = decimal.multiply(temp).setScale(0, BigDecimal.ROUND_HALF_UP);
+        return result.toString();
+    }
+
+    /**
+     * 判断a是否在[m,n]之间
+     * @param a
+     * @param m
+     * @param n
+     * @return
+     */
+    public static boolean isBetween(BigDecimal a,BigDecimal m, BigDecimal n) {
+        Range<BigDecimal> closed = Range.closed(m, n);
+        boolean contains = closed.contains(a);
+        return contains;
+    }
+
+    /**
+     * 判断是否one是否大于等于two
+     * @param one
+     * @param two
+     * @return
+     */
+    public static boolean isGreaterEqual(BigDecimal one, BigDecimal two) {
+        int i = one.compareTo(two);
+        if (i >= 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否one是否小于two
+     * @param one
+     * @param two
+     * @return
+     */
+    public static boolean isLessThan(BigDecimal one, BigDecimal two) {
+        int i = one.compareTo(two);
+        if (i < 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断m是否小于0
+     * @param m
+     * @return
+     */
+    public static boolean isLessThanZero(BigDecimal m) {
+        BigDecimal zero = BigDecimal.ZERO;
+        int i = m.compareTo(zero);
+        if (i < 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断m是否大于0
+     * @param m
+     * @return
+     */
+    public static boolean isGreateThanZero(BigDecimal m) {
+        BigDecimal zero = BigDecimal.ZERO;
+        int i = m.compareTo(zero);
+        if (i > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否one是否等于two
+     * @param one
+     * @param two
+     * @return
+     */
+    public static boolean isEqual(BigDecimal one, BigDecimal two) {
+        int i = one.compareTo(two);
+        if (i == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 返回某数相反数
+     * @param m
+     * @return
+     */
+    public static BigDecimal negate(BigDecimal m) {
+        return m.negate();
+    }
+
+    public static void main(String[] args) {
+        //String s = setPrecision("000.325", 3);
+        System.out.println(UUID.randomUUID().toString().replace("-", ""));
+
+//        String a = "07";
+//        System.out.println(Integer.parseInt(a));
+//        System.out.println(Integer.valueOf(a));
+    }
+}

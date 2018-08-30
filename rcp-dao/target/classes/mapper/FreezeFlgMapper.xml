@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FreezeFlgMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FreezeFlg" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="con_no" property="conNo" jdbcType="CHAR" />
+    <result column="point_code" property="pointCode" jdbcType="INTEGER" />
+    <result column="comm_addr" property="commAddr" jdbcType="CHAR" />
+    <result column="freeze_flg" property="freezeFlg" jdbcType="INTEGER" />
+    <result column="freeze_date" property="freezeDate" jdbcType="DATE" />
+    <result column="group_guid" property="groupGuid" jdbcType="CHAR" />
+    <result column="dev_cno" property="devCno" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

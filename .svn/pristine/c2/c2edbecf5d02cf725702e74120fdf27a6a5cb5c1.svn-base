@@ -1,0 +1,46 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.dto.BindDeviceInfo;
+import cn.com.cdboost.collect.dto.DeviceInfo4WeChat;
+import cn.com.cdboost.collect.dto.param.DeviceRechargeSuccessParam;
+import cn.com.cdboost.collect.dto.param.WeChatAlarmParam;
+import cn.com.cdboost.collect.dto.param.WeChatBindVo;
+import cn.com.cdboost.collect.dto.param.WxSendPaySuccessParam;
+
+import java.util.List;
+import java.util.Map;
+
+public interface WeixinService {
+
+    // 根据订单号查询订单信息
+    Map<String, Object> orderQuery(String tradeNo);
+
+    // 用户第一次绑定设备时，校验并绑定设备信息
+    void validateAndBindWeChat(WeChatBindVo bindVo);
+
+    // 微信绑定设备信息
+    void bindWeChat(String meterUserNo, String deviceType, String openId, String remark);
+
+    // 根据openId和设备类型获取绑定信息列表
+    List<BindDeviceInfo> getBindInfoList(String openId, String deviceType);
+
+    DeviceInfo4WeChat queryDeviceInfo(String deviceType, String meterUserNo);
+
+    // 微信充值成功，发送微信模板消息
+    void sendWeChatPaySuccess(List<WxSendPaySuccessParam> successParams);
+
+    // 设备充值成功，发送微信模板消息
+    void sendWeChatRechargeSuccess(DeviceRechargeSuccessParam param);
+
+    // 告警发送微信模板消息
+    void sendWeChatAlarmMessage(List<WeChatAlarmParam> param);
+
+    // 微信回调通知成功，业务处理
+    void processWeChatCallback(String outTradeNo,String totalFee,String timeEnd);
+
+    // 银联回调通知成功，业务处理
+    void processUnionCallback(String outTradeNo,String totalFee,Integer payMethod);
+
+    // 获取微信access_token
+    String getAccessToken();
+}

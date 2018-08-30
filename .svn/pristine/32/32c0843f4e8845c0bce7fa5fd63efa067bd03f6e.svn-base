@@ -1,0 +1,182 @@
+package cn.com.cdboost.collect.dto.param;
+
+import java.math.BigDecimal;
+
+/**
+ * 充电桩支付创建订单参数
+ */
+public class CreateOrderParam {
+    /**
+     * 用户唯一标识
+     */
+    private String customerGuid;
+
+    /**
+     * 开启编号
+     * 支付宝，支付宝用户id
+     * 微信，微信openId
+     */
+    private String openNo;
+
+    /**
+     * 订单编号
+     */
+    private String payFlag;
+
+    /**
+     * 第三方支付金额
+     */
+    private BigDecimal payMoney;
+
+    /**
+     * 本次订单支付完成后，需要给账户余额充值的钱，活动充值时，充5元实际到账10元的场景
+     */
+    private BigDecimal accountChargeMoney;
+
+    /**
+     * 本次订单支付完成后，账户余额需要扣除的钱，月卡支付时，扣款顺序：余额->第三方支付
+     */
+    private BigDecimal accountDeductMoney;
+
+    /**
+     * 价格方案上的充值时间
+     */
+    private Integer chargingTime;
+
+    /**
+     * 价格方案上的充值类别
+     */
+    private Integer payCategory;
+
+    /**
+     * 价格方案上的充值次数
+     */
+    private Integer chargingCnt;
+
+    /**
+     * 当前时间点账户剩余金额
+     */
+    private BigDecimal remainAmount;
+
+    /**
+     * 支付场景
+     * 0、充电页面选择充电方案场景
+     * 1、月卡充值场景
+     * 2、通过活动购买页给账户余额充值场景
+     */
+    private Integer type;
+
+    /**
+     * 充值方式 1-微信 2-支付宝 3-现金
+     */
+    private Integer payWay;
+
+    /**
+     * 订单支付状态
+     */
+    private Integer payState;
+
+    public String getCustomerGuid() {
+        return customerGuid;
+    }
+
+    public void setCustomerGuid(String customerGuid) {
+        this.customerGuid = customerGuid;
+    }
+
+    public String getOpenNo() {
+        return openNo;
+    }
+
+    public void setOpenNo(String openNo) {
+        this.openNo = openNo;
+    }
+
+    public String getPayFlag() {
+        return payFlag;
+    }
+
+    public void setPayFlag(String payFlag) {
+        this.payFlag = payFlag;
+    }
+
+    public BigDecimal getPayMoney() {
+        return payMoney;
+    }
+
+    public void setPayMoney(BigDecimal payMoney) {
+        this.payMoney = payMoney;
+    }
+
+    public BigDecimal getAccountChargeMoney() {
+        return accountChargeMoney;
+    }
+
+    public void setAccountChargeMoney(BigDecimal accountChargeMoney) {
+        this.accountChargeMoney = accountChargeMoney;
+    }
+
+    public BigDecimal getAccountDeductMoney() {
+        return accountDeductMoney;
+    }
+
+    public void setAccountDeductMoney(BigDecimal accountDeductMoney) {
+        this.accountDeductMoney = accountDeductMoney;
+    }
+
+    public Integer getChargingTime() {
+        return chargingTime;
+    }
+
+    public void setChargingTime(Integer chargingTime) {
+        this.chargingTime = chargingTime;
+    }
+
+    public Integer getPayCategory() {
+        return payCategory;
+    }
+
+    public void setPayCategory(Integer payCategory) {
+        this.payCategory = payCategory;
+    }
+
+    public Integer getChargingCnt() {
+        return chargingCnt;
+    }
+
+    public void setChargingCnt(Integer chargingCnt) {
+        this.chargingCnt = chargingCnt;
+    }
+
+    public BigDecimal getRemainAmount() {
+        return remainAmount;
+    }
+
+    public void setRemainAmount(BigDecimal remainAmount) {
+        this.remainAmount = remainAmount;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Integer getPayWay() {
+        return payWay;
+    }
+
+    public void setPayWay(Integer payWay) {
+        this.payWay = payWay;
+    }
+
+    public Integer getPayState() {
+        return payState;
+    }
+
+    public void setPayState(Integer payState) {
+        this.payState = payState;
+    }
+}

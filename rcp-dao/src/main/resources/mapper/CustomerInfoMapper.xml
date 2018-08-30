@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.CustomerInfoMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.CustomerInfo" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="is_auto_sms" property="isAutoSms" jdbcType="INTEGER" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="collect_sort" property="collectSort" jdbcType="INTEGER" />
+    <result column="customer_brand" property="customerBrand" jdbcType="VARCHAR" />
+    <result column="build_no" property="buildNo" jdbcType="VARCHAR" />
+    <result column="build_name" property="buildName" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <resultMap id="customerInfoDto" type="cn.com.cdboost.collect.dto.CustomerInfoDto">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT"/>
+    <result column="create_user_name" property="createUserName" jdbcType="VARCHAR"/>
+    <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR"/>
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
+    <result column="is_auto_sms" property="isAutoSms" jdbcType="INTEGER" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="send_flag" property="sendFlag" jdbcType="INTEGER" />
+    <result column="customer_brand" property="customerBrand" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <resultMap id="customerInfoDtodownload" type="cn.com.cdboost.collect.dto.CustomerInfoDtodownload">
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT"/>
+    <result column="create_user_name" property="createUserName" jdbcType="VARCHAR"/>
+    <result column="org_name" property="orgName" jdbcType="VARCHAR"/>
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
+    <result column="send_flag" property="sendFlag" jdbcType="INTEGER" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR"/>
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL"/>
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR"/>
+    <result column="transformer_no" property="transformerNo" jdbcType="VARCHAR"/>
+    <result column="building_no" property="buildingNo" jdbcType="VARCHAR"/>
+  </resultMap>
+  <select id="queryelectConsumption" parameterType="cn.com.cdboost.collect.dto.param.ElectConsumptionParam" statementType="CALLABLE"  resultType="cn.com.cdboost.collect.dto.param.ElectConsumptionResponseParam">
+   {call PRC_W_D_Fee_statistical (
+   #{customerName,mode=IN,jdbcType=VARCHAR},
+   #{customerAddr,mode=IN,jdbcType=VARCHAR},
+   #{customerContact,mode=IN,jdbcType=VARCHAR},
+   #{id,mode=IN,jdbcType=VARCHAR},
+   #{startDate,mode=IN,jdbcType=VARCHAR},
+   #{endDate,mode=IN,jdbcType=VARCHAR},
+   #{propertyName,mode=IN,jdbcType=VARCHAR},
+   #{pageSize,mode=IN,jdbcType=VARCHAR},
+   #{pageNumber,mode=IN,jdbcType=VARCHAR},
+   #{total,mode=OUT,jdbcType=VARCHAR},
+   #{sumPower,mode=OUT,jdbcType=DECIMAL},
+   #{sumMoney,mode=OUT,jdbcType=DECIMAL}
+   )}
+  </select>
+  <!--客户档案 -->
+  <select id="query" parameterType="cn.com.cdboost.collect.dto.param.CustomerInfoQueryVo" statementType="CALLABLE"  resultMap="customerInfoDto">
+    {call PRC_W_D_CustomerInfoGet(
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{sortName,mode=IN,jdbcType=VARCHAR},
+    #{sortOrder,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+  <!--客户档案 -->
+  <select id="queryNew" parameterType="cn.com.cdboost.collect.dto.param.CustomerInfoQueryNewVo" statementType="CALLABLE"  resultMap="customerInfoDto">
+ {call PRC_W_D_CustomerInfoGet(
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{sortName,mode=IN,jdbcType=VARCHAR},
+    #{sortOrder,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{importGuid,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+  <!--新客户档案下载 -->
+  <select id="querynew" parameterType="cn.com.cdboost.collect.dto.param.CustomerInfoQueryNewVo" statementType="CALLABLE"  resultMap="customerInfoDtodownload">
+    {call PRC_W_D_CustomerInfoDown(
+    #{customerName,mode=IN,jdbcType=VARCHAR},
+    #{customerContact,mode=IN,jdbcType=VARCHAR},
+    #{customerAddr,mode=IN,jdbcType=VARCHAR},
+    #{deviceNo,mode=IN,jdbcType=VARCHAR},
+    #{meterUserNo,mode=IN,jdbcType=VARCHAR},
+    #{sortName,mode=IN,jdbcType=VARCHAR},
+    #{sortOrder,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=BIGINT},
+    #{propertyName,mode=IN,jdbcType=VARCHAR},
+    #{importGuid,mode=IN,jdbcType=VARCHAR},
+    #{pageSize,mode=IN,jdbcType=VARCHAR},
+    #{pageNumber,mode=IN,jdbcType=VARCHAR},
+    #{total,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+
+  <resultMap id="queryUserResultMap" type="cn.com.cdboost.collect.dto.QueryUserDTO">
+    <id column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR"/>
+    <result column="dict_item_name" property="dictItemName" jdbcType="VARCHAR"/>
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER"/>
+    <result column="device_no" property="electMeterNo" jdbcType="VARCHAR" />
+    <result column="pay_count" property="payCount" jdbcType="INTEGER"/>
+    <result column="pay_date" property="payDate" jdbcType="TIMESTAMP"/>
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL"/>
+    <result column="pay_model" property="payModel" jdbcType="INTEGER"/>
+    <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+    <result column="write_meter" property="writeMeter" jdbcType="VARCHAR" />
+    <result column="pay_guid" property="payGuid" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="total_amount" property="totalAmount" jdbcType="DECIMAL" />
+    <result column="amount_collect_time" property="amountCollectTime" jdbcType="TIMESTAMP" />
+    <result column="meter_total_amount" property="meterTotalAmount" jdbcType="DECIMAL" />
+    <result column="meter_pay_count" property="meterPayCount" jdbcType="INTEGER" />
+    <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
+    <result column="user_name" property="chargeUserName" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="serial_num" property="serialNum" jdbcType="VARCHAR" />
+    <result column="pay_method" property="payMethod" jdbcType="VARCHAR" />
+    <result column="local_control" property="localControl" jdbcType="INTEGER" />
+    <result column="jzq_cno" property="jzqCno" jdbcType="VARCHAR" />
+    <result column="is_on" property="isOn" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!-- 充值用户查询 -->
+  <!-- 根据条件查询充值用户信息 -->
+  <select id="queryUser" parameterType="cn.com.cdboost.collect.dto.param.RechargeUserQueryVo" resultMap="queryUserResultMap">
+    SELECT
+    a.customer_no,
+    a.customer_name,
+    a.customer_contact,
+    a.customer_addr,
+    a.property_name,
+    e.dict_item_value,
+    a.is_enabled,
+    e.dict_item_name,
+    a.org_no,
+    b.remain_amount,
+    b.cno,
+    b.is_account,
+    right(b.cno,12) as device_no,
+    b.pay_count,
+    d.pay_date,
+    d.pay_money,
+    d.pay_model,
+    d.write_meter,
+    d.pay_guid,
+    tc.meter_type,
+    tx.local_control,
+    g.is_on,
+    tx.jzq_cno,
+    b.total_amount,
+    b.amount_collect_time,
+    b.meter_total_amount,
+    b.meter_pay_count,
+    b.meter_user_no,
+    IF(d.create_user_id=0,'自助缴费',u.user_name) as user_name,
+    d.serial_num,
+    d.pay_method
+    FROM em_d_customerinfo AS a
+    INNER JOIN em_d_customerdevmap AS b ON (a.customer_no = b.customer_no)
+    INNER join em_d_devicemeterparam as tx on b.cno=tx.cno and tx.comm_point_code>0
+    INNER JOIN em_d_device_meter_config tc ON tx.param_flag = tc.param_flag
+    INNER JOIN em_s_dictitem AS e ON tx.dict_item_value=e.dict_item_value AND e.dict_code IN (1,10,11)
+    left JOIN em_d_fee_pay AS d ON ( a.customer_no=d.customer_no  and b.cno = d.cno and d.is_valid=1)
+    LEFT JOIN em_b_user AS u ON (d.create_user_id = u.id)
+    LEFT JOIN em_d_deviceinfo AS g ON tx.cno = g.cno
+    <where>
+      b.is_change=0
+      <if test="customerNo != null and customerNo != ''">
+        AND a.customer_no = #{customerNo}
+      </if>
+      <if test="cno !=null and cno != ''">
+        AND b.cno = #{cno}
+      </if>
+    </where>
+    order by d.id desc
+    limit 0,1
+  </select>
+
+  <resultMap id="queryUserPayResultMap" type="cn.com.cdboost.collect.dto.QueryUserPayDTO">
+    <id column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact"  property="customerContact" jdbcType="VARCHAR"/>
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR"/>
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="VARCHAR" />
+    <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+    <result column="cno" property="cno" jdbcType="VARCHAR"  />
+    <result column="is_account" property="isAccount" jdbcType="INTEGER" />
+    <result column="device_no" property="electMeterNo" jdbcType="VARCHAR" />
+    <result column="pay_count" property="payCount" jdbcType="INTEGER" />
+    <result column="pay_date" property="payDate" jdbcType="TIMESTAMP" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="pay_model" property="payModel" jdbcType="INTEGER" />
+    <result column="cur_tranf_rto" property="curTranfRto" jdbcType="VARCHAR" />
+    <result column="vol_tranf_rto" property="volTranfRto" jdbcType="VARCHAR" />
+    <result column="overdraft_fee" property="overdraftFee" jdbcType="DECIMAL" />
+    <result column="re_wrt_time" property="reWrtTime" jdbcType="TIMESTAMP" />
+    <result column="error_cnt" property="errorCnt" jdbcType="INTEGER"  />
+    <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+    <result column="write_meter" property="writeMeter" jdbcType="VARCHAR"  />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="queryUserPay" resultMap="queryUserPayResultMap">
+    SELECT
+    a.customer_name,
+    a.customer_no,
+    a.customer_contact,
+    a.customer_addr,
+    a.dict_item_value,
+    a.org_no,
+    e.dict_item_name,
+    b.remain_amount,
+    b.is_account,
+    c.cur_tranf_rto,
+    c.vol_tranf_rto,
+    c.overdraft_fee,
+    c.re_wrt_time,
+    c.error_cnt,
+    c.card_id,
+    tc.meter_type,
+    right(b.cno,12) device_no,
+    b.cno,
+    b.pay_count,
+    b.meter_user_no
+    FROM em_d_customerinfo AS a
+    INNER JOIN em_d_customerdevmap AS b ON(a.customer_no = b.customer_no)
+    INNER JOIN em_d_fee_acct AS c ON(b.customer_no = c.customer_no and b.cno=c.cno)
+    INNER join em_d_devicemeterparam as tx on b.cno=tx.cno and tx.comm_point_code>0
+    INNER JOIN em_d_device_meter_config tc ON tx.param_flag = tc.param_flag
+    INNER JOIN em_s_dictitem AS e ON tx.dict_item_value = e.dict_item_value AND e.dict_code IN (1,10,11)
+    WHERE a.customer_no = #{customerNo} AND b.cno = #{cno} AND b.is_change=0
+  </select>
+
+  <resultMap id="fuzzyQueryResultMap" type="cn.com.cdboost.collect.dto.response.UserFuzzyQueryInfo" >
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 用户信息模糊查询 -->
+  <select id="fuzzyQuery" parameterType="cn.com.cdboost.collect.dto.param.UserFuzzyQueryVo" resultMap="fuzzyQueryResultMap">
+    SELECT DISTINCT
+    a.customer_no,
+    a.customer_name,
+    a.customer_contact,
+    a.customer_addr,
+    a.property_name
+    FROM em_d_customerinfo AS a
+    inner join em_b_org t1  on a.org_no=t1.org_no
+    inner join em_b_org t0 on t1.level_code like CONCAT(t0.level_code,'%')
+    inner join em_b_user t on t.org_no=t0.org_no
+    <where>
+      t.id = #{userId}
+      AND a.is_enabled=1
+      <if test="customerName != null and customerName != ''">
+        AND a.customer_name LIKE CONCAT('%',#{customerName},'%')
+      </if>
+      <if test="customerContact != null and customerContact != ''">
+        AND a.customer_contact LIKE CONCAT('%',#{customerContact},'%')
+      </if>
+      <if test="customerAddr !=null and customerAddr != ''">
+        AND a.customer_addr LIKE CONCAT('%',#{customerAddr},'%')
+      </if>
+      <if test="propertyName !=null and propertyName != ''">
+        AND a.property_name LIKE CONCAT('%',#{propertyName},'%')
+      </if>
+    </where>
+    order by a.id desc
+    limit 0,20
+  </select>
+
+  <!--批量导入-->
+  <select id="importExcel2DB" parameterType="java.util.Map" statementType="CALLABLE"  resultType="Integer">
+    {call PRC_B_All_Import(
+    #{tableName,mode=IN,jdbcType=VARCHAR},
+    #{importId,mode=IN,jdbcType=VARCHAR},
+    #{status,mode=OUT,jdbcType=INTEGER})}
+  </select>
+
+  <resultMap id="buildInfoDto" type="cn.com.cdboost.collect.dto.response.BuildInfoDto" >
+    <result column="org_no" property="orgNo" jdbcType="VARCHAR" />
+    <result column="build_no" property="buildNo" jdbcType="VARCHAR" />
+    <result column="build_name" property="buildName" jdbcType="VARCHAR" />
+    <result column="total" property="houseHolds" jdbcType="BIGINT" />
+  </resultMap>
+
+  <!--按组织、楼栋分组，并统计对应楼栋的用户数-->
+  <select id="queryBuildInfo" resultMap="buildInfoDto">
+    select org_no,build_no,build_name,count(*) as total
+    from em_d_customerinfo
+    <where>
+      is_enabled=1
+      AND org_no IN
+      <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+    </where>
+     GROUP BY org_no,build_no
+  </select>
+
+  <resultMap id="mainSubDto" type="cn.com.cdboost.collect.dto.response.MainSubDto" >
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="p_meter_cno" property="pMeterCno" jdbcType="VARCHAR" />
+    <result column="meter_cno" property="meterCno" jdbcType="VARCHAR" />
+    <result column="level" property="level" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+  </resultMap>
+
+  <!--返回总表信息-->
+  <select id="queryMainSubTree" resultMap="mainSubDto">
+    SELECT
+	d.install_addr,d.device_no,m.p_meter_cno,m.meter_cno,m.`level`,org.org_no
+    FROM em_d_deviceinfo d
+    INNER JOIN (
+	  SELECT org_no,org_name
+	  FROM em_b_org
+	  WHERE level_code LIKE CONCAT('%', #{orgNo}, '%')
+    ) AS org ON d.org_no = org.org_no
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    WHERE d.device_type = #{deviceType}
+    AND m.p_meter_cno = '0';
+  </select>
+
+  <!--根据设备编号，模糊查询，返回设备相关的树的节点信息-->
+  <select id="fuzzyQueryTree" resultMap="mainSubDto">
+    SELECT d.install_addr,d.device_no,m.p_meter_cno,m.meter_cno,m.`level`,org.org_no
+    FROM em_d_deviceinfo d
+    INNER JOIN (
+	  SELECT org_no,org_name
+	  FROM em_b_org
+	  WHERE level_code LIKE CONCAT('%', #{orgNo}, '%')
+    ) AS org ON d.org_no = org.org_no
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    WHERE d.device_type = #{deviceType}
+    AND d.device_no LIKE CONCAT('%', #{deviceNo}, '%');
+  </select>
+
+  <resultMap id="customerCacheVo" type="cn.com.cdboost.collect.cache.CustomerCacheVo" >
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+  </resultMap>
+
+  <select id="queryAll" resultMap="customerCacheVo">
+    select customer_no,customer_name,customer_contact,customer_addr,property_name,org_no
+    from em_d_customerinfo;
+  </select>
+
+  <!--树形菜单上的用户模糊查询-->
+  <select id="fuzzyQueryUserInfo" parameterType="cn.com.cdboost.collect.dto.param.FuzzyQueryUserParam"
+          resultType="cn.com.cdboost.collect.dto.response.FuzzyQueryUserDto">
+    select c.customer_no AS customerNo,
+    c.customer_name AS customerName,
+    c.property_name AS propertyName,
+    c.customer_contact AS customerContact,
+    c.customer_addr AS customerAddr
+    from em_d_customerinfo c
+    <if test="isImportant != null and isImportant==1">
+      INNER JOIN em_d_customerdevmap m ON c.customer_no = m.customer_no
+      INNER JOIN em_d_devicemeterparam p ON p.cno= m.cno
+    </if>
+    <where>
+      <if test="customerName != null and customerName != ''">
+        AND c.customer_name LIKE CONCAT('%',#{customerName},'%')
+      </if>
+      <if test="propertyName != null and propertyName != ''">
+        AND c.property_name LIKE CONCAT('%',#{propertyName},'%')
+      </if>
+      <if test="customerContact != null and customerContact != ''">
+        AND c.customer_contact LIKE CONCAT('%',#{customerContact},'%')
+      </if>
+      <if test="customerAddr != null and customerAddr != ''">
+        AND c.customer_addr LIKE CONCAT('%',#{customerAddr},'%')
+      </if>
+      <if test="isImportant != null and isImportant==1">
+        AND p.is_important = 1
+      </if>
+      AND c.org_no IN
+      <foreach collection="dataOrgList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+    </where>
+  </select>
+
+</mapper>

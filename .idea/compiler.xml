@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/rcp-dubbo/src/main/java/cn/com/cdboost/collect/impl/OnOffMessageServiceImpl.java" />
+      <file url="file://$PROJECT_DIR$/rcp-dubbo/src/main/java/cn/com/cdboost/collect/impl/HistoryElectricAmountServiceImpl.java" />
+      <file url="file://$PROJECT_DIR$/rcp-appapi/src/main/java/cn/com/cdboost/collect/controller/ZTController.java" />
+      <file url="file://$PROJECT_DIR$/rcp-appapi/src/main/java/cn/com/cdboost/collect/aspect/LogAspect.java" />
+      <file url="file://$PROJECT_DIR$/rcp-web/src/test/java/cn.com.cdboost.collect/Test.java" />
+      <file url="file://$PROJECT_DIR$/rcp-web/src/main/java/cn/com/cdboost/collect/controller/RealTimeDataController.java" />
+      <file url="file://$PROJECT_DIR$/rcp-web/src/main/java/cn/com/cdboost/collect/controller/FeeOnOffController.java" />
+      <file url="file://$PROJECT_DIR$/rcp-web/src/test/java/cn.com.cdboost.collect/controller/RealTimeDataControllerTest.java" />
+      <file url="file://$PROJECT_DIR$/rcp-web/src/main/java/cn/com/cdboost/collect/controller/CustomerInfoController.java" />
+      <file url="file://$PROJECT_DIR$/rcp-service/src/main/java/cn/com/cdboost/collect/impl/DeviceInfoServiceImpl.java" />
+      <file url="file://$PROJECT_DIR$/rcp-web/src/main/java/cn/com/cdboost/collect/controller/DeviceInfoController.java" />
+      <file url="file://$PROJECT_DIR$/rcp-service/src/main/java/cn/com/cdboost/collect/impl/GenerateFileServiceImpl.java" />
+    </excludeFromCompile>
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="rcp-appapi" />
+        <module name="rcp-common" />
+        <module name="rcp-dao" />
+        <module name="rcp-dubbo" />
+        <module name="rcp-facade" />
+        <module name="rcp-service" />
+        <module name="rcp-web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="rcp-appapi" target="1.8" />
+      <module name="rcp-common" target="1.8" />
+      <module name="rcp-dao" target="1.8" />
+      <module name="rcp-dubbo" target="1.8" />
+      <module name="rcp-facade" target="1.8" />
+      <module name="rcp-service" target="1.8" />
+      <module name="rcp-system" target="1.8" />
+      <module name="rcp-web" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

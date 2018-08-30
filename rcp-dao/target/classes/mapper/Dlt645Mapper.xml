@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.Dlt645Mapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.Dlt645" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="di" property="di" jdbcType="CHAR" />
+    <result column="di_split" property="diSplit" jdbcType="CHAR" />
+    <result column="data_len" property="dataLen" jdbcType="INTEGER" />
+    <result column="data_item_len" property="dataItemLen" jdbcType="INTEGER" />
+    <result column="data_item_dec_pos" property="dataItemDecPos" jdbcType="INTEGER" />
+    <result column="gy" property="gy" jdbcType="INTEGER" />
+    <result column="di_desc" property="diDesc" jdbcType="VARCHAR" />
+  </resultMap>
+</mapper>

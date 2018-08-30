@@ -1,0 +1,67 @@
+package cn.com.cdboost.collect.dto.chargerApp;
+
+import java.math.BigDecimal;
+
+public class PriceDto {
+    private Integer priceId;
+    private Integer payCategory;
+    private String payCategoryDesc;
+    private BigDecimal money;
+    private String payDesc;
+    private Integer chargeTime;
+
+    public String getPayDesc() {
+        return payDesc;
+    }
+
+    public void setPayDesc(String payDesc) {
+        this.payDesc = payDesc;
+    }
+
+    public Integer getPriceId() {
+        return priceId;
+    }
+
+    public void setPriceId(Integer priceId) {
+        this.priceId = priceId;
+    }
+
+    public Integer getPayCategory() {
+        return payCategory;
+    }
+
+    public void setPayCategory(Integer payCategory) {
+        this.payCategory = payCategory;
+    }
+
+    public String getPayCategoryDesc() {
+        if(payCategory==1){
+            payCategoryDesc="临时用户购买时长";
+        }else if(payCategory==2){
+            payCategoryDesc="包月用户购买次数";
+        }else{
+            payCategoryDesc="一次充满";
+        }
+        return payCategoryDesc;
+    }
+
+    public void setPayCategoryDesc(String payCategoryDesc) {
+        this.payCategoryDesc = payCategoryDesc;
+    }
+
+    public BigDecimal getMoney() {
+        return money;
+    }
+
+    public void setMoney(BigDecimal money) {
+        this.money = money;
+    }
+
+    public Integer getChargeTime() {
+        return chargeTime;
+    }
+
+    public void setChargeTime(Integer chargeTime) {
+        this.chargeTime = chargeTime;
+    }
+}

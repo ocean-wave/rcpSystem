@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ReportFormMapper">
+
+
+    <resultMap id="chargeSummaryDTO" type="cn.com.cdboost.collect.dto.ChargeSummaryDTO">
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName"/>
+        <result column="property_name" jdbcType="VARCHAR" property="propertyName"/>
+        <result column="unit_price" jdbcType="DOUBLE" property="unitPrice"/>
+        <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo"/>
+        <result column="remain_amount" jdbcType="DOUBLE" property="remainAmount"/>
+        <result column="sum_remain_amount" jdbcType="DOUBLE" property="sumRemainAmount"/>
+        <result column="eq_value" jdbcType="DOUBLE" property="eqValue"/>
+        <result column="payment" jdbcType="DOUBLE" property="payment"/>
+        <result column="remain_power" jdbcType="DOUBLE" property="remainPower"/>
+        <result column="start_read_value" jdbcType="DOUBLE" property="startReadValue"/>
+        <result column="end_read_value" jdbcType="DOUBLE" property="endReadValue"/>
+        <result column="expense_money" jdbcType="DOUBLE" property="expenseMoney"/>
+        <result column="customer_brand" jdbcType="VARCHAR" property="customerBrand"/>
+        <result column="device_no" jdbcType="VARCHAR" property="deviceNo"/>
+
+    </resultMap>
+    <resultMap id="chargeDetailDTO" type="cn.com.cdboost.collect.dto.ChargeDetailDTO">
+        <result column="pay_date" jdbcType="TIMESTAMP" property="chargeTime"/>
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName"/>
+        <result column="property_name" jdbcType="VARCHAR" property="propertyName"/>
+        <result column="customer_brand" jdbcType="VARCHAR" property="customerBrand"/>
+        <result column="unit_price" jdbcType="DOUBLE" property="customerElecBill"/>
+        <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo"/>
+        <result column="payment" jdbcType="DOUBLE" property="chargeAmount"/>
+        <result column="old_remain_amount" jdbcType="DOUBLE" property="preChargeAmount"/>
+        <result column="remain_amount" jdbcType="DOUBLE" property="surplusAmount"/>
+        <result column="pay_power" jdbcType="DOUBLE" property="chargeElecAmount"/>
+        <result column="old_remain_power" jdbcType="DOUBLE" property="preChargeElecAmount"/>
+        <result column="remain_power" jdbcType="DOUBLE" property="surplusChargeElecAmount"/>
+        <result column="pay_method" jdbcType="VARCHAR" property="payType"/>
+        <result column="device_no" jdbcType="VARCHAR" property="deviceNo"/>
+    </resultMap>
+
+    <select id="queryChargeSummaryList" parameterType="cn.com.cdboost.collect.dto.param.ChargeSummaryParam"
+            statementType="CALLABLE" resultMap="chargeSummaryDTO">
+   {call PRC_W_D_ReportForPaySum(
+   #{startDate, mode=IN,jdbcType=TIMESTAMP},
+   #{endDate, mode=IN,jdbcType=TIMESTAMP},
+   #{id, mode=IN,jdbcType=BIGINT},
+   #{pageNumber, mode=IN,jdbcType=INTEGER},
+   #{pageSize, mode=IN,jdbcType=INTEGER},
+   #{rowCount, mode=OUT,jdbcType=INTEGER}
+   )}
+  </select>
+    <select id="queryChargeDetailList" parameterType="cn.com.cdboost.collect.dto.param.ChargeSummaryParam"
+            statementType="CALLABLE" resultMap="chargeDetailDTO">
+        {call PRC_W_D_ReportForPay(
+     #{startDate, mode=IN,jdbcType=TIMESTAMP},
+   #{endDate, mode=IN,jdbcType=TIMESTAMP},
+   #{id, mode=IN,jdbcType=BIGINT},
+   #{pageNumber, mode=IN,jdbcType=INTEGER},
+   #{pageSize, mode=IN,jdbcType=INTEGER},
+   #{rowCount, mode=OUT,jdbcType=INTEGER}
+        )}
+    </select>
+</mapper>

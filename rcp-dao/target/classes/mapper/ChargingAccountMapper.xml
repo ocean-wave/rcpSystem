@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingAccountMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingAccount" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="webchar_no" property="webcharNo" jdbcType="VARCHAR" />
+    <result column="pay_category" property="payCategory" jdbcType="INTEGER" />
+    <result column="day_time" property="dayTime" jdbcType="INTEGER" />
+    <result column="total_cnt" property="totalCnt" jdbcType="INTEGER" />
+    <result column="use_cnt" property="useCnt" jdbcType="INTEGER" />
+    <result column="remain_cnt" property="remainCnt" jdbcType="INTEGER" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+</mapper>

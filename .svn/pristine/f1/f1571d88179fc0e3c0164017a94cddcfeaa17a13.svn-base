@@ -1,0 +1,19 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.common.BaseService;
+import cn.com.cdboost.collect.model.ChargingPayCheme;
+
+import java.util.List;
+
+/**
+ * 充值方案信息表接口
+ */
+public interface ChargingPayChemeService extends BaseService<ChargingPayCheme> {
+    //根据项目唯一标识查询月卡充值方案
+    List<ChargingPayCheme> queryMonthSchemeList();
+
+    // 充电页面，查询价格方案
+    List<ChargingPayCheme> querySchemeList4ChargePage(String projectGuid);
+
+    List<ChargingPayCheme> querySchemeList4ActivityPage();
+}

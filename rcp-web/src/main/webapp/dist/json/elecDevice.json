@@ -1,0 +1,26 @@
+{
+	"message": "成功",
+	"total": "1",
+	"code": 1,
+	"data": [{
+		"carCategory": 1,
+		"payCategory": 1,
+		"payMoney": 100,
+		"profitable": "100",
+		"state": 0,
+		"useTime": "12",
+		"startTime": "2018-07-04 00:00:00",
+		"endTime": "2018-07-04 12:00:00",
+		"customerGuid": "4fsgtt3342314234"
+	}, {
+		"carCategory": 2,
+		"payCategory": 2,
+		"payMoney": 10,
+		"profitable": "120",
+		"state": 1,
+		"useTime": "2",
+		"startTime": "2018-07-04 00:00:00",
+		"endTime": "2018-07-04 02:00:00",
+		"customerGuid": "gtt3342314234"
+	}]
+}

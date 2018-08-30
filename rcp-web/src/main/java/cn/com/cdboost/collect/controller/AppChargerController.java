@@ -1,0 +1,1432 @@
+package cn.com.cdboost.collect.controller;
+
+import cn.com.cdboost.collect.aop.SystemControllerLog;
+import cn.com.cdboost.collect.constant.ChargeAppConstant;
+import cn.com.cdboost.collect.constant.RedisKeyConstant;
+import cn.com.cdboost.collect.dto.RegisterDto;
+import cn.com.cdboost.collect.dto.chargerApp.*;
+import cn.com.cdboost.collect.dto.chargerApp.vo.*;
+import cn.com.cdboost.collect.dto.param.EventQueryParam;
+import cn.com.cdboost.collect.dto.response.*;
+import cn.com.cdboost.collect.model.ChargingCard;
+import cn.com.cdboost.collect.model.ChargingCst;
+import cn.com.cdboost.collect.model.ChargingDevice;
+import cn.com.cdboost.collect.service.*;
+import cn.com.cdboost.collect.util.MathUtil;
+import cn.com.cdboost.collect.util.RedisUtil;
+import cn.com.cdboost.collect.vo.PageData;
+import cn.com.cdboost.collect.vo.Result;
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.collections.map.HashedMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
+import java.util.*;
+
+@Controller
+@RequestMapping(value = "/appCharger")
+public class AppChargerController {
+    private static final Logger loggger = LoggerFactory.getLogger(AppChargerController.class);
+
+    @Autowired
+    private AppChargerService appChargerService;
+    @Autowired
+    private ChargingDeviceService chargingDeviceService;
+    @Autowired
+    private AliyunSmsService aliyunSmsService;
+    @Autowired
+    private ChargingCstService chargingCstService;
+    @Autowired
+    private WxChargerPayService wxChargerPayService;
+    @Autowired
+    private ChargingWithdrawCashService chargingWithdrawCashService;
+    @Autowired
+    private ChargingCardService chargingCardService;
+    @Autowired
+    private RedisUtil redisUtil;
+
+    /**
+     * 该方法是app端通断电后，超时时间后未收到websocket通知，主动查询充电桩设备运行状态
+     * @param deviceNo
+     * @return
+     */
+    @SystemControllerLog(description = "查询充电桩运行状态")
+    @RequestMapping(value = "/queryRunState")
+    @ResponseBody
+    public String queryRunState(HttpServletResponse response,@RequestParam String deviceNo) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<Integer> result = new Result();
+        if (StringUtils.isEmpty(deviceNo)) {
+            result.error("deviceNo不能为空");
+            return JSON.toJSONString(result);
+        }
+        String deviceNumber = deviceNo.substring(0,7);
+        String port = deviceNo.substring(7,deviceNo.length());
+        ChargingDevice chargingDevice = chargingDeviceService.queryByDeviceNo(deviceNumber,port);
+        result.setData(chargingDevice.getRunState());
+        return JSON.toJSONString(result);
+    }
+
+
+    /**
+     * 获取充电页面详情
+     * @param openId
+     * @param deviceNo
+     * @return
+     */
+    @SystemControllerLog(description = "获取充电页面详情")
+    @RequestMapping(value = "/getBaseInfo")
+    @ResponseBody
+    public String getBaseInfo(HttpServletResponse response,@RequestParam Integer appType,@RequestParam String openId,@RequestParam String deviceNo){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        //实例化查询对象
+        WxBaseInfoVo wxBaseInfoVo = new WxBaseInfoVo();
+        wxBaseInfoVo.setAppType(appType);
+        wxBaseInfoVo.setDeviceNo(deviceNo);
+        wxBaseInfoVo.setOpenId(openId);
+        //查询数据
+        WxBaseInfoDto wxBaseInfoDto = appChargerService.getBaseInfoNew(wxBaseInfoVo);
+        result.setData(wxBaseInfoDto);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取实时数据
+     * @param openId
+     * @param deviceNo
+     * @return
+     */
+    @SystemControllerLog(description = "获取实时数据")
+    @RequestMapping(value = "/getChargeOnline")
+    @ResponseBody
+    public String getChargeOnline(HttpServletResponse response,
+                                  @RequestParam Integer appType,
+                                  @RequestParam String openId,
+                                  @RequestParam String deviceNo){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<ChargeOnlineDto> result = new Result();
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        if(StringUtils.isEmpty(deviceNo)){
+            result.error("deviceNo不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        //实例化查询对象
+        ChargeOnlineVo chargeOnlineVo = new ChargeOnlineVo();
+        chargeOnlineVo.setDeviceNo(deviceNo);
+        chargeOnlineVo.setAppType(appType);
+        chargeOnlineVo.setOpenId(openId);
+        //查询数据
+        ChargeOnlineDto chargeOnlineDto = appChargerService.getChargeOnline(chargeOnlineVo);
+
+        result.setData(chargeOnlineDto);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "微信充电桩发起充电")
+    @RequestMapping(value = "/charge")
+    @ResponseBody
+    public String charge(HttpServletResponse response,
+                         @RequestParam String ip ,
+                         @RequestParam String openId,
+                         @RequestParam String deviceNo,
+                         @RequestParam String priceId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        //实例化结果对象
+        Result result = new Result();
+        //判断传入参数是否正确
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        if(StringUtils.isEmpty(deviceNo)){
+            result.error("deviceNo不能为空");
+            return JSON.toJSONString(result);
+        }
+        if(StringUtils.isEmpty(priceId)){
+            result.error("priceId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        String key = RedisKeyConstant.CHARGE_ELEC_PREFIX + openId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("微信充电，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        //设置参数
+        ChargeVo chargeVo = new ChargeVo();
+        chargeVo.setDeviceNo(deviceNo);
+        chargeVo.setOpenId(openId);
+        chargeVo.setPriceId(Integer.valueOf(priceId));
+        if(!StringUtils.isEmpty(ip)){
+           chargeVo.setIp(ip);
+        }
+
+        try {
+            ChargeDto chargeDto = appChargerService.charge(chargeVo);
+            result.setData(chargeDto);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("微信充电删除key[" + key + "]");
+        }
+
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "支付宝充电桩发起充电")
+    @RequestMapping(value = "/alipayCharge")
+    @ResponseBody
+    public String alipayCharge(HttpServletResponse response,
+                         @RequestParam String alipayUserId,
+                         @RequestParam String deviceNo,
+                         @RequestParam Integer priceId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<AlipayChargeDto> result = new Result();
+        if(StringUtils.isEmpty(alipayUserId)){
+            result.error("alipayUserId不能为空");
+            return JSON.toJSONString(result);
+        }
+        if(StringUtils.isEmpty(deviceNo)){
+            result.error("deviceNo不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        String key = RedisKeyConstant.CHARGE_ELEC_PREFIX + alipayUserId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("支付宝充电，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        try {
+            AlipayChargeDto chargeDto = appChargerService.alipaycharge(alipayUserId,deviceNo,priceId);
+            result.setData(chargeDto);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("支付宝充电删除key[" + key + "]");
+        }
+
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取充电记录
+     * @param response
+     * @param openId
+     * @param type
+     * @param pageNumber
+     * @param pageSize
+     * @return
+     */
+    @SystemControllerLog(description = "获取充电记录")
+    @RequestMapping(value = "/chargeHistory")
+    @ResponseBody
+    public String chargeHistory( HttpServletResponse response,
+                                 @RequestParam Integer appType,
+                                 @RequestParam String openId,
+                                 @RequestParam Integer type,
+                                 @RequestParam Integer pageNumber,
+                                 @RequestParam Integer pageSize){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        ChargingCst chargingCst;
+        if (ChargeAppConstant.AppType.WECHAT.getType().equals(appType)) {
+            chargingCst = chargingCstService.queryByOpenId(openId);
+        } else {
+            chargingCst = chargingCstService.queryByAlipayUserId(openId);
+        }
+
+        //实例化查询对象
+        HistoryVo historyVo = new HistoryVo();
+        historyVo.setPageSize(pageSize);
+        historyVo.setPageNumber(pageNumber);
+        //设置查询参数
+        historyVo.setCustomerGuid(chargingCst.getCustomerGuid());
+        //查询数据
+        if(type == 1){
+            // 使用列表
+            List<ChargeHistoryDto> list = appChargerService.chargeHistory(historyVo);
+
+            Long total = appChargerService.queryChargeTotal(historyVo);
+            //设置返回数据
+            Map map = new HashMap();
+            map.put("list",list);
+            map.put("total",total);
+            result.setData(map);
+            return JSON.toJSONString(result);
+        } else {
+            // 充值列表
+            //查询数据
+            List<ChargeMoneyHistoryDto> chargeMoneyHistoryDtoList = appChargerService.chargeMoneyHistory(historyVo);
+            //获取记录数
+            Long total = appChargerService.queryUseRecordTotal(historyVo);
+            //设置返回数据
+            Map map = new HashMap();
+            map.put("list",chargeMoneyHistoryDtoList);
+            map.put("total",total);
+            result.setData(map);
+            return JSON.toJSONString(result);
+        }
+    }
+
+    /**
+     * 停止充电
+     * @return
+     */
+    @SystemControllerLog(description = "停止充电")
+    @RequestMapping(value = "/stopCharge")
+    @ResponseBody
+    public String stopCharge(HttpServletResponse response,@RequestParam String openId,@RequestParam String deviceNo){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
+        Result result = new Result("发送停止充电指令成功");
+        if(StringUtils.isEmpty(deviceNo)){
+            result.error("deviceNo不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        StopChargeVo stopChargeVo = new StopChargeVo();
+
+        stopChargeVo.setDeviceNo(deviceNo);
+        stopChargeVo.setOpenId(openId);
+        //停止充电操作
+        appChargerService.stopCharge(stopChargeVo);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取用户信息接口
+     * @param openId
+     * @return
+     */
+    @SystemControllerLog(description = "获取用户信息接口")
+    @RequestMapping(value = "/getCustomer")
+    @ResponseBody
+    public String getCustomer(HttpServletResponse response,@RequestParam Integer appType,@RequestParam String openId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<AppUserDto> result = new Result();
+        //判断传入参数是否正确
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        AppUserDto chargingCst = appChargerService.getAppUser(appType,openId);
+        result.setData(chargingCst);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取消息列表接口
+     * @param openId
+     * @return
+     */
+    @SystemControllerLog(description = "获取消息列表接口")
+    @RequestMapping(value = "/messageList")
+    @ResponseBody
+    public String messageList(HttpServletResponse response,
+                              @RequestParam Integer appType,
+                              @RequestParam String openId,
+                              @RequestParam Integer pageNumber,
+                              @RequestParam Integer pageSize){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        //查询数据
+        EventQueryParam param = new EventQueryParam();
+        param.setAppType(appType);
+        param.setOpenId(openId);
+        param.setPageNumber(pageNumber);
+        param.setPageSize(pageSize);
+        List<MessageDto> messageDtoList = appChargerService.alarm(param);
+
+        Map<String,Object> map = new HashedMap();
+        map.put("list",messageDtoList);
+        map.put("total",param.getTotal());
+        result.setData(map);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取曲线接口
+     * @param response
+     * @param openId
+     * @param deviceNo
+     * @return
+     */
+    @SystemControllerLog(description = "获取曲线")
+    @RequestMapping(value = "/deviceCurve")
+    @ResponseBody
+    public String deviceCurve(HttpServletResponse response, @RequestParam String openId, @RequestParam String deviceNo){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        //实例化结果对象
+        Result result = new Result();
+        //判断传入参数是否正确
+        if(StringUtils.isEmpty(openId)){
+            result.error("未传入用户ID");
+            return JSON.toJSONString(result);
+        }
+        if(StringUtils.isEmpty(deviceNo)){
+            result.error("未传入设备编号");
+            return JSON.toJSONString(result);
+        }
+        //实例化查询对象
+        ChargeOnlineVo chargeOnlineVo = new ChargeOnlineVo();
+        //设置查询参数
+        chargeOnlineVo.setDeviceNo(deviceNo);
+        chargeOnlineVo.setOpenId(openId);
+        //查询数据
+        CurveListNDto chargeOnlineDto = appChargerService.deviceCurve(openId,deviceNo);
+        //设置返回数据
+        result.setData(chargeOnlineDto);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取用户最近一次使用记录
+     * @param openId
+     * @return
+     */
+    @SystemControllerLog(description = "获取用户最近一次使用记录")
+    @RequestMapping(value = "/getLateUseRecord")
+    @ResponseBody
+    public String getLateUseRecord(HttpServletResponse response,
+                                   @RequestParam Integer appType,
+                                   @RequestParam String openId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        LastUseRecordDto lastUseRecordDto = appChargerService.getLateUseRecord(appType,openId);
+        result.setData(lastUseRecordDto);
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "获取用户充值方案选择列表")
+    @RequestMapping(value = "/chargeList")
+    @ResponseBody
+    public String chargeList(HttpServletResponse response,@RequestParam Integer appType,@RequestParam String openId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        ChargeIntecerListDto chargeIntecerListDto = appChargerService.chargeList(appType,openId);
+        result.setData(chargeIntecerListDto);
+        //查询数据
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "账户余额充值接口")
+    @RequestMapping(value = "/chargeMoney")
+    @ResponseBody
+    public String chargeMoney(HttpServletRequest request,HttpServletResponse response,
+                              @RequestParam String ip,
+                              @RequestParam String openId,
+                              @RequestParam String priceId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        //实例化结果对象
+        Result result = new Result();
+        //判断传入参数是否正确
+        if(StringUtils.isEmpty(openId)){
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if(StringUtils.isEmpty(priceId)){
+            result.error("priceId不能为空");
+            return JSON.toJSONString(result);
+        }
+        String key = RedisKeyConstant.ACTIVITY_CHARGE_PREFIX + openId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("微信余额充值，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        //查询数据
+        try {
+            ChargeIntecerDto chargeIntecerDto = appChargerService.chargeMoney(request,ip,openId,priceId);
+            result.setData(chargeIntecerDto);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("微信余额充值删除key[" + key + "]");
+        }
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "支付宝账户余额充值接口")
+    @RequestMapping(value = "/chargeMoneyByAlipay")
+    @ResponseBody
+    public String chargeMoneyByAlipay(HttpServletResponse response,
+                              @RequestParam String alipayUserId,
+                              @RequestParam String priceId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<String> result = new Result();
+        if(StringUtils.isEmpty(alipayUserId)){
+            result.error("alipayUserId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if(StringUtils.isEmpty(priceId)){
+            result.error("priceId不能为空");
+            return JSON.toJSONString(result);
+        }
+        String key = RedisKeyConstant.ACTIVITY_CHARGE_PREFIX + alipayUserId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("支付宝余额充值，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        //查询数据
+        try {
+            String tradeNo = appChargerService.chargeMoneyByAlipay(alipayUserId, priceId);
+            result.setData(tradeNo);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("支付宝余额充值删除key[" + key + "]");
+        }
+
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 充电完成弹窗接口,或者使用记录点击接口
+     * @param response
+     * @param openId
+     * @return
+     */
+    @SystemControllerLog(description = "充电完成弹窗接口")
+    @RequestMapping(value = "/chargeComplete")
+    @ResponseBody
+    public String chargeComplete(HttpServletResponse response,
+                                 @RequestParam String openId,
+                                 @RequestParam String chargeGuid){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        //实例化结果对象
+        Result result = new Result();
+        //查询数据
+        ChargeCompleteDto chargeCompleteDto = appChargerService.chargeComplete(openId,chargeGuid);
+        result.setData(chargeCompleteDto);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 详细详情
+     * @param response
+     * @param chargeGuid
+     * @param messageType
+     * @return
+     */
+    @SystemControllerLog(description = "消息详情")
+    @RequestMapping(value = "/messageDetial")
+    @ResponseBody
+    public String messageDetial(HttpServletResponse response,
+                                @RequestParam String chargeGuid,
+                                @RequestParam Integer messageType){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        //实例化结果对象
+        Result result = new Result();
+        //查询数据
+        ChargeCompleteDto chargeCompleteDto = appChargerService.chargeMessageComplete(chargeGuid,messageType);
+        result.setData(chargeCompleteDto);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 月卡购买详情页面
+     * @param response
+     * @param openId
+     * @return
+     */
+    @SystemControllerLog(description = "月卡购买详情页面接口")
+    @RequestMapping(value = "/monthlyCardDetial")
+    @ResponseBody
+    public String monthlyCardDetial(HttpServletResponse response,
+                                    @RequestParam String openId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        //实例化结果对象
+        Result<Map> result = new Result();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        List<MonthDetialDto> list = appChargerService.monthlyCardDetial(openId);
+        Map map = new HashMap();
+        map.put("list",list);
+        result.setData(map);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 月卡充值接口
+     * @param response
+     * @param openId
+     * @param priceId
+     * @return
+     */
+    @SystemControllerLog(description = "月卡充值接口")
+    @RequestMapping(value = "/monthOfCharge")
+    @ResponseBody
+    public String monthOfCharge(HttpServletResponse response,
+                                @RequestParam String openId,
+                                @RequestParam String ip,
+                                @RequestParam Integer priceId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<MonthChargeDto> result = new Result<>();
+        //判断参数是否正确
+        if (StringUtils.isEmpty(ip)) {
+            result.error("ip不能为空");
+            return JSON.toJSONString(result);
+        }
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        if (priceId==null) {
+            result.error("priceId不能为null");
+            return JSON.toJSONString(result);
+        }
+
+        String key = RedisKeyConstant.MONTH_CARD_CHARGE_PREFIX + openId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("微信余额充值，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        //调用充值接口获取下单参数
+        try {
+            MonthChargeDto monthChargeDto= appChargerService.monthOfCharge(openId,ip,priceId);
+            result.setData(monthChargeDto);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("微信月卡充值删除key[" + key + "]");
+        }
+
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "支付宝月卡充值接口")
+    @RequestMapping(value = "/monthOfChargeByAlipay")
+    @ResponseBody
+    public String monthOfChargeByAlipay(HttpServletResponse response,
+                                @RequestParam String alipayUserId,
+                                @RequestParam Integer priceId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<MonthChargeDto4Alipay> result = new Result<>();
+        if (StringUtils.isEmpty(alipayUserId)) {
+            result.error("alipayUserId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        String key = RedisKeyConstant.MONTH_CARD_CHARGE_PREFIX + alipayUserId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("支付宝余额充值，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        try {
+            MonthChargeDto4Alipay dto = appChargerService.monthOfChargeByAlipay(alipayUserId, priceId);
+            result.setData(dto);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("支付宝月卡充值删除key[" + key + "]");
+        }
+
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 获取验证码接口
+     * @param response
+     * @param phoneNumber
+     * @return
+     */
+    @SystemControllerLog(description = "获取手机短信验证码接口")
+    @RequestMapping(value = "/getVerificationCode")
+    @ResponseBody
+    public String getVerificationCode(HttpServletResponse response,
+                                      @RequestParam String phoneNumber,
+                                      @RequestParam Integer appType,
+                                      @RequestParam String openId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<Map> result = new Result<>();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        //获取用户
+        ChargingCst chargingCst;
+        if (ChargeAppConstant.AppType.WECHAT.getType().equals(appType)) {
+            chargingCst = chargingCstService.queryByOpenId(openId);
+        } else {
+            chargingCst = chargingCstService.queryByAlipayUserId(openId);
+        }
+
+        if (chargingCst == null) {
+            if (StringUtils.isEmpty(phoneNumber)) {
+                result.error("phoneNumber不能为空");
+                return JSON.toJSONString(result);
+            }
+
+            // 新用户注册,发送验证码
+            aliyunSmsService.sendSmsCode(phoneNumber,openId);
+        } else {
+            // 修改手机号,发送验证码
+            aliyunSmsService.sendSmsCode(chargingCst.getCustomerContact(),openId);
+        }
+
+        Map map = new HashMap();
+        map.put("state",1);
+        map.put("stateDesc","短信验证码发送成功");
+        result.setData(map);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 手机短信注册
+     * @param response
+     * @param openId
+     * @param phoneNumber
+     * @param verificationCode
+     * @return
+     */
+    @SystemControllerLog(description = "手机短信注册")
+    @RequestMapping(value = "/register")
+    @ResponseBody
+    public String register(HttpServletResponse response,
+                           @RequestParam Integer appType,
+                           @RequestParam String openId,
+                           @RequestParam String nickName,
+                           @RequestParam String phoneNumber,
+                           @RequestParam String verificationCode){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<RegisterDto> result = new Result<>();
+        if (StringUtils.isEmpty(phoneNumber)) {
+            result.error("phoneNumber不能为空");
+            return JSON.toJSONString(result);
+        }
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        if (StringUtils.isEmpty(nickName)) {
+            result.error("nickName不能为空");
+            return JSON.toJSONString(result);
+        }
+        if (StringUtils.isEmpty(verificationCode)) {
+            result.error("verificationCode不能为空");
+            return JSON.toJSONString(result);
+        }
+        //注册用户
+        appChargerService.register(appType,openId,phoneNumber,nickName,verificationCode);
+        RegisterDto dto = new RegisterDto();
+        dto.setIsSuccess(1);
+        dto.setIsSuccessDesc("注册成功");
+        result.setData(dto);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 用户是否接收短信
+     * @param response
+     * @param openId
+     * @param isReceiveSms
+     * @return
+     */
+    @SystemControllerLog(description = "用户是否接收短信")
+    @RequestMapping(value = "/isReceiveSms")
+    @ResponseBody
+    public String isReceiveSms(HttpServletResponse response,
+                               @RequestParam Integer appType,
+                               @RequestParam String openId,
+                               @RequestParam Integer isReceiveSms){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result<>("修改成功");
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        //查询数据
+        Integer isSuccess = appChargerService.isReceiveSms(appType,openId,isReceiveSms);
+        if(isSuccess==0){
+            result.error("修改失败");
+            return JSON.toJSONString(result);
+        }
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 用户修改绑定的手机号
+     * @param response
+     * @param phoneNumber
+     * @param verificationCode
+     * @return
+     */
+    @SystemControllerLog(description = "用户修改绑定的手机号")
+    @RequestMapping(value = "/updatePhoneNumber")
+    @ResponseBody
+    public String updatePhoneNumber(HttpServletResponse response,
+                                    @RequestParam Integer appType,
+                                    @RequestParam String openId,
+                                    @RequestParam String phoneNumber,
+                                    @RequestParam String verificationCode){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<RegisterDto> result = new Result<>();
+        if (StringUtils.isEmpty(phoneNumber)) {
+            result.error("phoneNumber不能为空");
+            return JSON.toJSONString(result);
+        }
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+        if (StringUtils.isEmpty(verificationCode)) {
+            result.error("verificationCode不能为空");
+            return JSON.toJSONString(result);
+        }
+        //修改用户手机号
+        RegisterDto registerDto = appChargerService.updatePhoneNumber(appType,openId,phoneNumber,verificationCode);
+        result.setData(registerDto);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "提现页面相关信息查询")
+    @RequestMapping(value = "/withdrawCashInfo")
+    @ResponseBody
+    public String withdrawCashInfo(HttpServletResponse response, @RequestParam Integer appType,@RequestParam String openId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<WithdrawCashInfo> result = new Result<>();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        WithdrawCashInfo withdrawCashInfo = appChargerService.queryCashInfo(appType,openId);
+        result.setData(withdrawCashInfo);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "用户提现接口")
+    @RequestMapping(value = "/withdrawCash")
+    @ResponseBody
+    public String withdrawCash(HttpServletResponse response, HttpServletRequest request,
+                               @RequestParam String guid,
+                               @RequestParam String openId,
+                               @RequestParam BigDecimal amount){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result<>();
+
+        if (StringUtils.isEmpty(guid)) {
+            result.error("guid不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        BigDecimal one = BigDecimal.ONE;
+        BigDecimal two = BigDecimal.valueOf(20000);
+        boolean between = MathUtil.isBetween(amount, one, two);
+        if (!between) {
+            result.error("提现金额必须是1-20000之间");
+            return JSON.toJSONString(result);
+        }
+
+        String key = RedisKeyConstant.WECHAT_CASH_PREFIX + openId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("微信提现，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        try {
+            Result temp = wxChargerPayService.withdrawCash(guid,openId, amount, request);
+            BeanUtils.copyProperties(temp,result);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("微信提现删除key[" + key + "]");
+        }
+
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "支付宝用户提现接口")
+    @RequestMapping(value = "/alipayWithdrawCash")
+    @ResponseBody
+    public String alipayWithdrawCash(HttpServletResponse response,
+                                     @RequestParam String guid,
+                                     @RequestParam String alipayUserId,
+                                     @RequestParam BigDecimal amount){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result<>();
+
+        if (StringUtils.isEmpty(guid)) {
+            result.error("guid不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(alipayUserId)) {
+            result.error("alipayUserId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        BigDecimal one = new BigDecimal("0.1");
+        BigDecimal two = BigDecimal.valueOf(20000);
+        boolean between = MathUtil.isBetween(amount, one, two);
+        if (!between) {
+            result.error("支付宝提现金额必须是0.1-20000之间");
+            return JSON.toJSONString(result);
+        }
+
+        String key = RedisKeyConstant.ALIPAY_CASH_PREFIX + alipayUserId;
+        String value = redisUtil.get(key, "-1");
+        if (!"-1".equals(value)) {
+            loggger.info("支付宝提现，重复请求不处理");
+            result.error("请求过于频繁，请稍后再试");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = redisUtil.set(key, "1", 5);
+        if (flag) {
+            loggger.info("redis 设置key[" + key + "]成功");
+        }
+
+        try {
+            Result temp = wxChargerPayService.alipayWithdrawCash(guid,alipayUserId,amount);
+            BeanUtils.copyProperties(temp,result);
+        } finally {
+            redisUtil.del(key);
+            loggger.info("支付宝提现删除key[" + key + "]");
+        }
+
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "提现流水记录分页查询")
+    @RequestMapping(value = "/queryWithdrawCashFlow")
+    @ResponseBody
+    public String queryWithdrawCashFlow(HttpServletResponse response,
+                                        @RequestParam Integer appType,
+                                        @RequestParam String openId,
+                                        @RequestParam Integer pageNumber,
+                                        @RequestParam Integer pageSize){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        Map<String, Object> map = chargingWithdrawCashService.queryCashFlow(appType,openId, pageNumber, pageSize);
+        result.setData(map);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "绑定IC卡时，发送短信验证码")
+    @RequestMapping(value = "/sendSms4BindIcCard")
+    @ResponseBody
+    public String sendSms4BindIcCard(HttpServletResponse response,
+                                        @RequestParam Integer appType,
+                                        @RequestParam String openId,
+                                        @RequestParam String cardId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        ChargingCard chargingCard = chargingCardService.queryByCardId(cardId);
+        if (chargingCard == null) {
+            result.error("IC卡卡号不存在");
+            return JSON.toJSONString(result);
+        }
+
+        String customerGuid = chargingCard.getCustomerGuid();
+        if (!StringUtils.isEmpty(customerGuid)) {
+            result.error("此IC卡已经被绑定");
+            return JSON.toJSONString(result);
+        }
+
+        // 查询用户账户中手机号
+        ChargingCst chargingCst;
+        if (ChargeAppConstant.AppType.WECHAT.getType().equals(appType)) {
+            chargingCst = chargingCstService.queryByOpenId(openId);
+        } else {
+            chargingCst = chargingCstService.queryByAlipayUserId(openId);
+        }
+
+        aliyunSmsService.sendSmsCode(chargingCst.getCustomerContact(), chargingCst.getCustomerGuid());
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "IC卡绑定操作")
+    @RequestMapping(value = "/bindIcCard")
+    @ResponseBody
+    public String bindIcCard(HttpServletResponse response,
+                                     @RequestParam Integer appType,
+                                     @RequestParam String openId,
+                                     @RequestParam String cardId,
+                                     @RequestParam String smsCode,
+                                     @RequestParam String userPhone){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result("绑定成功");
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(smsCode)) {
+            result.error("smsCode不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        ChargingCst chargingCst;
+        if (ChargeAppConstant.AppType.WECHAT.getType().equals(appType)) {
+            chargingCst = chargingCstService.queryByOpenId(openId);
+        } else {
+            chargingCst = chargingCstService.queryByAlipayUserId(openId);
+        }
+
+        ChargingCard chargingCard = chargingCardService.queryByCardId(cardId);
+        if (chargingCard == null) {
+            result.error("IC卡卡号不存在");
+            return JSON.toJSONString(result);
+        }
+
+        Integer cardState = chargingCard.getCardState();
+        if (ChargeAppConstant.ICcardStatus.DISABLE.getStatus().equals(cardState)) {
+            result.error("此IC卡已经被停用");
+            return JSON.toJSONString(result);
+        } else if (ChargeAppConstant.ICcardStatus.SUSPEND.getStatus().equals(cardState)) {
+            result.error("此IC卡已经被挂失");
+            return JSON.toJSONString(result);
+        }
+
+        String customerGuid = chargingCard.getCustomerGuid();
+        if (!StringUtils.isEmpty(customerGuid)) {
+            if (!chargingCst.getCustomerGuid().equals(customerGuid)) {
+                result.error("此IC卡已经被他人绑定");
+                return JSON.toJSONString(result);
+            } else {
+                result.error("你已经绑定此IC卡，请勿重复绑定");
+                return JSON.toJSONString(result);
+            }
+        }
+
+        // 校验验证码
+        aliyunSmsService.verifySmsCode(chargingCst.getCustomerContact(),smsCode);
+
+        // 真正的绑定操作,将使用者的手机号绑定到IC卡上
+        appChargerService.bindIcCard(chargingCard,chargingCst.getCustomerGuid(),userPhone);
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "解除绑定或者挂失IC卡时，发送短信验证码")
+    @RequestMapping(value = "/sendSms4UnBindOrSuspendIcCard")
+    @ResponseBody
+    public String sendSms4UnBindOrSuspendIcCard(HttpServletResponse response, @RequestParam String cardId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        ChargingCard chargingCard = chargingCardService.queryByCardId(cardId);
+        if (chargingCard == null) {
+            result.error("IC卡卡号不存在");
+            return JSON.toJSONString(result);
+        }
+        String customerGuid = chargingCard.getCustomerGuid();
+        if (StringUtils.isEmpty(customerGuid)) {
+            result.error("IC卡未被绑定");
+            return JSON.toJSONString(result);
+        }
+
+        ChargingCst chargingCst = chargingCstService.queryByCustomerGuid(customerGuid);
+        // 发送验证码
+        aliyunSmsService.sendSmsCode(chargingCst.getCustomerContact(), chargingCst.getCustomerGuid());
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "解除绑定IC卡操作")
+    @RequestMapping(value = "/unBindIcCard")
+    @ResponseBody
+    public String unBindIcCard(HttpServletResponse response,
+                               @RequestParam String cardId,
+                               @RequestParam String smsCode,
+                               @RequestParam Integer isReserve,
+                               BigDecimal amount){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result("解绑成功");
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(smsCode)) {
+            result.error("smsCode不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (isReserve == 1) {
+            if (amount == null) {
+                result.error("预留金额amount不能为null");
+                return JSON.toJSONString(result);
+            }
+
+            boolean greateThanZero = MathUtil.isGreateThanZero(amount);
+            if (!greateThanZero) {
+                result.error("预留金额amount必须大于0");
+                return JSON.toJSONString(result);
+            }
+        }
+
+        ChargingCard chargingCard = chargingCardService.queryByCardId(cardId);
+        if (chargingCard == null) {
+            result.error("IC卡卡号不存在");
+            return JSON.toJSONString(result);
+        }
+        String customerGuid = chargingCard.getCustomerGuid();
+        if (StringUtils.isEmpty(customerGuid)) {
+            result.error("IC卡未被绑定");
+            return JSON.toJSONString(result);
+        }
+        ChargingCst chargingCst = chargingCstService.queryByCustomerGuid(customerGuid);
+
+        // 校验验证码
+        aliyunSmsService.verifySmsCode(chargingCst.getCustomerContact(),smsCode);
+
+        // 真正解绑操作
+        appChargerService.unBindIcCard(chargingCard,customerGuid,isReserve,amount);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "挂失IC卡操作")
+    @RequestMapping(value = "/suspendIcCard")
+    @ResponseBody
+    public String suspendIcCard(HttpServletResponse response,
+                               @RequestParam Integer appType,
+                               @RequestParam String openId,
+                               @RequestParam String cardId,
+                               @RequestParam String smsCode){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result("挂失成功");
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(smsCode)) {
+            result.error("smsCode不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        ChargingCst chargingCst;
+        if (ChargeAppConstant.AppType.WECHAT.getType().equals(appType)) {
+            chargingCst = chargingCstService.queryByOpenId(openId);
+        } else {
+            chargingCst = chargingCstService.queryByAlipayUserId(openId);
+        }
+
+        ChargingCard chargingCard = chargingCardService.queryByCardId(cardId);
+        if (chargingCard == null) {
+            result.error("IC卡卡号不存在");
+            return JSON.toJSONString(result);
+        }
+        String customerGuid = chargingCard.getCustomerGuid();
+        if (StringUtils.isEmpty(customerGuid)) {
+            result.error("IC卡未被绑定");
+            return JSON.toJSONString(result);
+        }
+        if (!customerGuid.equals(chargingCst.getCustomerGuid())) {
+            result.error("请勿挂失他人IC卡");
+            return JSON.toJSONString(result);
+        }
+
+        // 真正挂失操作
+        chargingCard.setCardState(ChargeAppConstant.ICcardStatus.SUSPEND.getStatus());
+        chargingCard.setUpdateTime(new Date());
+        chargingCardService.updateByPrimaryKeySelective(chargingCard);
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "查询用户所绑定的IC卡列表")
+    @RequestMapping(value = "/queryIcCardList")
+    @ResponseBody
+    public String queryIcCardList(HttpServletResponse response,
+                                  @RequestParam Integer appType,
+                                  @RequestParam String openId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        ChargingCst chargingCst;
+        if (ChargeAppConstant.AppType.WECHAT.getType().equals(appType)) {
+            chargingCst = chargingCstService.queryByOpenId(openId);
+        } else {
+            chargingCst = chargingCstService.queryByAlipayUserId(openId);
+        }
+
+        List<ChargingCard> chargingCards = chargingCardService.queryByCustomerGuid(chargingCst.getCustomerGuid());
+
+        IcCardListResponse listResponse = new IcCardListResponse();
+        listResponse.setRemainAmount(chargingCst.getRemainAmount());
+        if (CollectionUtils.isEmpty(chargingCards)) {
+            List<IcCardListVo> list = new ArrayList<>();
+            listResponse.setList(list);
+        } else {
+            List<IcCardListVo> list = new ArrayList<>();
+            for (ChargingCard chargingCard : chargingCards) {
+                IcCardListVo listVo = new IcCardListVo();
+                listVo.setCardId(chargingCard.getCardId());
+                listVo.setRemainAmount(chargingCard.getRemainAmount());
+                list.add(listVo);
+            }
+            listResponse.setList(list);
+        }
+
+        result.setData(listResponse);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "微信对IC卡充值")
+    @RequestMapping(value = "/chargeIcCardByWeChat")
+    @ResponseBody
+    public String chargeIcCardByWeChat(HttpServletResponse response,
+                                       @RequestParam String openId,
+                                       @RequestParam String cardId,
+                                       @RequestParam BigDecimal amount,
+                                       @RequestParam String ip){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = MathUtil.isBetween4LeftOpen(amount, BigDecimal.ZERO, new BigDecimal("300"));
+        if (!flag) {
+            result.error("IC卡充值金额amount必须大于0小于等于300");
+            return JSON.toJSONString(result);
+        }
+
+        Map<String, String> payMap = appChargerService.chargeIcCardByWeChat(openId, cardId, amount, ip);
+        result.setData(payMap);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "支付宝对IC卡充值")
+    @RequestMapping(value = "/chargeIcCardByAliPay")
+    @ResponseBody
+    public String chargeIcCardByAliPay(HttpServletResponse response,
+                                       @RequestParam String openId,
+                                       @RequestParam String cardId,
+                                       @RequestParam BigDecimal amount){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result result = new Result();
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        boolean flag = MathUtil.isBetween4LeftOpen(amount, BigDecimal.ZERO, new BigDecimal("300"));
+        if (!flag) {
+            result.error("IC卡充值金额amount必须大于0小于等于300");
+            return JSON.toJSONString(result);
+        }
+
+        String tradeNo = appChargerService.chargeIcCardByAlipay(openId, cardId, amount);
+        result.setData(tradeNo);
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "查询IC卡相关信息")
+    @RequestMapping(value = "/queryIcCardInfo")
+    @ResponseBody
+    public String queryIcCardInfo(HttpServletResponse response, @RequestParam String cardId){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<IcCardInfo> result = new Result();
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        IcCardInfo cardInfo = appChargerService.queryIcCardInfo(cardId);
+        result.setData(cardInfo);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "分页查询IC卡使用信息列表")
+    @RequestMapping(value = "/queryIcCardUseInfoList")
+    @ResponseBody
+    public String queryIcCardUseInfoList(HttpServletResponse response,
+                                         @RequestParam String cardId,
+                                         @RequestParam Integer appType,
+                                         @RequestParam String openId,
+                                         @RequestParam Integer pageNumber,
+                                         @RequestParam Integer pageSize){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<PageData<IcCardUseInfo>> result = new Result();
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        if (StringUtils.isEmpty(openId)) {
+            result.error("openId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        PageData<IcCardUseInfo> pageData = appChargerService.queryIcCardUseInfo(cardId,appType,openId, pageNumber, pageSize);
+        result.setData(pageData);
+        return JSON.toJSONString(result);
+    }
+
+
+    @SystemControllerLog(description = "分页查询IC卡支付信息列表")
+    @RequestMapping(value = "/queryIcCardPayInfoList")
+    @ResponseBody
+    public String queryIcCardPayInfoList(HttpServletResponse response,
+                                         @RequestParam String cardId,
+                                         @RequestParam Integer appType,
+                                         @RequestParam String openId,
+                                         @RequestParam Integer pageNumber,
+                                         @RequestParam Integer pageSize){
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Result<PageData<IcCardPayInfo>> result = new Result();
+        if (StringUtils.isEmpty(cardId)) {
+            result.error("cardId不能为空");
+            return JSON.toJSONString(result);
+        }
+
+        PageData<IcCardPayInfo> pageData = appChargerService.queryIcCardPayInfo(cardId,appType,openId, pageNumber, pageSize);
+        result.setData(pageData);
+        return JSON.toJSONString(result);
+    }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.FeeChangeIcCardMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeeChangeIcCard" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="old_card_id" property="oldCardId" jdbcType="VARCHAR" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="change_remark" property="changeRemark" jdbcType="VARCHAR" />
+    <result column="change_user_id" property="changeUserId" jdbcType="BIGINT" />
+    <result column="change_time" property="changeTime" jdbcType="TIMESTAMP" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="repet_type" property="repetType" jdbcType="INTEGER" />
+    <result column="repet_total_amount" property="repetTotalAmount" jdbcType="DECIMAL" />
+    <result column="repet_remain_amount" property="repetRemainAmount" jdbcType="DECIMAL" />
+    <result column="repet_pay_count" property="repetPayCount" jdbcType="INTEGER" />
+    <result column="repet_m_total_amount" property="repetMTotalAmount" jdbcType="DECIMAL" />
+    <result column="repet_m_remain_amount" property="repetMRemainAmount" jdbcType="INTEGER" />
+  </resultMap>
+
+
+  <resultMap id="feeChangeICCardInfo" type="cn.com.cdboost.collect.dto.FeeChangeICCardInfo" >
+    <result column="old_card_id" property="oldCardId" jdbcType="VARCHAR" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="change_remark" property="changeRemark" jdbcType="VARCHAR" />
+    <result column="user_name" property="changeUserName" jdbcType="VARCHAR" />
+    <result column="change_time" property="changeTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <select id="queryChangeICCardByCustomerNo" resultMap="feeChangeICCardInfo">
+    SELECT d.card_id,d.old_card_id,d.change_remark,d.change_time,u.user_name
+    FROM em_d_fee_changeiccard d,em_b_user u
+    WHERE d.cno = #{cno}
+    AND d.customer_no = #{customerNo,jdbcType=VARCHAR}
+    AND d.change_user_id = u.id ORDER BY d.id;
+  </select>
+
+  <!-- 重新开户 -->
+  <select id="reAdd" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.param.CustomerReAcctVo" resultMap="BaseResultMap">
+    {call PRC_W_D_CustomerReAcct(
+    #{customerNo, mode=IN, jdbcType=VARCHAR},
+    #{cno, mode=IN, jdbcType=VARCHAR},
+    #{payGuid, mode=IN, jdbcType=VARCHAR},
+    #{payment, mode=IN, jdbcType=VARCHAR},
+    #{payMoney, mode=IN, jdbcType=VARCHAR},
+    #{initAmount, mode=IN, jdbcType=VARCHAR},
+    #{userId, mode=IN, jdbcType=INTEGER},
+    #{result, mode=OUT, jdbcType=INTEGER}
+    )}
+  </select>
+</mapper>

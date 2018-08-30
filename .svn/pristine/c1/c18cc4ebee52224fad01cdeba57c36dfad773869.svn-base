@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.TmpCustomerInfoMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.TmpCustomerInfo" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+    <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+    <result column="customer_addr" property="customerAddr" jdbcType="VARCHAR" />
+    <result column="property_name" property="propertyName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="device_type" property="deviceType" jdbcType="CHAR" />
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="comm_setup_sn" property="commSetupSn" jdbcType="INTEGER" />
+    <result column="comm_point_code" property="commPointCode" jdbcType="INTEGER" />
+    <result column="comm_rule" property="commRule" jdbcType="INTEGER" />
+    <result column="jzq_no" property="jzqNo" jdbcType="VARCHAR" />
+    <result column="collect_no" property="collectNo" jdbcType="VARCHAR" />
+    <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+    <result column="alarm_threshold" property="alarmThreshold" jdbcType="DECIMAL" />
+    <result column="import_id" property="importId" jdbcType="VARCHAR" />
+    <result column="is_err" property="isErr" jdbcType="INTEGER" />
+    <result column="err_info" property="errInfo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="jzq_cno" property="jzqCno" jdbcType="VARCHAR" />
+    <result column="comm_port" property="commPort" jdbcType="INTEGER" />
+    <result column="init_amount" property="initAmount" jdbcType="DECIMAL" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="ratio" property="ratio" jdbcType="INTEGER" />
+    <result column="dict_item_value" property="dictItemValue" jdbcType="VARCHAR" />
+    <result column="meter_type" property="meterType" jdbcType="INTEGER" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="dict_item_name" property="dictItemName" jdbcType="VARCHAR" />
+    <result column="collect_dev_type" property="collectDevType" jdbcType="INTEGER" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="transformer_no" property="transformerNo" jdbcType="VARCHAR" />
+    <result column="building_no" property="buildingNo" jdbcType="VARCHAR" />
+    <result column="customer_mark" property="customerMark" jdbcType="INTEGER" />
+  </resultMap>
+</mapper>

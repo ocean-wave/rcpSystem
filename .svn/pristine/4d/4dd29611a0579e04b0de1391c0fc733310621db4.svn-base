@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.MeterDayPowerMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.MeterDayPower" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+    <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    <result column="cno" property="cno" jdbcType="VARCHAR" />
+    <result column="last_flnum" property="lastFlnum" jdbcType="INTEGER" />
+    <result column="last_read_value" property="lastReadValue" jdbcType="DECIMAL" />
+    <result column="last_read_value1" property="lastReadValue1" jdbcType="DECIMAL" />
+    <result column="last_read_value2" property="lastReadValue2" jdbcType="DECIMAL" />
+    <result column="last_read_value3" property="lastReadValue3" jdbcType="DECIMAL" />
+    <result column="last_read_value4" property="lastReadValue4" jdbcType="DECIMAL" />
+    <result column="last_collect_time" property="lastCollectTime" jdbcType="TIMESTAMP" />
+    <result column="read_flnum" property="readFlnum" jdbcType="INTEGER" />
+    <result column="read_value1" property="readValue1" jdbcType="DECIMAL" />
+    <result column="read_value2" property="readValue2" jdbcType="DECIMAL" />
+    <result column="read_value3" property="readValue3" jdbcType="DECIMAL" />
+    <result column="read_value4" property="readValue4" jdbcType="DECIMAL" />
+    <result column="read_value" property="readValue" jdbcType="DECIMAL" />
+    <result column="read_collect_time" property="readCollectTime" jdbcType="TIMESTAMP" />
+    <result column="day_eq_value1" property="dayEqValue1" jdbcType="DECIMAL" />
+    <result column="day_eq_value2" property="dayEqValue2" jdbcType="DECIMAL" />
+    <result column="day_eq_value3" property="dayEqValue3" jdbcType="DECIMAL" />
+    <result column="day_eq_value4" property="dayEqValue4" jdbcType="DECIMAL" />
+    <result column="day_eq_value" property="dayEqValue" jdbcType="DECIMAL" />
+    <result column="calc_data" property="calcData" jdbcType="DATE" />
+    <result column="calc_data_type" property="calcDataType" jdbcType="INTEGER" />
+    <result column="create_user_id" property="createUserId" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+
+  <resultMap id="villageList" type="cn.com.cdboost.collect.dto.VillageElectricityDto">
+      <result column="org_no" property="orgNo" jdbcType="INTEGER" />
+      <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+      <result column="ammeter_num" property="ammeterNum" jdbcType="INTEGER" />
+      <result column="socket_electricity" property="socketElectricity" jdbcType="DECIMAL" />
+      <result column="air_electricity" property="airElectricity" jdbcType="DECIMAL" />
+      <result column="power_electricity" property="powerElectricity" jdbcType="DECIMAL" />
+      <result column="special_electricity" property="specialElectricity" jdbcType="DECIMAL" />
+      <!--<result column="villageAddr" property="villageAddr" jdbcType="VARCHAR" />-->
+      <result column="platform_area_num" property="platformAreaNum" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="queryVillageList" parameterType="cn.com.cdboost.collect.dto.param.EnergyEfficiencyQueryVo"
+          statementType="CALLABLE" resultMap="villageList">
+    {call PRC_W_D_efficiency_static(
+     #{userId, mode=IN,jdbcType=INTEGER},
+     #{beginDate, mode=IN,jdbcType=TIMESTAMP},
+     #{endDate, mode=IN,jdbcType=TIMESTAMP},
+     #{orgName, mode=IN,jdbcType=VARCHAR},
+     #{pageSize, mode=IN,jdbcType=INTEGER},
+     #{pageNumber, mode=IN,jdbcType=INTEGER},
+     #{rowCount, mode=OUT,jdbcType=INTEGER}
+     )}
+  </select>
+
+  <resultMap id="electricCountMap" type="cn.com.cdboost.collect.dto.ElectricChartDto">
+      <result column="xData" property="xData" jdbcType="VARCHAR" />
+      <result column="last_data" property="yLastData" jdbcType="DECIMAL" />
+      <result column="curr_data" property="yThisData" jdbcType="DECIMAL" />
+  </resultMap>
+<select id="electricCount" parameterType="cn.com.cdboost.collect.dto.param.ChartsQueryVo"
+        statementType="CALLABLE" resultMap="electricCountMap">
+  {call PRC_W_D_efficiency_analy(
+     #{userId, mode=IN,jdbcType=INTEGER},
+     #{orgNo, mode=IN,jdbcType=INTEGER},
+     #{model, mode=IN,jdbcType=INTEGER}
+    )}
+</select>
+
+    <resultMap id="deviceDetailListMap" type="cn.com.cdboost.collect.dto.EnergyEfficiencyDetailDto">
+        <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+        <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+        <result column="cno" property="meterNo" jdbcType="VARCHAR" />
+        <result column="power" property="power" jdbcType="DECIMAL" />
+        <result column="meter_user_no" property="meterUserNo" jdbcType="VARCHAR" />
+    </resultMap>
+    <select id="queryDeviceDetail" parameterType="cn.com.cdboost.collect.dto.param.EnergyEfficiencyQueryVo"
+            statementType="CALLABLE"  resultMap="deviceDetailListMap">
+        {call PRC_W_D_efficiency_categorydetail(
+         #{beginDate, mode=IN,jdbcType=TIMESTAMP},
+         #{endDate, mode=IN,jdbcType=TIMESTAMP},
+         #{orgNo, mode=IN,jdbcType=INTEGER},
+         #{usePowerType, mode=IN,jdbcType=INTEGER},
+         #{pageSize, mode=IN,jdbcType=INTEGER},
+         #{pageNumber, mode=IN,jdbcType=INTEGER},
+         #{rowCount, mode=OUT,jdbcType=INTEGER}
+         )}
+    </select>
+
+  <select id="queryLastPowerDetail" parameterType="cn.com.cdboost.collect.dto.param.MeterDayPowerQueryVo"
+          resultType="cn.com.cdboost.collect.dto.EnergyEfficiencyDetailListDto">
+    SELECT
+        t.calc_data time,
+        sum(t.day_eq_value2) readValue2,
+        sum(t.day_eq_value3) readValue3,
+        sum(t.day_eq_value4) readValue4,
+        sum(t.day_eq_value) readValue
+    FROM
+        em_d_meter_day_power t
+    LEFT JOIN em_d_customerinfo t1 ON t.customer_no = t1.customer_no
+    LEFT JOIN em_d_customerdevmap t3 ON t3.customer_no=t.customer_no AND t.meter_user_no = t3.meter_user_no
+    WHERE  t.calc_data_type=0  AND t3.elec_type=#{usePowerType} AND t.meter_user_no=#{meterUserNo}
+    AND t.calc_data&lt;=#{countDate}
+    GROUP BY t.calc_data ORDER BY t.calc_data DESC LIMIT 15
+  </select>
+
+    <select id="queryMeterNum" parameterType="cn.com.cdboost.collect.dto.param.EnergyEfficiencyQueryVo" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM
+            em_d_customerdevmap t
+        INNER JOIN em_d_customerinfo t1 ON t.customer_no = t1.customer_no
+        WHERE
+            t1.org_no = #{orgNo}
+        AND t.elec_meter_category = 1
+    </select>
+    <resultMap id="queryDayElectricInfoMap" type="cn.com.cdboost.collect.dto.param.DayElectricInfoResponseParam">
+        <result column="calc_data" property="date" jdbcType="VARCHAR" />
+        <result column="day_eq_value" property="power" jdbcType="FLOAT" />
+        <result column="read_value" property="readValue" jdbcType="FLOAT" />
+    </resultMap>
+    <select id="queryDayElectricInfo" resultMap="queryDayElectricInfoMap">
+        SELECT
+        calc_data,day_eq_value,read_value
+        FROM em_d_meter_day_power t
+        INNER  JOIN (
+        SELECT
+         max(id) id
+         FROM
+          em_d_meter_day_power
+          WHERE customer_no=#{customerNo}
+          AND calc_data=#{calcData}
+          AND calc_data_type=1
+          GROUP BY customer_no,
+          meter_user_no
+        ) d on d.id=t.id
+    </select>
+    <select id="queryHistoryElectricAmount" resultMap="queryDayElectricInfoMap">
+        SELECT
+        calc_data,day_eq_value
+        FROM em_d_meter_day_power t
+        INNER  JOIN (
+        SELECT
+        max(id) id
+        FROM
+        em_d_meter_day_power
+        WHERE customer_no=#{customerNo}
+        AND calc_data BETWEEN #{start} AND #{end}
+        AND calc_data_type=0
+        GROUP BY customer_no,
+        meter_user_no,
+        calc_data
+        ) d on d.id=t.id
+    </select>
+</mapper>

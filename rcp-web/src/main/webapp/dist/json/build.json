@@ -1,0 +1,13 @@
+{
+    "code": 1,
+    "data": [{
+        "dictItemName": "1栋",
+        "dictItemValue": 1,
+        "id": 15
+    }, {
+        "dictItemName": "2栋",
+        "dictItemValue": 2,
+        "id": 16
+    }],
+    "message": "success"
+}

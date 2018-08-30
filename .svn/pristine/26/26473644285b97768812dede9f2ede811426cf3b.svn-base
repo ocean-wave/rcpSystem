@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingWithdrawCashMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingWithdrawCash" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_guid" property="customerGuid" jdbcType="VARCHAR" />
+    <result column="webchar_no" property="webcharNo" jdbcType="VARCHAR" />
+    <result column="partner_trade_no" property="partnerTradeNo" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+    <result column="after_remain_amount" property="afterRemainAmount" jdbcType="DECIMAL" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="error_code" property="errorCode" jdbcType="VARCHAR" />
+    <result column="error_msg" property="errorMsg" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="guid" property="guid" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="withdrawCashListMap" type="cn.com.cdboost.collect.dto.WithdrawCashListInfo">
+    <result column="create_time" property="date" jdbcType="VARCHAR" />
+    <result column="type" property="withdrawMethod" jdbcType="VARCHAR" />
+    <result column="amount" property="withdrawMoney" jdbcType="VARCHAR" />
+    <result column="after_remain_amount" property="remainAmount" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="withdrawCashList" parameterType="cn.com.cdboost.collect.dto.WithdrawCashListDto" resultMap="withdrawCashListMap">
+              SELECT
+              t.create_time,
+              t.type,
+              t.amount,
+              t.after_remain_amount,
+              CASE t.type
+              WHEN 1 THEN
+                  d.customer_name
+              WHEN 2 THEN
+                  d.alipay_nick_name
+              ELSE
+                  x.user_name
+              END user_id
+              FROM
+               em_d_charging_withdraw_cash t
+              INNER JOIN em_d_charging_cst d ON t.customer_guid = d.customer_guid
+              INNER JOIN em_b_user x ON x.id=#{withdrawCashListDto.userId}
+              AND  t.create_time BETWEEN #{withdrawCashListDto.startDate} and concat(#{withdrawCashListDto.endDate},' 23:59:59')
+              <where>
+                  <if test="withdrawCashListDto.withdrawMethod !=0">
+                  AND t.type=#{withdrawCashListDto.withdrawMethod}
+                  </if>
+              </where>
+              ORDER BY t.create_time DESC
+  </select>
+</mapper>

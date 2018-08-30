@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.MeterRelationMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.MeterRelation" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="p_meter_cno" property="pMeterCno" jdbcType="VARCHAR" />
+    <result column="meter_cno" property="meterCno" jdbcType="VARCHAR" />
+    <result column="level" property="level" jdbcType="VARCHAR" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="findChildByNodeid" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    SELECT t.id,t.meter_cno from em_d_meterrelation t INNER  JOIN em_d_meterrelation d on t.level like concat(d.level,'%')
+WHERE d.id=#{nodeId,jdbcType=INTEGER} and LENGTH (t.level)=LENGTH (d.level)+length(t.meter_cno)+1
+  </select>
+
+  <resultMap id="mainSubDto" type="cn.com.cdboost.collect.dto.response.MainSubDto" >
+    <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+    <result column="p_meter_cno" property="pMeterCno" jdbcType="VARCHAR" />
+    <result column="meter_cno" property="meterCno" jdbcType="VARCHAR" />
+    <result column="level" property="level" jdbcType="VARCHAR" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="customer_no" property="customerNo" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!--采集数据，普通用户召测，返回总表信息，查总表时最多返回500条-->
+  <select id="queryMainSubTree4CommonUser" resultMap="mainSubDto">
+    SELECT d.device_no,d.org_no,m.p_meter_cno,m.meter_cno,m.`level`,m.customer_no
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    <where>
+      d.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      AND d.device_type = #{deviceType}
+      AND m.p_meter_cno = '0'
+    </where>
+      limit 0,500
+  </select>
+
+  <!--普通用户，返回总表信息，查总表时最多返回500条-->
+  <select id="queryMainSubTree" resultMap="mainSubDto">
+    SELECT d.device_no,d.org_no,m.p_meter_cno,m.meter_cno,m.`level`,m.customer_no
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    <if test="onlineStatus != null">
+      INNER JOIN em_d_deviceinfo_devicestate ds ON d.rely_cno =ds.cno
+    </if>
+    <where>
+      d.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      AND d.device_type = #{deviceType}
+      <if test="onlineStatus == null">
+        AND m.p_meter_cno = '0'
+      </if>
+      <if test="onlineStatus != null">
+        AND ds.is_online=#{onlineStatus}
+      </if>
+    </where>
+    <if test="onlineStatus == null">
+      limit 0,500
+    </if>
+  </select>
+
+  <!--采集数据，重点用户召测，返回设备关联表信息-->
+  <select id="queryMeterRelation4Imp" resultMap="mainSubDto">
+    SELECT d.device_no,d.org_no,m.p_meter_cno,m.meter_cno,m.`level`,m.customer_no
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    INNER JOIN em_d_devicemeterparam p ON p.cno = d.cno
+    <where>
+      d.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      AND d.device_type = #{deviceType}
+      AND p.is_important=1
+    </where>
+  </select>
+
+
+  <!--客户档案，水电气设备数总表查询，最多返回500条-->
+  <select id="queryDeviceMainSubTree" resultMap="mainSubDto">
+    SELECT d.device_no,d.org_no,m.p_meter_cno,m.meter_cno,m.`level`,m.customer_no
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    <if test="onlineStatus != null">
+      INNER JOIN em_d_deviceinfo_devicestate ds ON d.rely_cno =ds.cno
+    </if>
+    <where>
+      d.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      AND d.device_type = #{deviceType}
+      <if test="onlineStatus == null">
+        AND m.p_meter_cno = '0'
+      </if>
+      <if test="onlineStatus != null">
+        AND ds.is_online=#{onlineStatus}
+      </if>
+    </where>
+    <if test="onlineStatus == null">
+      limit 0,500
+    </if>
+  </select>
+
+  <!--普通用户，根据设备编号，模糊查询，返回设备相关的树的节点信息-->
+  <select id="fuzzyQueryTree" resultMap="mainSubDto">
+    SELECT d.device_no,d.org_no,m.p_meter_cno,m.meter_cno,m.`level`,m.customer_no
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    <if test="onlineStatus != null">
+      INNER JOIN em_d_deviceinfo_devicestate ds ON d.rely_cno =ds.cno
+    </if>
+    <where>
+      d.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="deviceType != null">
+        AND d.device_type = #{deviceType}
+      </if>
+      <if test="deviceNo != null">
+        AND d.device_no LIKE CONCAT('%', #{deviceNo}, '%')
+      </if>
+      <if test="onlineStatus != null">
+        AND ds.is_online=#{onlineStatus}
+      </if>
+    </where>
+  </select>
+
+  <!--重点用户，根据设备编号，模糊查询，返回设备相关的树的节点信息-->
+  <select id="fuzzyQueryTree4Imp" resultMap="mainSubDto">
+    SELECT d.device_no,d.org_no,m.p_meter_cno,m.meter_cno,m.`level`,m.customer_no
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    INNER JOIN em_d_devicemeterparam p ON m.meter_cno = p.cno
+    <where>
+      d.org_no IN
+      <foreach collection="orgNoList" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="deviceType != null">
+        AND d.device_type = #{deviceType}
+      </if>
+      <if test="deviceNo != null">
+        AND d.device_no LIKE CONCAT('%', #{deviceNo}, '%')
+      </if>
+      AND p.is_important=1
+    </where>
+  </select>
+
+  <!-- 查询某个表下的子表（满足在线状态条件的）-->
+  <select id="queryChildByParam" resultMap="BaseResultMap">
+    SELECT m.*
+    FROM em_d_deviceinfo d
+    INNER JOIN em_d_meterrelation m ON d.cno = m.meter_cno
+    INNER JOIN em_d_deviceinfo_devicestate ds ON d.rely_cno =ds.cno
+    <where>
+      m.`level` LIKE CONCAT('%', #{pMeterCno}, '%')
+      <![CDATA[ AND m.meter_cno != #{pMeterCno} ]]>
+      AND ds.is_online=#{onlineStatus}
+    </where>
+  </select>
+
+  <!-- 查询某个表下的所有子表关系记录，必须满足是重点用户表-->
+  <select id="queryNextNodeImpDevice" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select * from em_d_meterrelation m
+    INNER JOIN em_d_devicemeterparam d ON m.meter_cno = d.cno
+    <where>
+      m.`level` LIKE CONCAT('%', #{pMeterCno}, '%')
+      <![CDATA[ AND m.meter_cno != #{pMeterCno} ]]>
+      AND d.is_important=1
+    </where>
+  </select>
+
+  <!--根据主键id，批量更新-->
+  <update id="batchUpdateByPrimaryKey" parameterType="java.util.List">
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      UPDATE em_d_meterrelation
+      <set>
+        <if test="item.pMeterCno != null">
+          p_meter_cno = #{item.pMeterCno,jdbcType=VARCHAR},
+        </if>
+        <if test="item.meterCno != null">
+          meter_cno = #{item.meterCno,jdbcType=VARCHAR},
+        </if>
+        <if test="item.level != null">
+          level = #{item.level,jdbcType=VARCHAR},
+        </if>
+        <if test="item.customerNo != null">
+          customer_no = #{item.customerNo,jdbcType=VARCHAR},
+        </if>
+      </set>
+      WHERE id = #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
+</mapper>

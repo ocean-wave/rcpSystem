@@ -1,0 +1,26 @@
+{
+	"message": "成功",
+	"total": "1",
+	"code": 1,
+	"data": {
+		"list": [{
+			"deviceNo": "32313123",
+			"chargingPlieGuid": "3231313131434",
+			"installAddr": "成都市",
+			"useNumber": 100,
+			"electricityFees": "100",
+			"electricQuantity": "200"
+		}, {
+			"deviceNo": "7885634534",
+			"installAddr": "成都市",
+			"chargingPlieGuid": "3131434323131",
+			"useNumber": 10,
+			"electricityFees": "120",
+			"electricQuantity": "240"
+		}],
+		"statistics": {
+			"electricityFees": "220",
+			"electricQuantity": "440"
+		}
+	}
+}

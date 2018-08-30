@@ -1,0 +1,116 @@
+-- 基础应用，数据采集，普通用户召测
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001101', '4', '浏览', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001101', '5', '实时召测', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001101', '6', '下载', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001101', '7', '发送短信', '0');
+
+-- 基础应用，数据采集，重点通用户召测
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001102', '4', '浏览', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001102', '5', '实时召测', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001102', '6', '下载', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001102', '7', '发送短信', '0');
+
+-- 基础应用，数据采集，APP补抄
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001103', '1', '添加', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001103', '2', '修改', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001103', '3', '删除', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001103', '4', '浏览', '0');
+
+-- 基础应用，费控操作，用户充值
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001201', '11', '远程充值', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001201', '12', '购电卡充值', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001201', '5', '实时召测', '0');
+
+-- 基础应用，费控操作，用户开户
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001202', '14', '开户', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001202', '15', '补卡', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001202', '20', '购电卡工具', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001202', '19', '重新开户', '0');
+
+-- 基础应用，费控操作，远程通断
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10001203', '13', '通断', '0');
+
+-- 运行维护，档案管理，用户档案
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '1', '添加', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '2', '修改', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '3', '删除', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '4', '浏览', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '8', '下发档案', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '9', '上传文件', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '6', '下载', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '14', '开户', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002101', '21', '注销用户', '0');
+
+-- 运行维护，档案管理，设备档案
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '2', '修改', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '3', '删除', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '4', '浏览', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '16', '集中器重启', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '17', '集中器初始化', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '23', '转换器重启', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '24', '转换器初始化', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '25', '转换器读时钟', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002102', '26', '转换器设时钟', '0');
+
+-- 运行维护，档案管理，换表记录
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002103', '4', '浏览', '0');
+
+-- 运行维护，费控参数，电价方案
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002201', '4', '浏览', '0');
+
+-- 运行维护，采集分析，普通用户分析
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002301', '4', '浏览', '0');
+
+-- 运行维护，采集分析，重点用户分析
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10002302', '4', '浏览', '0');
+
+-- 统计查询，综合查询
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100031', '4', '浏览', '0');
+
+-- 综合查询，用能排行
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100032', '4', '浏览', '0');
+
+-- 综合查询，异常记录
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100033', '27', '异常等级1', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100033', '28', '异常等级2', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100033', '29', '异常处理', '0');
+
+-- 统计查询，缴费记录
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100034', '4', '浏览', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100034', '6', '下载', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100034', '15', '补卡', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100034', '18', '撤销记录', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100034', '14', '开户', '0');
+
+-- 综合查询，采集数据，重点用户
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10003501', '4', '浏览', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10003501', '6', '下载', '0');
+
+-- 综合查询，采集数据，普通用户
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10003502', '4', '浏览', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('10003502', '6', '下载', '0');
+
+-- 系统管理，角色管理
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100041', '1', '添加', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100041', '2', '修改', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100041', '3', '删除', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100041', '4', '浏览', '0');
+
+-- 系统管理，人员管理
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100042', '1', '添加', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100042', '2', '修改', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100042', '3', '删除', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100042', '4', '浏览', '0');
+
+-- 系统管理，操作日志
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100043', '4', '浏览', '0');
+
+-- 系统管理，系统参数
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100044', '2', '修改', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100044', '4', '浏览', '0');
+
+-- 系统管理，部门管理
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100045', '1', '添加', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100045', '2', '修改', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100045', '3', '删除', '0');
+INSERT INTO `em_b_menuaction` (`menu_id`, `action_id`, `action_name`, `create_user_id`) VALUES ('100045', '4', '浏览', '0');

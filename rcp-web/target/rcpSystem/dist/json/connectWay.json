@@ -1,0 +1,11 @@
+{
+	"data": [{
+		"dictItemName": "远程通信",
+		"dictItemValue": 1
+	}, {
+		"dictItemName": "本地通信",
+		"dictItemValue": 2
+	}],
+	"message": "success",
+	"code": 1
+}

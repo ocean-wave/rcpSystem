@@ -1,0 +1,6 @@
+# 正式发布版
+host.ip = 127.0.0.1
+host.port = 3306
+db.name = sm_metercollect
+db.username = sa_pda
+db.password = emerp@250.123

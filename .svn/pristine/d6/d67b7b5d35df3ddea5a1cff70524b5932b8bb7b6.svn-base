@@ -1,0 +1,1 @@
+INSERT INTO `em_b_role` (`role_name`, `description`, `create_user_id`, `is_enabled`, `is_system`) VALUES ('系统管理员', '系统管理员角色', '0', '1', '1');

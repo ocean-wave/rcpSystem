@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.cdboost.collect.dao.CustomerinfoCostMapper">
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.CustomerInfoCost">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="BIGINT" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="remain_amount" jdbcType="DECIMAL" property="remainAmount" />
+    <result column="pay_count" jdbcType="INTEGER" property="payCount" />
+    <result column="total_amount" jdbcType="DECIMAL" property="totalAmount" />
+    <result column="calc_time" jdbcType="TIMESTAMP" property="calcTime" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="alarm_threshold" jdbcType="DECIMAL" property="alarmThreshold" />
+    <result column="alarm_threshold1" jdbcType="DECIMAL" property="alarmThreshold1" />
+    <result column="alarm_threshold2" jdbcType="DECIMAL" property="alarmThreshold2" />
+    <result column="overdraft_amount" jdbcType="INTEGER" property="overdraftAmount" />
+  </resultMap>
+</mapper>

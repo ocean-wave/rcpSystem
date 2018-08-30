@@ -1,0 +1,387 @@
+package cn.com.cdboost.collect.model;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+@Table(name = "em_d_charging_project")
+public class ChargingProject implements Serializable {
+    /**
+     * 标识id
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * 项目标识
+     */
+    @Column(name = "project_guid")
+    private String projectGuid;
+
+    /**
+     * 项目名称
+     */
+    @Column(name = "project_name")
+    private String projectName;
+
+    /**
+     * 项目位置
+     */
+    @Column(name = "project_addr")
+    private String projectAddr;
+
+    /**
+     * 小区名称
+     */
+    @Column(name = "community_name")
+    private String communityName;
+
+    /**
+     * 物业公司名称
+     */
+    @Column(name = "company_name")
+    private String companyName;
+
+    /**
+     * 联系人员
+     */
+    private String contact;
+
+    /**
+     * 联系电话
+     */
+    @Column(name = "contact_telphone")
+    private String contactTelphone;
+
+    /**
+     * 基础电价
+     */
+    @Column(name = "base_price")
+    private BigDecimal basePrice;
+
+    /**
+     * 提成电价
+     */
+    @Column(name = "up_price")
+    private BigDecimal upPrice;
+
+    /**
+     * 充电桩执行的电价
+     */
+    @Column(name = "price")
+    private BigDecimal price;
+
+    /**
+     * 项目备注信息
+     */
+    @Column(name = "remark")
+    private String remark;
+
+    /**
+     * 创建人员ID
+     */
+    @Column(name = "create_user_id")
+    private Long createUserId;
+
+    /**
+     * 创建时间
+     */
+    @Column(name = "create_time")
+    private Date createTime;
+
+    /**
+     * 更新人员ID
+     */
+    @Column(name = "update_user_id")
+    private Long updateUserId;
+
+    /**
+     * 更新时间
+     */
+    @Column(name = "update_time")
+    private Date updateTime;
+
+    /**
+     * 是否删除 0 正常 1删除
+     */
+    @Column(name = "is_del")
+    private Integer isDel;
+
+    /**
+     * 获取标识id
+     *
+     * @return id - 标识id
+     */
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * 设置标识id
+     *
+     * @param id 标识id
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * 获取项目标识
+     *
+     * @return project_guid - 项目标识
+     */
+    public String getProjectGuid() {
+        return projectGuid;
+    }
+
+    /**
+     * 设置项目标识
+     *
+     * @param projectGuid 项目标识
+     */
+    public void setProjectGuid(String projectGuid) {
+        this.projectGuid = projectGuid;
+    }
+
+    /**
+     * 获取项目名称
+     *
+     * @return project_name - 项目名称
+     */
+    public String getProjectName() {
+        return projectName;
+    }
+
+    /**
+     * 设置项目名称
+     *
+     * @param projectName 项目名称
+     */
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    /**
+     * 获取项目位置
+     *
+     * @return project_addr - 项目位置
+     */
+    public String getProjectAddr() {
+        return projectAddr;
+    }
+
+    /**
+     * 设置项目位置
+     *
+     * @param projectAddr 项目位置
+     */
+    public void setProjectAddr(String projectAddr) {
+        this.projectAddr = projectAddr;
+    }
+
+    /**
+     * 获取小区名称
+     *
+     * @return community_name - 小区名称
+     */
+    public String getCommunityName() {
+        return communityName;
+    }
+
+    /**
+     * 设置小区名称
+     *
+     * @param communityName 小区名称
+     */
+    public void setCommunityName(String communityName) {
+        this.communityName = communityName;
+    }
+
+    /**
+     * 获取物业公司名称
+     *
+     * @return company_name - 物业公司名称
+     */
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    /**
+     * 设置物业公司名称
+     *
+     * @param companyName 物业公司名称
+     */
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    /**
+     * 获取联系人员
+     *
+     * @return contact - 联系人员
+     */
+    public String getContact() {
+        return contact;
+    }
+
+    /**
+     * 设置联系人员
+     *
+     * @param contact 联系人员
+     */
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    /**
+     * 获取联系电话
+     *
+     * @return contact_telphone - 联系电话
+     */
+    public String getContactTelphone() {
+        return contactTelphone;
+    }
+
+    /**
+     * 设置联系电话
+     *
+     * @param contactTelphone 联系电话
+     */
+    public void setContactTelphone(String contactTelphone) {
+        this.contactTelphone = contactTelphone;
+    }
+
+    /**
+     * 获取充电桩执行的电价
+     *
+     * @return price - 充电桩执行的电价
+     */
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    /**
+     * 设置充电桩执行的电价
+     *
+     * @param price 充电桩执行的电价
+     */
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    /**
+     * 获取项目备注信息
+     *
+     * @return remark - 项目备注信息
+     */
+    public String getRemark() {
+        return remark;
+    }
+
+    /**
+     * 设置项目备注信息
+     *
+     * @param remark 项目备注信息
+     */
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    /**
+     * 获取创建人员ID
+     *
+     * @return create_user_id - 创建人员ID
+     */
+    public Long getCreateUserId() {
+        return createUserId;
+    }
+
+    /**
+     * 设置创建人员ID
+     *
+     * @param createUserId 创建人员ID
+     */
+    public void setCreateUserId(Long createUserId) {
+        this.createUserId = createUserId;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return create_time - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    /**
+     * 获取更新人员ID
+     *
+     * @return update_user_id - 更新人员ID
+     */
+    public Long getUpdateUserId() {
+        return updateUserId;
+    }
+
+    /**
+     * 设置更新人员ID
+     *
+     * @param updateUserId 更新人员ID
+     */
+    public void setUpdateUserId(Long updateUserId) {
+        this.updateUserId = updateUserId;
+    }
+
+    /**
+     * 获取更新时间
+     *
+     * @return update_time - 更新时间
+     */
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    /**
+     * 设置更新时间
+     *
+     * @param updateTime 更新时间
+     */
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public BigDecimal getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(BigDecimal basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public BigDecimal getUpPrice() {
+        return upPrice;
+    }
+
+    public void setUpPrice(BigDecimal upPrice) {
+        this.upPrice = upPrice;
+    }
+
+    public Integer getIsDel() {
+        return isDel;
+    }
+
+    public void setIsDel(Integer isDel) {
+        this.isDel = isDel;
+    }
+}

@@ -1,0 +1,11 @@
+# 贵州中天测试版本号
+version=Gzzt_1.4.T18
+
+# 贵州中天归档版本号
+# version=Gzzt_1.4.3
+
+# logback日志路径配置
+log.path=${logback.path}
+
+# 微信支付回调路径
+callback.url = https://pay.cdboost.cn

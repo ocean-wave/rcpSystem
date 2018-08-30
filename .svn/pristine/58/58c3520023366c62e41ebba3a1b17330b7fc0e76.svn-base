@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingPayMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingPay" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+      <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="webchar_no" property="webcharNo" jdbcType="VARCHAR" />
+    <result column="pay_category" property="payCategory" jdbcType="INTEGER" />
+    <result column="num_months" property="numMonths" jdbcType="INTEGER" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="account_charge_money" property="accountChargeMoney" jdbcType="DECIMAL" />
+    <result column="account_deduct_money" property="accountDeductMoney" jdbcType="DECIMAL" />
+    <result column="buy_cnt" property="buyCnt" jdbcType="INTEGER" />
+    <result column="charging_time" property="chargingTime" jdbcType="INTEGER" />
+    <result column="serial_num" property="serialNum" jdbcType="VARCHAR" />
+    <result column="pay_flag" property="payFlag" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="pay_state" property="payState" jdbcType="INTEGER" />
+    <result column="customer_guid" property="customerGuid" jdbcType="CHAR" />
+    <result column="after_remain_amount" property="afterRemainAmount" jdbcType="DECIMAL" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="pay_way" property="payWay" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!--客户充值记录结果集-->
+  <resultMap id="queryChargeMap" type="cn.com.cdboost.collect.dto.chargerApp.ChargeMoneyHistoryDto">
+     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+     <result column="account_charge_money" property="payMoney" jdbcType="DECIMAL" />
+     <result column="pay_state" property="payState" jdbcType="INTEGER" />
+     <result column="pay_category" property="payCategory" jdbcType="INTEGER" />
+     <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+     <result column="charger_date" property="date" jdbcType="VARCHAR" />
+     <result column="charger_time" property="time" jdbcType="VARCHAR" />
+      <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
+      <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+      <result column="pay_way" property="payWay" jdbcType="INTEGER" />
+      <result column="real_pay_money" property="realPayMoney" jdbcType="DECIMAL" />
+      <result column="account_deduct_money" property="accountDeductMoney" jdbcType="DECIMAL" />
+  </resultMap>
+    <resultMap id="chargeRecordListMap" type="cn.com.cdboost.collect.dto.ChargeRecordListInfo">
+        <result column="create_time" property="date" jdbcType="VARCHAR" />
+        <result column="pay_way" property="payMethod" jdbcType="VARCHAR" />
+        <result column="pay_money" property="payMoney" jdbcType="VARCHAR" />
+        <result column="after_remain_amount" property="remainAmount" jdbcType="VARCHAR" />
+        <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    </resultMap>
+    <select id="chargeRecordList" parameterType="cn.com.cdboost.collect.dto.ChargeRecordListDto" resultMap="chargeRecordListMap">
+        SELECT
+        t.create_time,
+        t.pay_way,
+        t.pay_money,
+        t.after_remain_amount,
+        CASE t.pay_way
+        WHEN 1 THEN
+        d.customer_name
+        WHEN 2 THEN
+        d.alipay_nick_name
+        ELSE
+        x.user_name
+        END user_id
+        FROM
+        em_d_charging_pay t
+        INNER JOIN em_d_charging_cst d ON t.customer_guid = d.customer_guid
+        AND d.customer_guid=#{chargeRecordListDto.customerGuid}
+        AND t.create_time BETWEEN #{chargeRecordListDto.startDate}
+        AND concat(#{chargeRecordListDto.endDate},' 23:59:59')
+        INNER JOIN em_b_user x ON x.id=#{chargeRecordListDto.userId}
+        <where>
+            <if test="chargeRecordListDto.payMethod !=0 ">
+                AND t.pay_way=#{chargeRecordListDto.payMethod}
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+    </select>
+    <!--客户充值记录列表查询-->
+    <select id="queryCharge" parameterType="cn.com.cdboost.collect.dto.chargerApp.vo.HistoryVo" resultMap="queryChargeMap">
+        SELECT t1.after_remain_amount as remain_amount,
+        substring(date_format(t4.expire_time,'%Y-%m-%d %H:%i:%S'), 1, 10) as end_time,
+        t1.create_time as charger_date,
+        substring(date_format(t1.create_time,'%Y-%m-%d %H:%i:%S'), 11) as charger_time,
+        t1.create_time,t1.account_charge_money,t1.pay_category,t1.pay_state,t1.pay_way,
+        t1.pay_money as real_pay_money,t1.account_deduct_money
+        FROM em_d_charging_pay t1
+        INNER JOIN em_d_charging_cst t4 ON t1.customer_guid = t4.customer_guid
+        <where>
+            AND t1.customer_guid = #{customerGuid}
+            AND t1.pay_state = 1
+        </where>
+        ORDER BY t1.id DESC
+        limit #{pageIndex},#{pageSize}
+    </select>
+
+  <!--获取用户充值记录总数-->
+    <select id="queryChargeTotal" parameterType="cn.com.cdboost.collect.dto.chargerApp.vo.HistoryVo" resultType="java.lang.Long">
+        SELECT count(*) as total
+        FROM em_d_charging_pay t1
+        INNER JOIN em_d_charging_cst t4 ON t1.customer_guid = t4.customer_guid
+        <where>
+            AND t1.customer_guid = #{customerGuid}
+            AND t1.pay_state = 1
+        </where>
+        ORDER BY t1.id DESC
+    </select>
+
+    <!--客户IC卡充值记录列表查询-->
+    <select id="queryICCardPayList" parameterType="cn.com.cdboost.collect.dto.param.ChargerICCardQueryVo" resultType="cn.com.cdboost.collect.dto.ChargingICPayDto">
+        SELECT
+        t1.after_remain_amount ICRemainAmount,
+        t1.create_time createTime,
+        t1.pay_money payMoney,
+        t1.pay_state payState,
+        t1.pay_way payWay,
+        t2.customer_name customerName,
+        t2.alipay_nick_name alipayNickName
+        FROM
+        em_d_charging_pay t1
+        LEFT JOIN em_d_charging_cst t2 ON t1.customer_guid = t2.customer_guid
+        where t1.pay_state = 1 AND t1.card_id=#{cardId}
+            AND t1.create_time BETWEEN CONCAT(#{startDate},' 00:00:00') AND CONCAT(#{endDate},' 23:59:59')
+        ORDER BY t1.create_time DESC
+        limit #{pageIndex},#{pageSize}
+    </select>
+    <!--客户IC卡充值记录列表查询-->
+    <select id="queryICCardPayTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerICCardQueryVo" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        em_d_charging_pay t1
+        where t1.pay_state = 1 AND t1.card_id=#{cardId}
+        AND t1.create_time BETWEEN CONCAT(#{startDate},' 00:00:00') AND CONCAT(#{endDate},' 23:59:59')
+    </select>
+</mapper>

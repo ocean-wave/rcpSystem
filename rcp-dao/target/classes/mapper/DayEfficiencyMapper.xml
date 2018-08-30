@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.DayEfficiencyMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.DayEfficiency" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+    <result column="org_name" property="orgName" jdbcType="VARCHAR" />
+    <result column="anal_date" property="analDate" jdbcType="DATE" />
+    <result column="total_num" property="totalNum" jdbcType="INTEGER" />
+    <result column="total_electricity" property="totalElectricity" jdbcType="DECIMAL" />
+    <result column="socket_electricity" property="socketElectricity" jdbcType="DECIMAL" />
+    <result column="air_electricity" property="airElectricity" jdbcType="DECIMAL" />
+    <result column="power_electricity" property="powerElectricity" jdbcType="DECIMAL" />
+    <result column="special_electricity" property="specialElectricity" jdbcType="DECIMAL" />
+    <result column="socket_num" property="socketNum" jdbcType="INTEGER" />
+    <result column="air_num" property="airNum" jdbcType="INTEGER" />
+    <result column="power_num" property="powerNum" jdbcType="INTEGER" />
+    <result column="special_num" property="specialNum" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+</mapper>

@@ -1,0 +1,252 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.dto.RegisterDto;
+import cn.com.cdboost.collect.dto.chargerApp.*;
+import cn.com.cdboost.collect.dto.chargerApp.vo.*;
+import cn.com.cdboost.collect.dto.param.EventQueryParam;
+import cn.com.cdboost.collect.dto.response.WithdrawCashInfo;
+import cn.com.cdboost.collect.model.ChargingCst;
+import cn.com.cdboost.collect.model.ChargingDevlog;
+import cn.com.cdboost.collect.model.ChargingPay;
+import cn.com.cdboost.collect.model.ChargingPayCheme;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+public interface AppChargerService {
+    /**
+     * 获取充电页面基本信息
+     * @param wxBaseInfoVo
+     * @return
+     */
+    WxBaseInfoDto getBaseInfo(WxBaseInfoVo wxBaseInfoVo);
+
+    WxBaseInfoDto getBaseInfoNew(WxBaseInfoVo wxBaseInfoVo);
+
+    /**
+     * 获取充电实时数据
+     * @param chargeOnlineVo
+     * @return
+     */
+    ChargeOnlineDto getChargeOnline(ChargeOnlineVo chargeOnlineVo);
+
+    /**
+     * 充电
+     * @param chargeVo
+     * @return
+     */
+    ChargeDto charge(ChargeVo chargeVo);
+
+    /**
+     * 获取充电记录
+     * @param historyVo
+     * @return
+     */
+    List<ChargeHistoryDto> chargeHistory(HistoryVo historyVo);
+
+    /**
+     * 获取充值记录
+     * @param historyVo
+     * @return
+     */
+    List<ChargeMoneyHistoryDto> chargeMoneyHistory(HistoryVo historyVo);
+
+    /**
+     * 停止充电
+     * @return
+     */
+    void stopCharge(StopChargeVo stopChargeVo);
+
+    /**
+     * 保存客户信息
+     * @param chargingCst
+     * @return
+     */
+    Integer saveChargerCustomer(ChargingCst chargingCst);
+
+    /**
+     * 获取客户信息
+     * @param chargingCst
+     * @return
+     */
+    ChargingCst getCustomer(ChargingCst chargingCst);
+
+    /**
+     * 获取价格方案信息
+     * @param id
+     * @return
+     */
+    ChargingPayCheme getPayCheme(Integer id);
+
+    /**
+     * 获取充值结果
+     * @param chargingPay
+     * @return
+     */
+    ChargingPay getChargingPay(ChargingPay chargingPay);
+
+    /**
+     *
+     * @param chargingPay
+     * @return
+     */
+    int updateChargingPay(ChargingPay chargingPay);
+
+    /**
+     * 获取消息通知
+     * @param param
+     * @return
+     */
+    List<MessageDto> alarm(EventQueryParam param);
+
+    /**
+     * 获取用户
+     * @param openId
+     * @return
+     */
+    AppUserDto getAppUser(String openId);
+
+    /**
+     * 更新用户
+     * @param chargingCst
+     * @return
+     */
+    Integer updateCustomer(ChargingCst chargingCst);
+
+    /**
+     * 获取客户使用记录总数
+     * @param historyVo
+     * @return
+     */
+    Long queryUseRecordTotal(HistoryVo historyVo);
+
+    /**
+     * 获取客户充值总数
+     * @param historyVo
+     * @return
+     */
+    Long queryChargeTotal(HistoryVo historyVo);
+
+    /**
+     * 获取用户曲线接口
+     * @param openId
+     * @param deviceNo
+     * @return
+     */
+    CurveListNDto deviceCurve(String openId, String deviceNo);
+
+    /**
+     * 开电时的事物操作
+     * @param deviceNo
+     * @return
+     */
+    Integer startCharge(String deviceNo);
+
+    /**
+     * 断电时的事物操作
+     * @param chargingGuid
+     * @return
+     */
+    void stopCharge(String openId, String chargingGuid);
+
+    /**
+     * 获取用户最近一次使用记录
+     * @param openId
+     * @return
+     */
+    LastUseRecordDto getLateUseRecord(String openId);
+
+    /**
+     * 获取用户充值方案选择列表
+      * @param openId
+     * @return
+     */
+    ChargeIntecerListDto chargeList(String openId);
+
+    /**
+     * 客户充值接口
+     * @param request
+     * @param openId
+     * @param priceId
+     * @return
+     */
+    ChargeIntecerDto chargeMoney(HttpServletRequest request, String ip, String openId, String priceId);
+
+    /**
+     * 充电完成弹出接口
+     * @param openId
+     * @param chargingGuid
+     * @return
+     */
+    ChargeCompleteDto chargeComplete(String openId, String chargingGuid);
+
+    /**
+     * 消息列表详情
+     * @param chargingGuid
+     * @return
+     */
+    ChargeCompleteDto chargeMessageComplete(String chargingGuid, Integer messageType);
+
+    /**
+     * 月卡购买详情页面
+     * @param openId
+     * @return
+     */
+    List<MonthDetialDto> monthlyCardDetial(String openId);
+    /**
+     * 用户注册
+     * @param openId
+     * @param phoneNumber
+     * @param verificationCode
+     * @return
+     */
+    RegisterDto register(String openId,String phoneNumber,String verificationCode);
+
+    /**
+     * 月卡充值接口
+     * @param openId
+     * @param priceId
+     * @return
+     */
+    MonthChargeDto monthOfCharge(String openId,String ip,Integer priceId);
+
+    /**
+     * 更新用户接收短信标志
+     * @param openId
+     * @param isReceiveSms
+     * @return
+     */
+    Integer isReceiveSms(String openId,Integer isReceiveSms);
+
+    /**
+     * 用户修改绑定的手机号
+     * @param openId
+     * @param phoneNumber
+     * @param verificationCode
+     * @return
+     */
+    RegisterDto updatePhoneNumber(String openId,String phoneNumber,String verificationCode);
+
+    /**
+     * 发送警告信息
+     * @param chargingDevlog
+     * @param address
+     * @param createTime
+     */
+    void sendAlarmMessage(ChargingDevlog chargingDevlog, String address, String createTime);
+
+    /**
+     * 发送断电信息
+      * @param chargingGuid
+     * @param address
+     * @param createTime
+     */
+    void sendStopMessage(String chargingGuid,String address,String createTime);
+
+    /**
+     * 进入提现页面，查询相关信息
+     * @param openId
+     * @return
+     */
+    WithdrawCashInfo queryCashInfo(String openId);
+}

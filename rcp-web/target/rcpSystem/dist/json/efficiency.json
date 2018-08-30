@@ -1,0 +1,81 @@
+{
+  "data": [
+    {
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500,
+      "villageNo":"2"
+    },{
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500
+    },{
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500
+    },{
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500
+    },{
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500
+    },{
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500
+    },{
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500
+    },{
+      "villageName":"国网成都分公司",
+      "ammeterNum":1560,
+      "socketElectricity":1390,
+      "airElectricity": 3250,
+      "powerElectricity":2520,
+      "specialElectricity": 1320,
+      "villageAddr": "成都博高信息",
+      "platformAreaNum":500
+    }
+  ],
+  "total": 8,
+  "message": "success",
+  "code": 1
+}

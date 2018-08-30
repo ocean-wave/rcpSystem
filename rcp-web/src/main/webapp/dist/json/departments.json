@@ -1,0 +1,81 @@
+{
+    "code": 1,
+    "data": [{
+        "children": [{
+            "children": [{
+                "children": [{
+                    "houseHolds": 1500,
+                    "nodeName": "A区1栋(1)",
+                    "nodeNo": 1,
+                    "nodeType": 2,
+                    "pNodeNo": 10002
+                }, {
+                    "houseHolds": 1200,
+                    "nodeName": "A区2栋",
+                    "nodeNo": 2,
+                    "nodeType": 2,
+                    "pNodeNo": 10002
+                }, {
+                    "houseHolds": 1000,
+                    "nodeName": "B区1栋",
+                    "nodeNo": 3,
+                    "nodeType": 2,
+                    "pNodeNo": 10002
+                }, {
+                    "houseHolds": 1300,
+                    "nodeName": "B区2栋",
+                    "nodeNo": 4,
+                    "nodeType": 2,
+                    "pNodeNo": 10002
+                }],
+                "houseHolds": 5000,
+                "nodeName": "项目一",
+                "nodeNo": 10002,
+                "nodeType": 1,
+                "pNodeNo": 1001
+            }, {
+                "children": [{
+                    "houseHolds": 1000,
+                    "nodeName": "A区1栋",
+                    "nodeNo": 1,
+                    "nodeType": 2,
+                    "pNodeNo": 10003
+                }, {
+                    "houseHolds": 1200,
+                    "nodeName": "A区2栋",
+                    "nodeNo": 2,
+                    "nodeType": 2,
+                    "pNodeNo": 10003
+                }, {
+                    "houseHolds": 1500,
+                    "nodeName": "B区1栋",
+                    "nodeNo": 3,
+                    "nodeType": 2,
+                    "pNodeNo": 10003
+                }, {
+                    "houseHolds": 1300,
+                    "nodeName": "B区2栋",
+                    "nodeNo": 4,
+                    "nodeType": 2,
+                    "pNodeNo": 10003
+                }],
+                "houseHolds": 5000,
+                "nodeName": "项目二",
+                "nodeNo": 10003,
+                "nodeType": 1,
+                "pNodeNo": 1001
+            }],
+            "houseHolds": 10000,
+            "nodeName": "贵州片区",
+            "nodeNo": 1001,
+            "nodeType": 1,
+            "pNodeNo": 1000
+        }],
+        "houseHolds": 20000,
+        "nodeName": "中天集团",
+        "nodeNo": 1000,
+        "nodeType": 1,
+        "pNodeNo": 0
+    }],
+    "message": "success"
+}

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.SysConfigMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.SysConfig" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="config_id" property="configId" jdbcType="BIGINT" />
+    <result column="config_name" property="configName" jdbcType="VARCHAR" />
+    <result column="config_value" property="configValue" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="config_type" property="configType" jdbcType="INTEGER" />
+  </resultMap>
+
+  <resultMap id="SumDataGetDTOResultMap" type="cn.com.cdboost.collect.dto.SumDataGetDTO">
+    <result column="device_type" property="deviceType" jdbcType="VARCHAR" />
+    <result column="sum_pr" property="sumPR" jdbcType="DECIMAL" />
+    <result column="sum_remain_amount" property="sumRemainAmount" jdbcType="DECIMAL"/>
+    <result column="clt_month" property="cltMonth" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <!-- 查询一年内每月的电、水、气的使用量 -->
+  <select id="sumGetForMonth" parameterType="cn.com.cdboost.collect.dto.param.GetForMonthQueryVo"
+          statementType="CALLABLE" resultMap="SumDataGetDTOResultMap">
+    {call PRC_W_D_SumGetForMonth(
+    #{year,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{customerNo,mode=IN,jdbcType=VARCHAR},
+    #{cno,mode=IN,jdbcType=VARCHAR},
+    #{result,mode=OUT,jdbcType=VARCHAR})}
+  </select>
+
+  <!-- 首页面汇总用户的档案未下发数量、异常数量等 -->
+  <select id="pageStaticCount" parameterType="java.util.Map" statementType="CALLABLE">
+    {call PRC_W_D_PageStaticCount(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{meterErrCount,mode=OUT,jdbcType=INTEGER},
+    #{offCount,mode=OUT,jdbcType=INTEGER},
+    #{cstErr,mode=OUT,jdbcType=INTEGER},
+    #{cstTotal,mode=OUT,jdbcType=INTEGER})}
+  </select>
+
+  <resultMap id="AnalAmountDTOResultMap" type="cn.com.cdboost.collect.dto.AnalAmountDTO">
+    <result column="c0"  property="c0Amount" jdbcType="INTEGER"/>
+    <result column="c50" property="c50Amount" jdbcType="INTEGER" />
+    <result column="c200" property="c200Amount" jdbcType="INTEGER" />
+    <result column="c500" property="c500Amount" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!-- 首页面汇总剩余金额的分布 -->
+  <select id="pageAnalAmount" parameterType="java.util.Map" statementType="CALLABLE" resultMap="AnalAmountDTOResultMap">
+    {call PRC_W_D_PageAnalAmount(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR}
+    )}
+  </select>
+
+  <!-- 汇总当月的电、水、气的使用量 -->
+  <select id="pageSumDataGet" parameterType="java.util.Map" statementType="CALLABLE" resultMap="SumDataGetDTOResultMap">
+    {call PRC_W_D_PageSumDataGet(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{startTime,mode=OUT,jdbcType=VARCHAR},
+    #{endTime,mode=OUT,jdbcType=VARCHAR}
+    )}
+  </select>
+
+  <!-- 汇总当月电量和上月电表的数据及环比 -->
+  <select id="pageSumMonthPer" parameterType="java.util.Map" statementType="CALLABLE">
+    {call PRC_W_D_PageSumMonthPer(
+    #{userId,mode=IN,jdbcType=VARCHAR},
+    #{deviceType,mode=IN,jdbcType=VARCHAR},
+    #{lastMonth,mode=OUT,jdbcType=VARCHAR},
+    #{currentMonth,mode=OUT,jdbcType=VARCHAR},
+    #{percent,mode=OUT,jdbcType=VARCHAR},
+    #{currentDay,mode=OUT,jdbcType=VARCHAR}
+    )}
+  </select>
+
+  <!-- 批量更新 -->
+  <update id="batchUpdate" parameterType="java.util.List">
+    <foreach separator=";" index="index" item="item" collection="list" close="" open="">
+      update em_s_sysconfig
+      <set>
+        config_value = #{item.configValue,jdbcType=VARCHAR}
+      </set>
+      where config_name = #{item.configName, jdbcType=VARCHAR}
+      AND config_type = #{item.configType, jdbcType=INTEGER}
+    </foreach>
+  </update>
+</mapper>

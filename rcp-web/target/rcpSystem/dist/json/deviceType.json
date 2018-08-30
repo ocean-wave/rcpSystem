@@ -1,0 +1,11 @@
+{
+	"data": [{
+		"dictItemName": "购买次数 ",
+		"dictItemValue": 1
+	}, {
+		"dictItemName": "包月充值",
+		"dictItemValue": 2
+	}],
+	"message": "success",
+	"code": 1
+}

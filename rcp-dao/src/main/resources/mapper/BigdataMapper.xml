@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.BigdataMapper" >
+  <!--返回：总户数、跳闸用户、告警用户、当月电量、当月电费 -->
+  <select id="queryBaseInformation"  statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.response.QueryBaseInformationInfo">
+ {call PRC_W_D_View_Static(
+    #{queryBaseInformationDto.id, mode=IN, jdbcType=VARCHAR},
+    #{queryBaseInformationDto.v_offCount, mode=OUT, jdbcType=VARCHAR},
+    #{queryBaseInformationDto.v_cstTotal, mode=OUT, jdbcType=VARCHAR},
+    #{queryBaseInformationDto.v_userAlerm, mode=OUT, jdbcType=VARCHAR},
+    #{queryBaseInformationDto.v_current_power, mode=OUT, jdbcType=VARCHAR},
+    #{queryBaseInformationDto.v_current_money, mode=OUT, jdbcType=VARCHAR}
+    )}
+  </select>
+    <!--获取用电排名列表 -->
+  <select id="queryElectTopList" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.response.QueryElectTopListInfo">
+ {call PRC_W_D_View_StaticOrgTop(
+    #{id, mode=IN, jdbcType=VARCHAR}
+    )}
+  </select>
+    <!--获取分项用能情况-->
+  <select id="queryCategoryInformation" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.response.QueryCategoryInformationDB">
+ {call PRC_W_D_View_StaticItemPower(
+    #{queryCurrentMonthDto.id, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.deviceType, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.year, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.month, mode=IN, jdbcType=VARCHAR}
+    )}
+  </select>
+    <!--获取本月用能分析图表-->
+  <select id="queryCurrentMonth" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.response.QueryCurrentMonthDB">
+ {call PRC_W_D_View_StaticPower(
+    #{queryCurrentMonthDto.id, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.deviceType, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.year, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.month, mode=IN, jdbcType=VARCHAR}
+    )}
+  </select>
+    <!--获取本年的用能分析图表-->
+  <select id="queryCurrentYear" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.response.QueryCurrentMonthDB">
+ {call PRC_W_D_View_StaticPower(
+    #{queryCurrentMonthDto.id, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.deviceType, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.year, mode=IN, jdbcType=VARCHAR},
+    #{queryCurrentMonthDto.month, mode=IN, jdbcType=VARCHAR}
+    )}
+  </select>
+    <!--汇总各小区的线损列表-->
+    <select id="queryResidentialList" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.param.QueryResidentialListInfo">
+        {call PRC_W_D_Line_loss_Static(
+        #{queryResidentialListDto.id, mode=IN, jdbcType=VARCHAR},
+        #{queryResidentialListDto.startDate, mode=IN, jdbcType=VARCHAR},
+        #{queryResidentialListDto.endDate, mode=IN, jdbcType=VARCHAR},
+        #{queryResidentialListDto.residential, mode=IN, jdbcType=VARCHAR},
+        #{queryResidentialListDto.queryGuid, mode=IN, jdbcType=VARCHAR},
+        #{queryResidentialListDto.pageSize, mode=IN, jdbcType=VARCHAR},
+        #{queryResidentialListDto.pageNumber, mode=IN, jdbcType=VARCHAR},
+        #{queryResidentialListDto.total, mode=OUT, jdbcType=BIGINT}
+        )}
+    </select>
+    <!--根据线损率查询台区线损数据-->
+    <resultMap id="queryLineLostListInfo" type="cn.com.cdboost.collect.dto.param.QueryLineLostListInfo">
+        <result property="platform" column="platform"/>
+        <result property="electDeviceAmount" column="elect_device_amount"/>
+        <result property="occupation" column="occupation"/>
+        <result property="powerSupply" column="power_supply"/>
+        <result property="electSale" column="elect_sale"/>
+        <result property="electLoss" column="elect_loss"/>
+        <result property="meterCno" column="meter_cno"/>
+    </resultMap>
+    <select id="queryLineLostList" statementType="CALLABLE" resultMap="queryLineLostListInfo">
+        {call PRC_W_D_Line_loss_StaticByOrg(
+        #{queryLineLostListDto.lossType, mode=IN, jdbcType=VARCHAR},
+        #{queryLineLostListDto.orgNo, mode=IN, jdbcType=VARCHAR},
+        #{queryLineLostListDto.platform, mode=IN, jdbcType=VARCHAR},
+        #{queryLineLostListDto.queryGuid, mode=IN, jdbcType=VARCHAR},
+        #{queryLineLostListDto.pageSize, mode=IN, jdbcType=VARCHAR},
+        #{queryLineLostListDto.pageNumber, mode=IN, jdbcType=VARCHAR},
+        #{queryLineLostListDto.total, mode=OUT, jdbcType=BIGINT}
+        )}
+    </select>
+    <!--台区日损耗列表-->
+    <select id="queryDayLost" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.param.QueryDayLostInfo">
+        {call PRC_W_D_Line_loss_dayByTq(
+        #{queryDayLostDto.meterCno, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.startDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.endDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageSize, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageNumber, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.total, mode=OUT, jdbcType=BIGINT}
+        )}
+    </select>
+    <!--各台区供入电量明细-->
+    <select id="querySupplyElectDetail" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.param.QuerySupplyElectDetailInfo">
+        {call PRC_W_D_Line_loss_dayByIn(
+        #{queryDayLostDto.meterCno, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.startDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.endDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageSize, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageNumber, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.total, mode=OUT, jdbcType=BIGINT}
+        )}
+    </select>
+    <!--各台区供出电量明细-->
+    <select id="queryConfessElectDetail" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.param.QueryConfessElectDetailInfo">
+        {call PRC_W_D_Line_loss_dayByOut(
+        #{queryDayLostDto.meterCno, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.startDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.endDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageSize, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageNumber, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.total, mode=OUT, jdbcType=BIGINT}
+        )}
+    </select>
+    <!--各台区日抄表成功率-->
+    <select id="queryDayCollectSucceedRate" statementType="CALLABLE" resultType="cn.com.cdboost.collect.dto.param.QueryDayCollectSucceedRateInfo">
+        {call PRC_W_D_Line_loss_dayRate(
+        #{queryDayLostDto.meterCno, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.startDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.endDate, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageSize, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.pageNumber, mode=IN, jdbcType=VARCHAR},
+        #{queryDayLostDto.total, mode=OUT, jdbcType=BIGINT}
+        )}
+    </select>
+</mapper>

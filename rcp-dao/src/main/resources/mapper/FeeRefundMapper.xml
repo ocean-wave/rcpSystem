@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.cdboost.collect.dao.FeeRefundMapper">
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeeRefund">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+    <result column="cno" jdbcType="VARCHAR" property="cno" />
+    <result column="device_type" jdbcType="CHAR" property="deviceType" />
+    <result column="refund_money" jdbcType="DECIMAL" property="refundMoney" />
+    <result column="refund_guid" jdbcType="VARCHAR" property="refundGuid" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="refund_method" jdbcType="INTEGER" property="refundMethod" />
+    <result column="serial_num" jdbcType="VARCHAR" property="serialNum" />
+    <result column="befor_remain_amount" jdbcType="DECIMAL" property="beforRemainAmount" />
+    <result column="is_valid" jdbcType="INTEGER" property="isValid" />
+    <result column="refund_date" jdbcType="TIMESTAMP" property="refundDate" />
+    <result column="create_user_id" jdbcType="BIGINT" property="createUserId" />
+  </resultMap>
+
+  <resultMap id="queryListMap" type="cn.com.cdboost.collect.dto.RefundQueryListDto">
+    <result column="cno" jdbcType="VARCHAR" property="cno" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="user_name" jdbcType="VARCHAR" property="createUserName" />
+    <result column="create_user_id" jdbcType="BIGINT" property="createUserId" />
+    <result column="customer_addr" jdbcType="VARCHAR" property="customerAddr" />
+    <result column="customer_contact" jdbcType="VARCHAR" property="customerContact" />
+    <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+    <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+    <result column="is_valid" jdbcType="INTEGER" property="isValid" />
+    <result column="refund_date" jdbcType="TIMESTAMP" property="refundDate" />
+    <result column="refund_method" jdbcType="INTEGER" property="refundMethod" />
+    <result column="refund_money" jdbcType="DECIMAL" property="refundMoney" />
+    <result column="refund_guid" jdbcType="VARCHAR" property="refundGuid" />
+    <result column="property_name" jdbcType="VARCHAR" property="propertyName" />
+    <result column="after_remain_amount" jdbcType="DECIMAL" property="afterRemainAmount" />
+    <result column="serial_num" jdbcType="VARCHAR" property="serialNum" />
+    <result column="device_no" jdbcType="VARCHAR" property="deviceNo" />
+    <result column="org_name" jdbcType="VARCHAR" property="orgName" />
+    <result column="remark" jdbcType="VARCHAR" property="remarks" />
+  </resultMap>
+
+  <resultMap id="queryDetialMap" type="cn.com.cdboost.collect.dto.QueryDetailDto">
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="user_name" jdbcType="VARCHAR" property="createUserName" />
+    <result column="create_user_id" jdbcType="BIGINT" property="createUserId" />
+    <result column="customer_addr" jdbcType="VARCHAR" property="customerAddr" />
+    <result column="customer_contact" jdbcType="VARCHAR" property="customerContact" />
+    <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+    <result column="is_valid" jdbcType="INTEGER" property="isValid" />
+    <result column="refund_date" jdbcType="TIMESTAMP" property="refundDate" />
+    <result column="refund_method" jdbcType="INTEGER" property="refundMethod" />
+    <result column="refund_money" jdbcType="DECIMAL" property="refundMoney" />
+    <result column="refund_guid" jdbcType="VARCHAR" property="refundGuid" />
+    <result column="property_name" jdbcType="VARCHAR" property="propertyName" />
+    <result column="after_remain_amount" jdbcType="DECIMAL" property="afterRemainAmount" />
+    <result column="serial_num" jdbcType="VARCHAR" property="serialNum" />
+    <result column="remark" jdbcType="VARCHAR" property="remarks" />
+  </resultMap>
+
+
+  <resultMap id="queryRefundRecordMap" type="cn.com.cdboost.collect.dto.QueryRefundRecordDto">
+    <result column="customer_addr" jdbcType="VARCHAR" property="customerAddr" />
+    <result column="customer_contact" jdbcType="VARCHAR" property="customerContact" />
+    <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+    <result column="customer_name" jdbcType="VARCHAR" property="customerName" />
+    <result column="refund_date" jdbcType="TIMESTAMP" property="refundDate" />
+    <result column="refund_money" jdbcType="DECIMAL" property="refundMoney" />
+    <result column="property_name" jdbcType="VARCHAR" property="propertyName" />
+    <result column="device_no" jdbcType="VARCHAR" property="deviceNo" />
+    <result column="install_addr" jdbcType="VARCHAR" property="installAddr" />
+  </resultMap>
+
+  <sql id="QUERY-COMMON">
+    <where>
+      t2.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="customerAddr!=null and customerAddr!=''">
+        AND t2.customer_addr like CONCAT('%',#{customerAddr},'%')
+      </if>
+      <if test="customerContact!=null and customerContact!=''">
+        AND t2.customer_contact = #{customerContact}
+      </if>
+      <if test="customerName!=null and customerName!=''">
+        AND t2.customer_name like CONCAT('%',#{customerName},'%')
+      </if>
+      <if test="propertyName!=null and propertyName!=''">
+        AND t2.property_name = #{propertyName}
+      </if>
+      <if test="startDate!=null and startDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &gt;= str_to_date(#{startDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+      <if test="endDate!=null and endDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &lt;= str_to_date(#{endDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+    </where>
+    ORDER BY t1.refund_date DESC
+  </sql>
+
+  <!--退费列表查询-->
+  <select id="queryList" parameterType="cn.com.cdboost.collect.dto.param.RefundQueryListVo" resultMap="queryListMap">
+    SELECT  t5.org_name,t1.create_user_id,t4.user_name,t2.customer_addr,t2.customer_contact,t2.customer_name,t2.customer_no,t1.is_valid,t1.refund_date,t1.refund_method,t1.refund_money,
+    t2.property_name,t1.after_remain_amount,t1.serial_num,t1.refund_guid,t1.remark
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_b_user t4 ON t4.id = t1.create_user_id
+    LEFT JOIN em_b_org t5 ON t5.org_no = t2.org_no
+    <include refid="QUERY-COMMON" />
+    limit #{pageIndex},#{pageSize}
+  </select>
+  <!--退费列表条数统计-->
+  <select id="queryCount" parameterType="cn.com.cdboost.collect.dto.param.RefundQueryListVo" resultType="java.lang.Long">
+    SELECT count(*) as total FROM (SELECT
+    t2.customer_addr,t2.customer_contact,t2.customer_name,t2.customer_no,t1.is_valid,t1.refund_date,t1.refund_method,t1.refund_money,
+    t2.property_name,t1.after_remain_amount,t1.serial_num,t1.refund_guid,t1.remark
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_b_user t4 ON t4.id = t1.create_user_id
+    LEFT JOIN em_b_org t5 ON t5.org_no = t2.org_no
+    <include refid="QUERY-COMMON" />) AS dd
+  </select>
+  <!--统计总退费金额-->
+  <select id="queryRefundMoney" parameterType="cn.com.cdboost.collect.dto.param.RefundQueryListVo" resultType="java.lang.Float">
+    SELECT sum(t1.refund_money)
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_b_user t4 ON t4.id = t1.create_user_id
+    LEFT JOIN em_b_org t5 ON t5.org_no = t2.org_no
+    <include refid="QUERY-COMMON" />
+  </select>
+  <!--查询客户退费详情-->
+  <select id="queryDetial" parameterType="cn.com.cdboost.collect.dto.param.QueryDetialVo" resultMap="queryDetialMap">
+    SELECT t1.create_user_id,t4.user_name,t2.customer_addr,t2.customer_contact,t2.customer_name,t2.customer_no,t1.is_valid,t1.refund_date,t1.refund_method,t1.refund_money,
+    t2.property_name,t1.after_remain_amount,t1.serial_num,t1.refund_guid,t1.remark
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_b_user t4 ON t4.id = t1.create_user_id
+    <where>
+      t2.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      and t1.refund_guid = #{refundGuid}
+    </where>
+    ORDER BY t1.id DESC
+  </select>
+  <!--查询客户退费记录-->
+  <select id="queryListByCst" parameterType="cn.com.cdboost.collect.dto.param.QueryListByCstVo" resultMap="queryDetialMap">
+    SELECT t1.create_user_id,t4.user_name,t2.customer_addr,t2.customer_contact,t2.customer_name,t2.customer_no,t1.is_valid,t1.refund_date,t1.refund_method,t1.refund_money,
+    t2.property_name,t1.after_remain_amount,t1.serial_num,t1.refund_guid,t1.remark
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_b_user t4 ON t4.id = t1.create_user_id
+    <where>
+      t2.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      AND t1.customer_no = #{customerNo,jdbcType=VARCHAR}
+      <if test="startDate!=null and startDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &gt;= str_to_date(#{startDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+      <if test="endDate!=null and endDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &lt;= str_to_date(#{endDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+    </where>
+    ORDER BY t1.id DESC
+  </select>
+  <!--用户退费查询-->
+  <select id="queryRefundRecord" parameterType="cn.com.cdboost.collect.dto.param.QueryRefundRecordVo" resultMap="queryRefundRecordMap">
+    SELECT t2.customer_addr,t2.customer_contact,t1.meter_user_no,t2.customer_name,t1.refund_date,t1.refund_money,
+    t2.property_name,right(t1.cno,12) as device_no,t3.install_addr
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_d_deviceinfo t3 ON t3.cno = t1.cno
+    <where>
+      t2.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="startDate!=null and startDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &gt;= str_to_date(#{startDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+      <if test="endDate!=null and endDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &lt;= str_to_date(#{endDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+    </where>
+    ORDER BY t1.refund_date DESC
+    limit #{pageIndex},#{pageSize}
+  </select>
+  <select id="queryRefundRecordCount" parameterType="cn.com.cdboost.collect.dto.param.QueryRefundRecordVo" resultType="java.lang.Long">
+    SELECT count(*) as total FROM(SELECT
+    t2.customer_addr,t2.customer_contact,t1.meter_user_no,t2.customer_name,t1.refund_date,t1.refund_money,
+    t2.property_name,right(t1.cno,12) as device_no,t3.install_addr
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_d_deviceinfo t3 ON t3.cno = t1.cno
+    <where>
+      t2.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="startDate!=null and startDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &gt;= str_to_date(#{startDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+      <if test="endDate!=null and endDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &lt;= str_to_date(#{endDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+    </where>) as dd
+  </select>
+  <select id="queryRefundRecordMoneyCount" parameterType="cn.com.cdboost.collect.dto.param.QueryRefundRecordVo" resultType="java.lang.Float">
+    SELECT sum(t1.refund_money)
+    FROM em_d_fee_refund t1
+    LEFT JOIN em_d_customerinfo t2 ON t2.customer_no = t1.customer_no
+    LEFT JOIN em_d_deviceinfo t3 ON t3.cno = t1.cno
+    <where>
+      t2.org_no IN
+      <foreach collection="orgNos" index="index" item="item" open="(" separator="," close=")">
+        #{item,jdbcType=BIGINT}
+      </foreach>
+      <if test="startDate!=null and startDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &gt;= str_to_date(#{startDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+      <if test="endDate!=null and endDate!=''" >
+        AND DATE_FORMAT(t1.refund_date,'%y-%m-%d') &lt;= str_to_date(#{endDate},'%Y-%m-%d %H:%i:%s')
+      </if>
+    </where>
+  </select>
+  <!-- 客户退费调用的存储过程 -->
+  <select id="customerRefund" statementType="CALLABLE"
+          parameterType="cn.com.cdboost.collect.dto.CustomerRefundCallVo" >
+    <![CDATA[
+       {call PRC_W_D_Refund(
+          #{refundMoney, mode=IN, jdbcType=DECIMAL},
+          #{customerNo, mode=IN, jdbcType=VARCHAR},
+          #{cno, mode=IN, jdbcType=VARCHAR},
+          #{refundGuid, mode=IN, jdbcType=VARCHAR},
+          #{createUserId, mode=IN, jdbcType=INTEGER},
+          #{refundMethod, mode=IN, jdbcType=INTEGER},
+          #{remark, mode=IN, jdbcType=VARCHAR},
+          #{result, mode=OUT, jdbcType=INTEGER}
+       )}
+    ]]>
+  </select>
+</mapper>

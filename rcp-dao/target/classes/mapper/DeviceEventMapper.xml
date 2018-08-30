@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.cdboost.collect.dao.DeviceEventMapper">
+    <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.DeviceEvent">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="customer_no" jdbcType="VARCHAR" property="customerNo"/>
+        <result column="cno" jdbcType="CHAR" property="cno"/>
+        <result column="event_level" jdbcType="INTEGER" property="eventLevel"/>
+        <result column="event_category" jdbcType="VARCHAR" property="eventCategory"/>
+        <result column="event_content" jdbcType="VARCHAR" property="eventContent"/>
+        <result column="event_time" jdbcType="TIMESTAMP" property="eventTime"/>
+        <result column="event_flag" jdbcType="INTEGER" property="eventFlag"/>
+        <result column="solve_user_id" jdbcType="INTEGER" property="solveUserId"/>
+        <result column="solve_content" jdbcType="VARCHAR" property="solveContent"/>
+        <result column="solve_time" jdbcType="TIMESTAMP" property="solveTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <resultMap id="QueryEventDTO" type="cn.com.cdboost.collect.dto.QueryEventDTO">
+        <result column="property_name" jdbcType="VARCHAR" property="propertyName"/>
+        <result column="device_no" jdbcType="VARCHAR" property="deviceNo"/>
+        <result column="event_time" jdbcType="TIMESTAMP" property="alarmTime"/>
+        <result column="event_content" jdbcType="VARCHAR" property="alarmReason"/>
+        <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo"/>
+        <result column="event_flag" jdbcType="VARCHAR" property="eventStatus"/>
+        <result column="solve_time" jdbcType="TIMESTAMP" property="alarmDealTime"/>
+        <result column="solve_content" jdbcType="VARCHAR" property="alarmDealDescribe"/>
+        <result column="user_name" jdbcType="VARCHAR" property="alarmDealPerson"/>
+        <result column="event_category" jdbcType="VARCHAR" property="eventCategory"/>
+        <result column="event_content" jdbcType="VARCHAR" property="eventContent"/>
+        <result column="customer_name" jdbcType="VARCHAR" property="customerName"/>
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="property_name" jdbcType="VARCHAR" property="propertyName"/>
+        <result column="org_name" jdbcType="VARCHAR" property="orgName"/>
+        <result column="install_addr" jdbcType="VARCHAR" property="installAddr"/>
+    </resultMap>
+    <resultMap id="ExcAccountListDTO" type="cn.com.cdboost.collect.dto.ExcAccountListDTO">
+        <result column="event_category" jdbcType="VARCHAR" property="eventCategory"/>
+        <result column="account_num" jdbcType="VARCHAR" property="accountNum"/>
+        <result column="deal_num" jdbcType="VARCHAR" property="dealNum"/>
+        <result column="undeal_num" jdbcType="VARCHAR" property="undealNum"/>
+    </resultMap>
+    <select id="getDeviceEvent" parameterType="cn.com.cdboost.collect.dto.param.QueryEventVo" resultMap="QueryEventDTO">
+        SELECT
+        t.customer_name,
+        e.install_addr,
+        a.id,
+        a.event_content,
+        a.event_category,
+        d.meter_user_no,
+        t.property_name,
+        e.device_no,
+        a.event_time,
+        a.event_content,
+        a.event_flag,
+        a.solve_time,
+        a.solve_content,
+        c.user_name
+        from em_d_customerdevmap d
+        INNER JOIN em_d_customerinfo t on d.customer_no=t.customer_no AND d.is_change=0
+        INNER JOIN em_d_device_event a on a.cno=d.cno
+        LEFT  JOIN em_b_user c on a.solve_user_id=c.id
+        INNER JOIN em_d_deviceinfo e on a.cno=e.cno
+        where 1=1
+        <if test="customerNo!=null">
+            and d.customer_no=#{customerNo,jdbcType=VARCHAR}
+        </if>
+        <if test="deviceType!=null">
+            AND d.device_type=#{deviceType,jdbcType=VARCHAR}
+        </if>
+        <if test="eventCategory!=null ">
+            and a.event_category=#{eventCategory}
+        </if>
+        <if test="eventStatus!=null ">
+            and a.event_flag=#{eventStatus}
+        </if>
+        <if test="customerName!=null ">
+            and t.customer_name like concat('%',#{customerName},'%')
+        </if>
+        <if test="propertyName!=null ">
+            and t.property_name like concat('%',#{propertyName},'%')
+        </if>
+        <if test="customerContact!=null ">
+            and t.customer_contact like concat('%',#{customerContact},'%')
+        </if>
+        <if test="installAddr!=null ">
+            and e.install_addr like concat('%',#{installAddr},'%')
+        </if>
+        <if test="deviceNo!=null ">
+            and e.device_no like concat('%',#{deviceNo},'%')
+        </if>
+        <if test="meterUserNo!=null ">
+            and d.meter_user_no like concat('%',#{meterUserNo},'%')
+        </if>
+        <if test="id!=1">
+            and a.event_level in
+        <foreach collection="permissionIdlist" item="item" index="index" open="(" close=")" separator=",">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+        </if>
+
+
+        and a.create_time
+        BETWEEN #{startDate,jdbcType=TIMESTAMP}
+        and <![CDATA[date_add(#{endDate,jdbcType=TIMESTAMP},interval 1 day)]]>
+    </select>
+    <select id="getDeviceEventcall" statementType="CALLABLE" parameterType="cn.com.cdboost.collect.dto.param.QueryEventVo"
+    resultMap="QueryEventDTO"
+    >
+        {call PRC_W_D_DeviceEventDetail (
+        #{deviceNo,mode=IN,jdbcType=VARCHAR},
+        #{customerName,mode=IN,jdbcType=VARCHAR},
+        #{installAddr,mode=IN,jdbcType=VARCHAR},
+        #{startDate,mode=IN,jdbcType=VARCHAR},
+        #{endDate,mode=IN,jdbcType=VARCHAR},
+        #{eventCategory,mode=IN,jdbcType=VARCHAR},
+        #{permissionId,mode=IN,jdbcType=VARCHAR},
+        #{id,mode=IN,jdbcType=BIGINT},
+        #{pageSize,mode=IN,jdbcType=BIGINT},
+        #{pageNumber,mode=IN,jdbcType=BIGINT},
+        #{eventStatus,mode=IN,jdbcType=VARCHAR},
+        #{deviceType,mode=IN,jdbcType=VARCHAR},
+        #{customerNo,mode=IN,jdbcType=VARCHAR},
+        #{rowCount,mode=OUT,jdbcType=VARCHAR}
+        )}
+
+
+    </select>
+    <select id="queryExcAccountListDTO"  statementType="CALLABLE"  resultMap="ExcAccountListDTO" >
+  {call PRC_W_D_DeviceEventGet(
+  #{start,mode=IN,jdbcType=VARCHAR},
+  #{end,mode=IN,jdbcType=VARCHAR},
+  #{eventLevel,mode=IN,jdbcType=VARCHAR},
+  #{userid,mode=IN,jdbcType=INTEGER},
+  #{deviceType,mode=IN,jdbcType=VARCHAR}
+  )}
+
+    </select>
+
+    <update id="updateDeviceEvent" parameterType="cn.com.cdboost.collect.dto.QueryEventDTO">
+        update em_d_device_event
+        <set>
+            <if test="solveUserId != null ">
+                solve_user_id = #{solveUserId,jdbcType=INTEGER},
+            </if>
+            <if test="solveContent!=null">
+                solve_content=#{solveContent,jdbcType=VARCHAR},
+            </if>
+            <if test="alarmDealTime!=null">
+                solve_time=#{alarmDealTime,jdbcType=TIMESTAMP},
+            </if>
+            event_flag=1
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+
+    </update>
+
+</mapper>

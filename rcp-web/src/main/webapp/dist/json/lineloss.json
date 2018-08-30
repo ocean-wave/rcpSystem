@@ -1,0 +1,26 @@
+{
+  "data": [
+    {
+    "residential":"国网成都分公司",
+    "platformTotal":100,
+    "lineLossRateLess0platform":10,
+    "lineLossRateLess0ccupation": 0.1,
+    "lineLossRateLess10platform":20,
+    "lineLossRateLess10ccupation": 0.2,
+    "lineLossRateBigger10platform":40,
+    "lineLossRateBigger10ccupation":0.4
+  },{
+      "residential":"新城市别墅",
+      "platformTotal":100,
+      "lineLossRateLess0platform":10,
+      "lineLossRateLess0ccupation": 0.1,
+      "lineLossRateLess10platform":20,
+      "lineLossRateLess10ccupation": 0.2,
+      "lineLossRateBigger10platform":40,
+      "lineLossRateBigger10ccupation":0.4
+    }
+  ],
+  "total": 2,
+  "message": "success",
+  "code": 1
+}

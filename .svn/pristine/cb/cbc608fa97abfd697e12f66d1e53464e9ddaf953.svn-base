@@ -1,0 +1,103 @@
+package cn.com.cdboost.collect.service;
+
+
+import cn.com.cdboost.collect.common.BaseService;
+import cn.com.cdboost.collect.dto.WorkRuntorNameOrgInfo;
+import cn.com.cdboost.collect.dto.param.UserGetQueryVo;
+import cn.com.cdboost.collect.dto.response.UserQueryInfo;
+import cn.com.cdboost.collect.exception.BusinessException;
+import cn.com.cdboost.collect.model.User;
+
+import java.util.List;
+import java.util.Set;
+
+/**
+ * 用户服务接口
+ */
+public interface UserService extends BaseService<User>{
+	/**
+	 * 添加用户和用户角色信息
+	 * @param user 要添加的用户信息
+	 * @param dataOrgList 用户拥有的数据权限列表
+	 * @param roleId 用户所属的角色id
+	 * @throws BusinessException
+	 */
+	void addUserInfo(User user,List<Long> dataOrgList, Integer roleId) throws BusinessException;
+
+	/**
+	 * 根据用户id删除用户
+	 * @param ids 要删除的用户id集合
+	 * @param currentUserId 当前登录用户id
+	 * @return
+	 * @throws Exception
+	 */
+	void batchDeleteByIds(Set<Integer> ids, Integer currentUserId) throws BusinessException;
+
+	/**
+	 * 更新用户已经用户角色信息
+	 * @param user
+	 * @param roleId
+	 */
+	void updateUserInfo(User user,List<Long> dataOrgList, int roleId) throws BusinessException;
+
+	/**
+	*@Description:查询用户
+	*@return List<User>
+	*@throws Exception  List<User>
+	*/
+	List<UserQueryInfo> query(UserGetQueryVo queryVo);
+
+
+	/**
+	 * 验证用户密码,是否正确
+	 * @param userId
+	 * @param password
+	 * @return
+	 */
+	boolean validatePassword(Integer userId, String password);
+
+	/**
+	*@Description:修改用户密码
+	*@return int
+	*@throws Exception
+	*/
+	void changeUserPassword(Integer userId, String password);
+	/**
+	*@Description:
+	*@return User
+	*@throws Exception 
+	*/
+	User getUserByLoginName(String LoginName);
+	
+	/**
+	*@Description:查询用户的角色id
+	*@return String
+	*@throws Exception 
+	*/
+	long getRoleIdByUserID(long userId);
+
+
+	/**
+	 * 根据用户姓名模糊查询并生成以用户id为key的数据结构如下：
+	 * {“text”: “姓名：张三|部门：部门机构 ”，”value”: “人员编号”}
+	 */
+	List<WorkRuntorNameOrgInfo> queryUsersByUserName(String userName);
+
+	/**
+	 * 登录名称是否存在
+	 * @param loginName
+	 * @return
+	 */
+	Boolean isLoginNameExist(String loginName) throws BusinessException;
+
+	/**
+	 * 用户手机号是否存在
+	 * @param userMobile
+	 * @return
+	 */
+	Boolean isUserMobileExist(String userMobile) throws BusinessException;
+
+	// 根据ids列表，批量查询
+	List<User> batchQueryByIds(List<Integer> ids);
+}
+

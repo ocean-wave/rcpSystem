@@ -1,0 +1,42 @@
+## 阿里云短信
+aliyun.accessKeyId = LTAIea61AljIytkp
+aliyun.accessKeySecret = s7voGly322RSCB567e1ZMVxv6cdMba
+
+# 短信签名
+aliyun.signName = 成都博高
+
+# 短信回执消息队列名
+aliyun.queueName = Alicom-Queue-1390728788274354-SmsReport
+
+# 公司申请短信模板
+# 验证码模板code
+aliyun.templateCode.validateCode = SMS_137425732
+
+# 订单微信支付成功（缴费到账提醒）
+aliyun.templateCode.paySuccessSmsTemplateCode = SMS_137410784
+
+# 远程充值成功（充值到账提醒）
+aliyun.templateCode.remoteSuccessSmsTemplateCode = SMS_137415818
+
+# 告警短信通知模板（缴费提醒）
+aliyun.templateCode.alarmSmsTemplateCode = SMS_140550049
+
+#app充电告警短信通知模板(充电中意外断开通知)
+aliyun.templateCode.alarmChargeTemplateCode = SMS_140520150
+
+# 短信内容模板
+# 验证码内容模板
+aliyun.content.validateContent = 尊敬的用户您好，您的验证码为%s，您正在进行微信账号绑定操作，验证码5分钟内有效。
+
+# 缴费到账提醒内容模板
+aliyun.content.paySuccessSmsContent = 尊敬的%s用户您好，您于%s通过%s向编号为%s的%s支付%s元%s，系统将在一小时内将充值信息下发至%s，请耐心等待。
+
+# 充值到账提醒内容模板
+aliyun.content.remoteSuccessSmsContent = 尊敬的%s用户您好，您于%s通过%s支付的%s元%s已成功下发至编号为%s的%s。
+
+# 告警短信内容模板
+aliyun.content.alarmSmsContent = 尊敬的%s用户您好，截止到%s,%s剩余金额已低于%s元，当前剩余金额%s元,请及时充值。
+
+#充电app告警短信内容模板
+aliyun.content.alarmChargeContent = 用户你好，你于%s日,在%s充电过程中于%s时监测到充电桩号为%s。
+

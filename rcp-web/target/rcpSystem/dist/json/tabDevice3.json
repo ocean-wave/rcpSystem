@@ -1,0 +1,35 @@
+{
+	"data": [{
+		"state": "2",
+		"remainBattery": "20%",
+		"deviceNo": "989897",
+		"deviceType": "1"
+	}, {
+		"state": "2",
+		"remainBattery": "29%",
+		"deviceNo": "8678675",
+		"deviceType": "2"
+	}, {
+		"state": "2",
+		"remainBattery": "34%",
+		"deviceNo": "8679789",
+		"deviceType": "3"
+	}, {
+		"state": "2",
+		"remainBattery": "20%",
+		"deviceNo": "989897",
+		"deviceType": "1"
+	}, {
+		"state": "2",
+		"remainBattery": "29%",
+		"deviceNo": "8678675",
+		"deviceType": "2"
+	}, {
+		"state": "2",
+		"remainBattery": "34%",
+		"deviceNo": "8679789",
+		"deviceType": "3"
+	}],
+	"message": "success",
+	"code": 1
+}

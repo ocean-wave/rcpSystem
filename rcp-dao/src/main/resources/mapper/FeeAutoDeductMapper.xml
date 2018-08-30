@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.com.cdboost.collect.dao.FeeAutoDeductMapper">
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.FeeAutoDeduct">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="customer_no" jdbcType="VARCHAR" property="customerNo" />
+    <result column="meter_user_no" jdbcType="VARCHAR" property="meterUserNo" />
+    <result column="cno" jdbcType="VARCHAR" property="cno" />
+    <result column="deduct_money" jdbcType="DECIMAL" property="deductMoney" />
+    <result column="cost_type" jdbcType="INTEGER" property="costType" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="calculate_id" jdbcType="INTEGER" property="calculateId" />
+    <result column="customer_remain_amount" jdbcType="DECIMAL" property="customerRemainAmount" />
+    <result column="remain_amount" jdbcType="DECIMAL" property="remainAmount" />
+    <result column="group_guid" jdbcType="VARCHAR" property="groupGuid" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+</mapper>

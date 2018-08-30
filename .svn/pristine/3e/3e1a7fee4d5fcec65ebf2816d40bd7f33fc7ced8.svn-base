@@ -1,0 +1,58 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.dto.chargerApp.Ajax;
+import cn.com.cdboost.collect.model.ChargingCst;
+import cn.com.cdboost.collect.model.ChargingPayCheme;
+import cn.com.cdboost.collect.vo.Result;
+
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+
+public interface WxChargerPayService {
+    /**
+     * 微信充值下单
+     * @param pay
+     * @param openid
+     * @return
+     */
+    Ajax pay(Double pay, String ip, ChargingPayCheme chargingPayCheme, String customerGuid, String openid, HttpServletRequest request);
+
+    /**
+     * 微信通知
+      * @param outTradeNo
+     * @return
+     */
+    void notify(String outTradeNo);
+    /**
+     * 扣费接口
+     * @param openId
+     * @return
+     */
+    void deductions(String chargingGUID, String deviceNo,String port ,String openId, String priceId);
+
+    /**
+     *  用户购买月卡余额扣减
+     * @param chargingCst
+     * @param chargingPayCheme
+     */
+    void deductionsOfMonth(ChargingCst chargingCst,ChargingPayCheme chargingPayCheme);
+
+    /**
+     * 微信下单接口
+     * @param pay
+     * @param ip
+     * @param chargingPayCheme
+     * @param customerGuid
+     * @param openid
+     * @return
+     */
+    Ajax chargePay(Integer type,BigDecimal deductAmount,BigDecimal pay, String ip, ChargingPayCheme chargingPayCheme, String customerGuid, String openid);
+
+    String refund(String openId,BigDecimal amount,HttpServletRequest request);
+
+
+    Result withdrawCash(String guid,String openId, BigDecimal amount, HttpServletRequest request);
+
+    // 查询提现流水状态
+    void checkCashFailFlows(Integer id,String partnerTradeNo);
+}

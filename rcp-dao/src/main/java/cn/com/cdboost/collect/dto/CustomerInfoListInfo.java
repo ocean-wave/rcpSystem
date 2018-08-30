@@ -1,0 +1,104 @@
+package cn.com.cdboost.collect.dto;
+
+/**
+ * @author wt
+ * @desc
+ * @create in  2018/8/15
+ **/
+public class CustomerInfoListInfo {
+    private String customerState;
+    private String customerContact;
+    private String remainAmount;
+    private String remainCnt;
+    private String chargeCount;
+    private String alipayNickName="";
+    private String customerName="";
+    private String cardId="";
+    private String updateTime;
+    private String customerGuid;
+
+    public String getCustomerGuid() {
+        return customerGuid;
+    }
+
+    public void setCustomerGuid(String customerGuid) {
+        this.customerGuid = customerGuid;
+    }
+
+    public String getCustomerState() {
+        return customerState;
+    }
+
+    public void setCustomerState(String customerState) {
+        if("1".equals(customerState)){
+            customerState="运行中";
+        }else{
+            customerState="黑名单";
+        }
+        this.customerState = customerState;
+    }
+
+    public String getCustomerContact() {
+        return customerContact;
+    }
+
+    public void setCustomerContact(String customerContact) {
+        this.customerContact = customerContact;
+    }
+
+    public String getRemainAmount() {
+        return remainAmount;
+    }
+
+    public void setRemainAmount(String remainAmount) {
+        this.remainAmount = remainAmount;
+    }
+
+    public String getRemainCnt() {
+        return remainCnt;
+    }
+
+    public void setRemainCnt(String remainCnt) {
+        this.remainCnt = remainCnt;
+    }
+
+    public String getChargeCount() {
+        return chargeCount;
+    }
+
+    public void setChargeCount(String chargeCount) {
+        this.chargeCount = chargeCount;
+    }
+
+    public String getAlipayNickName() {
+        return alipayNickName;
+    }
+
+    public void setAlipayNickName(String alipayNickName) {
+        this.alipayNickName = alipayNickName;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+}

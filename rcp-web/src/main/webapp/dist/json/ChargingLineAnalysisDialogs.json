@@ -1,0 +1,75 @@
+{
+  "code": 1,
+  "message": "success",
+  "data":{
+    "list":[{
+      "port": "11",
+      "deviceElect": "11",
+      "startDate": "2018-8-5",
+      "endDate":  "2018-8-5",
+      "mostPower": 0.1,
+      "mostCurrent": 20
+    },{
+      "port": "11",
+      "deviceElect": "13",
+      "startDate": "2018-8-6",
+      "endDate":  "2018-8-6",
+      "mostPower": 0.1,
+      "mostCurrent": 20
+    },{
+      "port": "11",
+      "deviceElect": "15",
+      "startDate": "2018-8-7",
+      "endDate":  "2018-8-7",
+      "mostPower": 0.1,
+      "mostCurrent": 20
+    },{
+      "port": "11",
+      "deviceElect": "10",
+      "startDate": "2018-8-8",
+      "endDate":  "2018-8-8",
+      "mostPower": 0.1,
+      "mostCurrent": 20
+    },{
+      "port": "11",
+      "deviceElect": "18",
+      "startDate": "2018-8-9",
+      "endDate":  "2018-8-9",
+      "mostPower": 0.1,
+      "mostCurrent": 20
+    }],
+    "import": [{
+      "date": "00:15",
+      "voltageA": 100,
+      "currentA": 10
+    },{
+      "date": "00:30",
+      "voltageA": 10,
+      "currentA": 13
+    },{
+      "date": "00:45",
+      "voltageA": 70,
+      "currentA": 30
+    },{
+      "date": "01:00",
+      "voltageA": 60,
+      "currentA": 80
+    },{
+      "date": "01:15",
+      "voltageA": 110,
+      "currentA": 60
+    },{
+      "date": "01:30",
+      "voltageA": 40,
+      "currentA": 60
+    },{
+      "date": "01:45",
+      "voltageA": 90,
+      "currentA": 60
+    },{
+      "date": "02:00",
+      "voltageA": 100,
+      "currentA": 60
+    }]
+  }
+}
