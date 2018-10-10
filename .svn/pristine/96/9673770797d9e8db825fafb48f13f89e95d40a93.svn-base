@@ -1,0 +1,254 @@
+package cn.com.cdboost.collect.model;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Table(name = "em_d_charging_pay_cheme")
+public class ChargingPayCheme implements Serializable {
+    /**
+     * 标识id
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * 方案唯一标识
+     */
+    @Column(name = "scheme_guid")
+    private String schemeGuid;
+
+    /**
+     * 充值类别 1-购买次数  2-包月充值
+     */
+    @Column(name = "pay_category")
+    private Integer payCategory;
+
+    /**
+     * 充值包月数 pay_category=2时有效
+     */
+    @Column(name = "num_months")
+    private Integer numMonths;
+
+    /**
+     * 活动实际支付金额 pay_category=4时有效
+     */
+    @Column(name = "pay_money")
+    private  BigDecimal payMoney;
+
+    /**
+     * 金额
+     */
+    private BigDecimal money;
+
+    /**
+     * 0 标识不限 其他标识实时时长,单位小时
+     */
+    @Column(name = "charging_time")
+    private Integer chargingTime;
+
+    /**
+     * 使用次数
+     */
+    @Column(name = "charging_cnt")
+    private Integer chargingCnt;
+
+    /**
+     * 项目标识
+     */
+    @Column(name = "project_guid")
+    private  String projectGuid;
+
+    /**
+     * 排序
+     */
+    @Column(name = "sort_no")
+    private  Integer sortNo;
+
+    /**
+     * 是否启用（1启用，0禁用）
+     */
+    @Column(name = "is_enable")
+    private Integer isEnable;
+
+    /**
+     * 电瓶车功率标识（0小功率，1大功率,2中功率）
+     */
+    @Column(name = "power")
+    private Integer power;
+
+    /**
+     * '方案的最小功率'
+     */
+    @Column(name = "min_power")
+    private Integer minPower;
+
+    /**
+     * '方案的最大功率'
+     */
+    @Column(name = "max_power")
+    private Integer maxPower;
+
+    public Integer getMinPower() {
+        return minPower;
+    }
+
+    public void setMinPower(Integer minPower) {
+        this.minPower = minPower;
+    }
+
+    public Integer getMaxPower() {
+        return maxPower;
+    }
+
+    public void setMaxPower(Integer maxPower) {
+        this.maxPower = maxPower;
+    }
+
+    public String getProjectGuid() {
+        return projectGuid;
+    }
+
+    public void setProjectGuid(String projectGuid) {
+        this.projectGuid = projectGuid;
+    }
+
+    public BigDecimal getPayMoney() {
+        return payMoney;
+    }
+
+    public void setPayMoney(BigDecimal payMoney) {
+        this.payMoney = payMoney;
+    }
+
+    public Integer getSortNo() {
+        return sortNo;
+    }
+
+    public void setSortNo(Integer sortNo) {
+        this.sortNo = sortNo;
+    }
+
+    /**
+     * 获取标识id
+     *
+     * @return id - 标识id
+     */
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * 设置标识id
+     *
+     * @param id 标识id
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * 获取充值类别 1-购买次数  2-包月充值
+     *
+     * @return pay_category - 充值类别 1-购买次数  2-包月充值
+     */
+    public Integer getPayCategory() {
+        return payCategory;
+    }
+
+    /**
+     * 设置充值类别 1-购买次数  2-包月充值
+     *
+     * @param payCategory 充值类别 1-购买次数  2-包月充值
+     */
+    public void setPayCategory(Integer payCategory) {
+        this.payCategory = payCategory;
+    }
+
+    /**
+     * 获取金额
+     *
+     * @return money - 金额
+     */
+    public BigDecimal getMoney() {
+        return money;
+    }
+
+    /**
+     * 设置金额
+     *
+     * @param money 金额
+     */
+    public void setMoney(BigDecimal money) {
+        this.money = money;
+    }
+
+    /**
+     * 获取0 标识不限 其他标识实时时长,单位小时
+     *
+     * @return charging_time - 0 标识不限 其他标识实时时长,单位小时
+     */
+    public Integer getChargingTime() {
+        return chargingTime;
+    }
+
+    /**
+     * 设置0 标识不限 其他标识实时时长,单位小时
+     *
+     * @param chargingTime 0 标识不限 其他标识实时时长,单位小时
+     */
+    public void setChargingTime(Integer chargingTime) {
+        this.chargingTime = chargingTime;
+    }
+
+    /**
+     * 获取使用次数
+     *
+     * @return charging_cnt - 使用次数
+     */
+    public Integer getChargingCnt() {
+        return chargingCnt;
+    }
+
+    /**
+     * 设置使用次数
+     *
+     * @param chargingCnt 使用次数
+     */
+    public void setChargingCnt(Integer chargingCnt) {
+        this.chargingCnt = chargingCnt;
+    }
+
+    public Integer getNumMonths() {
+        return numMonths;
+    }
+
+    public void setNumMonths(Integer numMonths) {
+        this.numMonths = numMonths;
+    }
+
+    public String getSchemeGuid() {
+        return schemeGuid;
+    }
+
+    public void setSchemeGuid(String schemeGuid) {
+        this.schemeGuid = schemeGuid;
+    }
+
+    public Integer getIsEnable() {
+        return isEnable;
+    }
+
+    public void setIsEnable(Integer isEnable) {
+        this.isEnable = isEnable;
+    }
+
+    public Integer getPower() {
+        return power;
+    }
+
+    public void setPower(Integer power) {
+        this.power = power;
+    }
+}

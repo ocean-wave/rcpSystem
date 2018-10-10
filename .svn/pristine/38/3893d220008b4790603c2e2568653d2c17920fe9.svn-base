@@ -1,0 +1,333 @@
+package cn.com.cdboost.collect.listener;
+
+
+import cn.com.cdboost.collect.constant.ChargeAppConstant;
+import cn.com.cdboost.collect.constant.ChargeConstant;
+import cn.com.cdboost.collect.constant.RedisKeyConstant;
+import cn.com.cdboost.collect.constant.WebSocketConstant;
+import cn.com.cdboost.collect.dto.param.OnOffCharging;
+import cn.com.cdboost.collect.dto.response.AppReChargerResponse;
+import cn.com.cdboost.collect.dto.response.AppStopChargerResponse;
+import cn.com.cdboost.collect.dto.response.WebSocketResponse;
+import cn.com.cdboost.collect.enums.ChargingEnum;
+import cn.com.cdboost.collect.enums.GlobalConstant;
+import cn.com.cdboost.collect.handler.SpringWebSocketHandler;
+import cn.com.cdboost.collect.lock.Lock;
+import cn.com.cdboost.collect.model.ChargingDevice;
+import cn.com.cdboost.collect.model.ChargingUseDetailed;
+import cn.com.cdboost.collect.service.AppChargerService;
+import cn.com.cdboost.collect.service.ChargingDeviceService;
+import cn.com.cdboost.collect.service.ChargingUseDetailedService;
+import cn.com.cdboost.collect.service.WxChargerPayService;
+import cn.com.cdboost.collect.util.MathUtil;
+import cn.com.cdboost.collect.util.RedisUtil;
+import cn.com.cdboost.collect.util.StringUtil;
+import com.alibaba.fastjson.JSON;
+import com.example.clienttest.client.AFN19DataBackLisener;
+import com.example.clienttest.client.AFN19Object;
+import com.example.clienttest.client.AFN20Object;
+import com.example.clienttest.clientfuture.ClientManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+@Component("aFN19ResultDataBackLisener")
+public class AFN19ResultDataBackLisener implements AFN19DataBackLisener {
+    private static final Logger logger = LoggerFactory.getLogger(AFN19ResultDataBackLisener.class);
+    @Autowired
+    AppChargerService appChargerService;
+    @Autowired
+    WxChargerPayService wxChargerPayService;
+    @Autowired
+    ChargingDeviceService chargingDeviceService;
+    @Autowired
+    ChargingUseDetailedService chargingUseDetailedService;
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Override
+    public void onDataBack(AFN19Object afn19Object) {
+        logger.info("开始或停止充电回调接口接收数据：AFN19Object=" + JSON.toJSONString(afn19Object));
+
+        // APP端推送
+        this.sendAppUser(afn19Object);
+
+        // WEB端推送
+        this.sendWebUser(afn19Object);
+    }
+
+    /**
+     * App端推送
+     * @param afn19Object
+     */
+    private void sendAppUser(AFN19Object afn19Object) {
+        logger.info("-----进入APP推送逻辑--------");
+        Lock lock = new Lock();
+        String chargingGuid = afn19Object.getChargingGuid();
+        String powerState = afn19Object.getPowerState();
+        int status = afn19Object.getStatus();
+        String openId = afn19Object.getOpenId();
+        String commNo = afn19Object.getMoteEUI();
+        int measure = afn19Object.getMeasure();
+        try{
+            if (StringUtils.isEmpty(chargingGuid)) {
+                logger.info("chargingGuid为空");
+                return;
+            }
+
+            ChargingUseDetailed useDetailed = chargingUseDetailedService.queryChargingRecordByChargingGuid(chargingGuid);
+            if (StringUtils.isEmpty(openId)) {
+                openId = useDetailed.getOpenNo();
+            }
+
+            if (ChargeConstant.OnOffType.ON.getType().equalsIgnoreCase(powerState) && ChargeAppConstant.MeasureType.APPEND_MEASURE.getType() == measure) {
+                // 续充通电成功或失败 websocket推送
+                this.sendReChargeSuccessMesssage(openId,commNo,status);
+            } else {
+                // 发送websocket推送
+                this.sendMesssage(openId,commNo,status,powerState);
+            }
+
+            if (ChargeConstant.OnOffType.OFF.getType().equalsIgnoreCase(powerState) && status == 1) {
+                lock.lock(chargingGuid + powerState + status);
+            }
+
+            int openMeans = afn19Object.getOpenMeans();
+            //判断是否为断电状态
+            String port = afn19Object.getPort();
+            ChargingDevice chargingDevice = chargingDeviceService.queryByCommon(commNo,port);
+            if(ChargeConstant.OnOffType.OFF.getType().equalsIgnoreCase(powerState) && status == 1){
+                // 是否有退费
+                BigDecimal refundMoney = new BigDecimal(afn19Object.getRefundMoney());
+                boolean flag = MathUtil.isGreateThanZero(refundMoney);
+                if (flag) {
+                    appChargerService.refundMoney(useDetailed,refundMoney);
+                }
+
+                // 断电发送短信或微信消息
+                appChargerService.sendMessage4OffElec(chargingDevice,useDetailed);
+            } else if(ChargeConstant.OnOffType.ON.getType().equalsIgnoreCase(powerState) &&
+                    ChargeAppConstant.MeasureType.RE_MEASURE.getType() == measure && status == 1){
+                // 首次充电、费用扣减操作
+                wxChargerPayService.deductions(chargingDevice,chargingGuid,openMeans,openId,afn19Object.getPriceId());
+
+                // 发送微信模板
+                appChargerService.sendWxMessage4OnElec(chargingDevice,chargingGuid);
+            } else if (ChargeConstant.OnOffType.ON.getType().equalsIgnoreCase(powerState) &&
+                    ChargeAppConstant.MeasureType.APPEND_MEASURE.getType() == measure && status==1) {
+                // 充电中，点击续充电成功，费用扣除
+                String key = RedisKeyConstant.RE_CHARGE_ELEC_PREFIX + chargingDevice.getChargingPlieGuid();
+                boolean flag = redisUtil.set(key, "1", 60);
+                if (flag) {
+                    String deviceNo = chargingDevice.getDeviceNo() + chargingDevice.getDeviceNo();
+                    logger.info("设备编号{}续充电成功，放入redis缓存，60秒后删除",deviceNo);
+                }
+
+                wxChargerPayService.rechargeDeductions(useDetailed);
+            }
+        } catch (Exception e){
+            logger.error("充电停止充电回调监听接口异常:",e);
+            lock.unLock();
+        }
+
+    }
+
+    /**
+     *
+     * @param openId
+     * @param moteEUI
+     * @param status
+     * @param powerState
+     */
+    private void sendMesssage(String openId, String moteEUI, int status, String powerState) {
+        ConcurrentMap<String,WebSocketSession> appUsers = SpringWebSocketHandler.getAppUsers();
+        if (CollectionUtils.isEmpty(appUsers)) {
+            logger.info("WebSocket App在线用户数为空");
+            return;
+        }
+
+        for (Map.Entry<String, WebSocketSession> user : appUsers.entrySet()) {
+            String userOpenId = user.getKey();
+            if(!user.getValue().isOpen()){
+                appUsers.remove(userOpenId,user.getValue());
+                continue;
+            }
+
+            if (!openId.equals(userOpenId)) {
+                continue;
+            }
+
+            //判断是否为断电状态
+            AppStopChargerResponse response  = this.createResponse(moteEUI, openId, powerState, status);
+
+            //发送
+            WebSocketResponse<AppStopChargerResponse> socketResponse = new WebSocketResponse<>();
+            socketResponse.setData(response);
+            socketResponse.setDataFlag(WebSocketConstant.DataFlagEnum.CHARGE_ON_OFF.getFlag());
+            try {
+//                logger.info("发送者:"+appUsers.get(userOpenId)+"发送信息："+JSON.toJSONString(socketResponse));
+                appUsers.get(userOpenId).sendMessage(new TextMessage(JSON.toJSONString(socketResponse)));
+            } catch (IOException e) {
+                logger.error("开始或停止充电异常！",e);
+            }
+            // 跳出for循环
+            break;
+        }
+    }
+
+
+    /**
+     *
+     * @param openId
+     * @param moteEUI
+     * @param status
+     */
+    private void sendReChargeSuccessMesssage(String openId, String moteEUI, int status) {
+        ConcurrentMap<String,WebSocketSession> appUsers = SpringWebSocketHandler.getAppUsers();
+        if (CollectionUtils.isEmpty(appUsers)) {
+            logger.info("WebSocket App在线用户数为空");
+            return;
+        }
+
+        for (Map.Entry<String, WebSocketSession> user : appUsers.entrySet()) {
+            String userOpenId = user.getKey();
+            if(!user.getValue().isOpen()){
+                appUsers.remove(userOpenId,user.getValue());
+                continue;
+            }
+
+            if (!openId.equals(userOpenId)) {
+                continue;
+            }
+
+            //判断是否为断电状态
+            AppReChargerResponse response = new AppReChargerResponse();
+            response.setOpenId(openId);
+            response.setDeviceNo(moteEUI);
+            response.setState(status);
+
+            //发送
+            WebSocketResponse<AppReChargerResponse> socketResponse = new WebSocketResponse<>();
+            socketResponse.setData(response);
+            socketResponse.setDataFlag(WebSocketConstant.DataFlagEnum.RE_CHARGE_ON_OFF.getFlag());
+            try {
+//                logger.info("发送者:"+appUsers.get(userOpenId)+"发送信息："+JSON.toJSONString(socketResponse));
+                appUsers.get(userOpenId).sendMessage(new TextMessage(JSON.toJSONString(socketResponse)));
+            } catch (IOException e) {
+                logger.error("开始或停止充电异常！",e);
+            }
+            // 跳出for循环
+            break;
+        }
+    }
+
+    private AppStopChargerResponse createResponse(String moteEUI, String openId, String powerState, int status) {
+        AppStopChargerResponse response = new AppStopChargerResponse();
+        response.setDeviceNo(moteEUI);
+        response.setOpenId(openId);
+        //判断是否为断电状态
+
+        if (ChargeConstant.OnOffType.OFF.getType().equalsIgnoreCase(powerState)) {
+            // 断电
+            response.setType(ChargeConstant.OnOffType.OFF.getValue());
+            if(status == 1){
+                response.setState(ChargeConstant.OnOffOperateStatus.OFF_SUCCESS.getStatus());
+                response.setStateDesc(ChargeConstant.OnOffOperateStatus.OFF_SUCCESS.getDesc());
+            } else {
+                response.setState(ChargeConstant.OnOffOperateStatus.OFF_FAIL.getStatus());
+                response.setStateDesc(ChargeConstant.OnOffOperateStatus.OFF_FAIL.getDesc());
+            }
+        } else {
+            // 通电
+            response.setType(ChargeConstant.OnOffType.ON.getValue());
+            if(status == 1){
+                response.setState(ChargeConstant.OnOffOperateStatus.ON_SUCCESS.getStatus());
+                response.setStateDesc(ChargeConstant.OnOffOperateStatus.ON_SUCCESS.getDesc());
+            } else {
+                response.setState(ChargeConstant.OnOffOperateStatus.ON_FAIL.getStatus());
+                response.setStateDesc(ChargeConstant.OnOffOperateStatus.ON_FAIL.getDesc());
+            }
+        }
+        return response;
+    }
+
+
+    /**
+     * Web端推送
+     * @param afn19Object
+     */
+    private void sendWebUser(AFN19Object afn19Object){
+        try {
+            CopyOnWriteArraySet<WebSocketSession> users = SpringWebSocketHandler.getUsers();
+            String powerState = afn19Object.getPowerState();
+            Integer runState;
+            if (ChargeConstant.OnOffType.OFF.getType().equalsIgnoreCase(powerState) && afn19Object.getStatus() == 1 ){
+                if (!StringUtil.isEmpty(afn19Object.getSessionId())){//sessionId不为空表示web停用充电桩操作
+                    /*if ("0".equals(afn19Object.getNonUseFlag())){//停用指令
+                        chargingDeviceService.updateRunState(afn19Object.getMoteEUI(), ChargingEnum.OFF_STATE.getKey(),afn19Object.getPort());
+                    }else if ("-1".equals(afn19Object.getNonUseFlag())){//停充指令（中间件收到停充指令会将状态改为空闲）
+
+                    }*/
+                    //runState = ChargingEnum.OFF_STATE.getKey();
+                } else {
+                    //sessionId为空表示app端停止充电操作
+                }
+            }
+
+            if (CollectionUtils.isEmpty(users)) {
+//                logger.info("webSocket 在线用户数为空");
+                return;
+            }
+
+            //通过commNo和端口查询数据库充电桩详情
+            ChargingDevice device = chargingDeviceService.queryByCommon(afn19Object.getMoteEUI(), afn19Object.getPort());
+            runState = device.getRunState();
+            for (WebSocketSession session :users){
+                HttpSession httpSession = (HttpSession) session.getAttributes().get(GlobalConstant.HTTP_SESSION_OBJECT);
+//                logger.info("WebSocket中记录的sessionId=" + httpSession.getId());
+                //判断是否为通电操作
+                if(ChargeConstant.OnOffType.ON.getType().equalsIgnoreCase(powerState)){
+                    //主动召测一次数据
+                    AFN20Object afn20Object = new AFN20Object(UUID.randomUUID().toString(),"20","999999999","0042475858fffaa",afn19Object.getMoteEUI(),afn19Object.getPort(),httpSession.getId(),null);
+                    ClientManager.sendAFN20Msg(afn20Object);
+                    return;
+                }
+                WebSocketResponse<OnOffCharging> response = new WebSocketResponse<>();
+
+                //停用不推送长连接
+                if (runState == ChargingEnum.OFF_STATE.getKey()){
+                    return;
+                }
+                OnOffCharging onOffCharging = new OnOffCharging();
+                onOffCharging.setRunState(runState);
+                onOffCharging.setStatus(afn19Object.getStatus());
+                onOffCharging.setPort(afn19Object.getPort());
+
+                onOffCharging.setOnline(device.getOnline());
+                onOffCharging.setDeviceNo(device.getDeviceNo());
+                onOffCharging.setChargingPlieGuid(device.getChargingPlieGuid());
+
+                response.setData(onOffCharging);
+                response.setDataFlag(WebSocketConstant.DataFlagEnum.ONOFF_DEVICE_DATA.getFlag());
+                session.sendMessage(new TextMessage(JSON.toJSONString(response)));
+                logger.info("web端电瓶车充电桩停充websocket send success: data=" + JSON.toJSONString(response));
+//                logger.info("电瓶车充电桩停用websocket send success: data=" + JSON.toJSONString(response));
+            }
+        }catch (Exception e) {
+            logger.error("停用充电桩异常",e);
+        }
+    }
+}

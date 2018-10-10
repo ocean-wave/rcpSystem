@@ -1,0 +1,86 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.common.BaseService;
+import cn.com.cdboost.collect.dto.*;
+import cn.com.cdboost.collect.dto.param.ChargeHeartStepVo;
+import cn.com.cdboost.collect.dto.param.ChargeThresholdVo;
+import cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo;
+import cn.com.cdboost.collect.dto.param.ElectricCountQueryVo;
+import cn.com.cdboost.collect.model.ChargingDevice;
+import cn.com.cdboost.collect.vo.Result;
+import com.github.pagehelper.PageInfo;
+
+import java.text.ParseException;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * 充电设备业务层
+ */
+public interface ChargingDeviceService extends BaseService<ChargingDevice> {
+    PageInfo withdrawCashList(WithdrawCashListDto withdrawCashListDto);
+    PageInfo chargeRecordList(ChargeRecordListDto useRecordListDto);
+    PageInfo useRecordList(UseRecordListDto useRecordListDto);
+    Integer setCustomerState(String customerGuid, Integer customerState);
+    ChargeCustomerInfoDetailInfo customerInfoDetail(String customerGuid);
+    PageInfo customerInfoList(CustomerInfoListDto customerInfoListDto);
+    DayLineLossInfo dayLineLoss(DayLineLossDto totalLineLossDto) throws ParseException;
+    TotalLineLossInfo totalLineLoss(TotalLineLossDto totalLineLossDto) throws ParseException;
+
+    List<ChargingDeviceDto> deviceList(ChargerDeviceQueryVo queryVo, Integer userId);
+
+    List<ChargingUseDetailedDto> deviceDetialUseList(ChargerDeviceQueryVo queryVo);
+
+    void addDevice(ChargingDevice chargingDevice, Integer userId);
+
+    boolean deleteDevice(List<String> chargingPlieGuids, Integer userId);
+
+    boolean editDevice(ChargingDevice chargingDevice, Integer userId);
+
+    ChargingDeviceDto queryDeviceDetial(String chargingPlieGuid);
+
+    ElectricCountDto queryCountList(ChargerDeviceQueryVo queryVo);
+
+    PowerAndFeeCountInfo queryPowerAndFeeCount(ElectricCountQueryVo queryVo);
+
+    List<MonitorDeviceDto> monitorDeviceList(ChargerDeviceQueryVo queryVo);
+
+
+    // 根据设备编号和端口号查询
+    ChargingDevice queryByDeviceNo(String deviceNo,String port);
+
+    // 根据设备编号和端口号查询
+    ChargingDevice queryByCommon(String common,String port);
+    // 根据充电桩guid查询
+    ChargingDevice queryByChargingPlieGuid(String chargingPlieGuid);
+
+    List<ChargingDevice> batchQueryByChargingPlieGuids(Collection<String> guids);
+
+    ChargingCountByRunState monitorDeviceCount(ChargerDeviceQueryVo queryVo);
+
+    void updateRunState(String commNo, Integer runState, String port);
+
+    //web端停用或启用充电桩
+    void offOnCharge(OffOnChargeVo offOnChargeVo);
+
+    //查询充电桩阈值
+    void queryThreshold(String sessionId, String commNo, String port);
+
+    //设置充电桩阈值
+    void setThreshold(String sessionId, ChargeThresholdVo chargeThresholdVo);
+
+    //查询充电桩心跳间隔
+    void queryHeartStep(String id, String commNo);
+
+    //设置充电桩心跳间隔
+    void setHeartStep(String id, ChargeHeartStepVo chargeHeartStepVo);
+
+    //添加ic卡下发表
+    void addCardList(ChargingDevice chargingDevice, Result result);
+
+    //删除ic卡下发表
+    void deleteCardList(List<String> deviceNos);
+
+    //修改ic卡下发表
+    void editCardList(ChargingDevice chargingDevice,String oldProjectGuid, Result result);
+}

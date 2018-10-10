@@ -1,6 +1,5 @@
 cn\com\cdboost\collect\param\DayElectricInfoParam.class
 cn\com\cdboost\collect\util\TokenUtil.class
-cn\com\cdboost\collect\util\DateUtil.class
 cn\com\cdboost\collect\exception\RcpDubboException.class
 cn\com\cdboost\collect\param\PaymentRecordParam.class
 cn\com\cdboost\collect\service\SmokeDeviceServiceDubbo.class
@@ -16,15 +15,18 @@ cn\com\cdboost\collect\vo\SmokeDeviceListNoTimeVo.class
 cn\com\cdboost\collect\service\SmokeDevlogServiceDubbo.class
 cn\com\cdboost\collect\util\SelfDateAnnValidator.class
 cn\com\cdboost\collect\vo\SmokeDeviceListVo.class
+cn\com\cdboost\collect\param\QueryListParamDate.class
 cn\com\cdboost\collect\service\ArrearageMessageService.class
+cn\com\cdboost\collect\param\QueryListParam.class
 cn\com\cdboost\collect\param\CustomerOnOffParam.class
-cn\com\cdboost\collect\vo\Result$errorType.class
 cn\com\cdboost\collect\vo\DayElectricInfoResponseVo.class
-cn\com\cdboost\collect\vo\Result.class
 cn\com\cdboost\collect\service\HistoryElectricAmountService.class
+cn\com\cdboost\collect\param\BaseSychronizeDto.class
+cn\com\cdboost\collect\service\BaseSychronizeServiceDubbo.class
 cn\com\cdboost\collect\vo\OnOffMeterVo.class
 cn\com\cdboost\collect\vo\SmokeDeviceVo.class
 cn\com\cdboost\collect\param\HistoryElectricAmountParam.class
+cn\com\cdboost\collect\result\vo\Result$errorType.class
 cn\com\cdboost\collect\param\RemainAmountResponse.class
 cn\com\cdboost\collect\param\ArrearageMessageParam.class
 cn\com\cdboost\collect\vo\SmokeDeviceSelectTotalDB.class
@@ -33,4 +35,6 @@ cn\com\cdboost\collect\param\PaymentRecordresponseParam.class
 cn\com\cdboost\collect\service\PaymentRecordService.class
 cn\com\cdboost\collect\param\BasequeryParam.class
 cn\com\cdboost\collect\service\CustomerOnOffService.class
+cn\com\cdboost\collect\param\BaseSychronizeReseponse.class
+cn\com\cdboost\collect\result\vo\Result.class
 cn\com\cdboost\collect\param\OnOffMessageParam.class

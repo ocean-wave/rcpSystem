@@ -21,7 +21,6 @@
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 		<property name="locations">
 			<array>
-				<value>classpath:sms-config.properties</value>
 				<value>classpath:aliyun-sms-config.properties</value>
 				<value>classpath:alipay-config.properties</value>
 				<value>classpath:weixin-config.properties</value>

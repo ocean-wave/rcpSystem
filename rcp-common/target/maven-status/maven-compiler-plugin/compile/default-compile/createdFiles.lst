@@ -35,6 +35,7 @@ cn\com\cdboost\collect\constant\CustomerInfoConstant$EnableStatus.class
 cn\com\cdboost\collect\constant\RealTimeDataConstant$CollectMeterStatus.class
 cn\com\cdboost\collect\constant\ChargeConstant$ChargeState.class
 cn\com\cdboost\collect\util\Md5Util2.class
+cn\com\cdboost\collect\constant\ChargeAppConstant$SplitAccountType.class
 cn\com\cdboost\collect\constant\ChargeAppConstant$UserType.class
 cn\com\cdboost\collect\util\Md5.class
 cn\com\cdboost\collect\util\MD5Util.class
@@ -44,6 +45,7 @@ cn\com\cdboost\collect\constant\ChargeAppConstant$AppType.class
 cn\com\cdboost\collect\util\CodeCacheUtil.class
 cn\com\cdboost\collect\constant\ChargeAppConstant.class
 cn\com\cdboost\collect\constant\ClientConstant$CommRuleDescEnum.class
+cn\com\cdboost\collect\constant\ChargeConstant$SendFlag.class
 cn\com\cdboost\collect\constant\ChargeAppConstant$WithdrawCashType.class
 cn\com\cdboost\collect\constant\ClientConstant$AFN07ObjectFlag.class
 cn\com\cdboost\collect\vo\SmsBaseParam.class
@@ -102,6 +104,7 @@ cn\com\cdboost\collect\vo\PageData.class
 cn\com\cdboost\collect\constant\ChargeCardConstant$State.class
 cn\com\cdboost\collect\util\XmlUtil.class
 cn\com\cdboost\collect\constant\MeterDiConstant$CommonUser97.class
+cn\com\cdboost\collect\constant\ChargeAppConstant$MeasureType.class
 cn\com\cdboost\collect\constant\ChargeAppConstant$MessageType.class
 cn\com\cdboost\collect\constant\ChargeAppConstant$PayWay.class
 cn\com\cdboost\collect\constant\DictCodeConstant.class

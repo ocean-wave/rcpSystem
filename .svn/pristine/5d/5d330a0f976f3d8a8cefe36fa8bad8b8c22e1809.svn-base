@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:property-placeholder location="classpath:dubbo.properties" ignore-unresolvable="true" file-encoding="UTF-8" />
+	<!-- 配置当前应用模块名称 -->
+	<dubbo:application name="rcp-dubbo"/>
+
+	<!-- 配置注册中心的位置 -->
+	<dubbo:registry address="${zookeeper.address}" protocol="zookeeper"/>
+
+	<!-- 配置Dubbo客户端的访问端口 -->
+	<dubbo:protocol name="dubbo" port="20881"/>
+
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.CustomerOnOffService" ref="customerOnOffServiceImpl"
+                   version="1.0" timeout="3000"/>
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.DayElectricInfoService" ref="dayElectricInfoServiceImpl"
+				   version="1.0" timeout="3000"/>
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.HistoryElectricAmountService" ref="historyElectricAmountServiceImpl"
+				   version="1.0" timeout="3000"/>
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.PaymentRecordService" ref="paymentRecordServiceImpl"
+				   version="1.0" timeout="3000"/>
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.RemainAmountService" ref="remainAmountServiceImpl"
+				   version="1.0" timeout="3000"/>
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.SmokeDeviceServiceDubbo" ref="smokeDeviceServiceDubboImpl"
+				   version="1.0" timeout="3000"/>
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.SmokeDevlogServiceDubbo" ref="smokeDevlogServiceDubboImpl"
+				   version="1.0" timeout="3000"/>
+</beans>

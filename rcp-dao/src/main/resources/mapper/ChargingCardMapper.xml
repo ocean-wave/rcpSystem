@@ -11,7 +11,9 @@
     <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
     <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
     <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+    <result column="card_guid" property="cardGuid" jdbcType="VARCHAR" />
     <result column="card_state" property="cardState" jdbcType="INTEGER" />
+    <result column="card_owe" property="cardOwe" jdbcType="INTEGER" />
     <result column="use_cnt" property="useCnt" jdbcType="INTEGER" />
     <result column="init_amount" property="initAmount" jdbcType="DECIMAL" />
     <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
@@ -31,6 +33,8 @@
     t.customer_contact customerContact,
     t.remain_amount icRemainAmount,
     t.init_amount initAmount,
+    t.card_guid cardGuid,
+    t.project_guid projectGuid,
     t1.customer_guid customerGuid,
     t1.remain_amount remainAmount,
     t1.webchar_no webcharNo,
@@ -38,12 +42,28 @@
     FROM
         em_d_charging_card t
     LEFT JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+    INNER JOIN em_d_charging_project t3 on t.project_guid=t3.project_guid
+    INNER JOIN em_b_org t2 ON t3.org_no = t2.org_no
+    <if test="nodeType !=null and nodeType==1">
+      INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+      AND h3.org_no =#{nodeId}
+    </if>
     <where>
+      t2.org_no in
+    <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+      #{item}
+    </foreach>
+    <if test="nodeType !=null and nodeType==2">
+      AND t.project_guid=#{nodeId}
+    </if>
     <if test="cardId!=null and cardId!=''">
       AND t.card_id like CONCAT('%',#{cardId},'%')
     </if>
     <if test="cardState!=null">
       AND t.card_state = #{cardState}
+    </if>
+    <if test="projectGuid!=null and projectGuid != ''">
+      AND t.project_guid = #{projectGuid}
     </if>
     </where>
     <choose>
@@ -67,6 +87,9 @@
       </if>
       <if test="cardState!=null">
         AND t.card_state = #{cardState}
+      </if>
+      <if test="projectGuid!=null and projectGuid != ''">
+        AND t.project_guid = #{projectGuid}
       </if>
     </where>
   </select>

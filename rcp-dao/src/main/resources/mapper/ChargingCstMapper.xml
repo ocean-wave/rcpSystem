@@ -15,39 +15,7 @@
     <result column="car_category" property="carCategory" jdbcType="INTEGER" />
     <result column="car_power" property="carPower" jdbcType="INTEGER" />
     <result column="remain_amount" property="remainAmount" jdbcType="DECIMAL" />
-    <result column="remain_cnt" property="remainCnt" jdbcType="INTEGER" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
   </resultMap>
-
-  <!-- 更新账户余额信息 -->
-  <update id="updateAccountAmount">
-    update em_d_charging_cst
-    <set>
-      <if test="amount ！= null">
-        remain_amount=remain_amount + #{amount},
-      </if>
-      <if test="updateTime ！= null">
-        update_time= #{updateTime},
-      </if>
-    </set>
-    WHERE id= #{id}
-  </update>
-
-  <!-- 更新账户充值次数信息 -->
-  <update id="updateAccountCnt">
-    update em_d_charging_cst
-    <set>
-      <if test="chargeCnt != null">
-        remain_cnt= remain_cnt + #{chargeCnt},
-      </if>
-      <if test="expireTime != null">
-        expire_time = #{expireTime},
-      </if>
-      <if test="updateTime != null">
-        update_time= #{updateTime},
-      </if>
-    </set>
-    WHERE id= #{id}
-  </update>
 </mapper>

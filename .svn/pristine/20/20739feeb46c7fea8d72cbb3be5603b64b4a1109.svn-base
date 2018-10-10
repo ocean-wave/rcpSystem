@@ -1,0 +1,104 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.dao.ChargingMonthCardAcctMapper;
+import cn.com.cdboost.collect.dto.param.AccountOperateVo;
+import cn.com.cdboost.collect.model.ChargingAccountFlow;
+import cn.com.cdboost.collect.model.ChargingMonthCardAcct;
+import cn.com.cdboost.collect.service.ChargingAccountFlowService;
+import cn.com.cdboost.collect.service.ChargingMonthCardAcctService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ * 充电月卡账户实现类
+ */
+@Service
+public class ChargingMonthCardAcctServiceImpl extends BaseServiceImpl<ChargingMonthCardAcct> implements ChargingMonthCardAcctService {
+
+    @Autowired
+    private ChargingMonthCardAcctMapper monthCardAcctMapper;
+    @Autowired
+    private ChargingAccountFlowService chargingAccountFlowService;
+
+    @Override
+    public List<ChargingMonthCardAcct> queryUseableMonthCard(String customerGuid,List<String> list) {
+        Condition condition = new Condition(ChargingMonthCardAcct.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("customerGuid",customerGuid);
+        criteria.andIn("schemeGuid",list);
+        criteria.andGreaterThanOrEqualTo("expireTime",new Date());
+        criteria.andGreaterThan("payCnt",0);
+
+        return monthCardAcctMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public List<ChargingMonthCardAcct> queryUseableMonthCardList(String customerGuid) {
+        Condition condition = new Condition(ChargingMonthCardAcct.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("customerGuid",customerGuid);
+        criteria.andGreaterThanOrEqualTo("expireTime",new Date());
+        criteria.andGreaterThan("remainCnt",0);
+
+        return monthCardAcctMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public List<ChargingMonthCardAcct> queryUserBuyMonthCard(String customerGuid, List<String> list) {
+        Condition condition = new Condition(ChargingMonthCardAcct.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("customerGuid",customerGuid);
+        criteria.andIn("schemeGuid",list);
+
+        return monthCardAcctMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public ChargingMonthCardAcct queryUseableMonthCard(String customerGuid, String schemeGuid) {
+        Condition condition = new Condition(ChargingMonthCardAcct.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("customerGuid",customerGuid);
+        criteria.andEqualTo("schemeGuid",schemeGuid);
+        criteria.andGreaterThanOrEqualTo("expireTime",new Date());
+        List<ChargingMonthCardAcct> list = monthCardAcctMapper.selectByCondition(condition);
+        if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        ChargingMonthCardAcct monthCardAcct = list.get(0);
+
+        return monthCardAcct;
+    }
+
+    @Override
+    public ChargingMonthCardAcct queryByParams(String customerGuid, String schemeGuid) {
+        ChargingMonthCardAcct param = new ChargingMonthCardAcct();
+        param.setCustomerGuid(customerGuid);
+        param.setSchemeGuid(schemeGuid);
+        return monthCardAcctMapper.selectOne(param);
+    }
+
+    @Override
+    public void updateAccount(ChargingMonthCardAcct param, AccountOperateVo operateVo) {
+        // 更新账户余额
+        monthCardAcctMapper.updateByPrimaryKeySelective(param);
+
+        // 新增账户变动流水记录
+        ChargingAccountFlow flow = new ChargingAccountFlow();
+        flow.setAccountId(0);
+        flow.setMonthAccountId(param.getId());
+        flow.setCardId("");
+        flow.setChargeCnt(operateVo.getChargeCnt());
+        flow.setBusinessType(operateVo.getBusinessType());
+        flow.setGuid(operateVo.getGuid());
+        flow.setCreateTime(new Date());
+        flow.setRemark(operateVo.getReamrk());
+        chargingAccountFlowService.insertSelective(flow);
+    }
+}

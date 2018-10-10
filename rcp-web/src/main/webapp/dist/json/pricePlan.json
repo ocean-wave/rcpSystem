@@ -1,0 +1,39 @@
+{
+	"message": "成功",
+	"total": "1",
+	"code": 1,
+	"data": {
+		"planId": "331312312312",
+		"createTime": "2018-05-06 14:22:30",
+		"isEnable": 0,
+		"deviceCst": 2,
+		"projectGuid": "32323",
+		"contact": "张三",
+		"contactTelphone": "13524152635",
+		"basePrice": 0.45,
+		"upPrice": 0.12,
+		"remark": "测试数据",
+		"projectAddr": "武侯区武科东四路路",
+		"companyName": "成都博高",
+		"communityName": "胡编乱造",
+	"monthly": {
+		"schemeGuid": "frt6546535",
+		"monthlyPrice": 4.5,
+		"monthlyTime": 10,
+		"monthlyCnt": 40
+	},
+		"temporary": [{
+			"schemeGuid": "323123123",
+			"price": 1,
+			"time": 2
+		}, {
+			"schemeGuid": "8775634534",
+			"price": 2,
+			"time": 5
+		}, {
+			"schemeGuid": "98978789",
+			"price": 4,
+			"time": 10
+		}]
+	}
+}

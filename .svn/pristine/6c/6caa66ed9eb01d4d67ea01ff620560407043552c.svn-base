@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingUseDetailedMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingUseDetailed" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+      <result column="customer_guid" property="customerGuid" jdbcType="CHAR" />
+    <result column="charging_plie_guid" property="chargingPlieGuid" jdbcType="CHAR" />
+    <result column="webchar_no" property="webcharNo" jdbcType="VARCHAR" />
+    <result column="pay_category" property="payCategory" jdbcType="INTEGER" />
+    <result column="scheme_guid" property="schemeGuid" jdbcType="VARCHAR" />
+    <result column="charging_way" property="chargingWay" jdbcType="INTEGER" />
+    <result column="charging_time" property="chargingTime" jdbcType="INTEGER" />
+    <result column="charging_power" property="chargingPower" jdbcType="INTEGER" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="end_method" property="endMethod" jdbcType="INTEGER" />
+    <result column="use_time" property="useTime" jdbcType="INTEGER" />
+    <result column="use_power" property="usePower" jdbcType="DECIMAL" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="consumption_money" property="consumptionMoney" jdbcType="DECIMAL" />
+    <result column="deduct_money" property="deductMoney" jdbcType="DECIMAL" />
+    <result column="refund_money" property="refundMoney" jdbcType="DECIMAL" />
+    <result column="refund_state" property="refundState" jdbcType="INTEGER" />
+    <result column="message_state" property="messageState" jdbcType="INTEGER" />
+    <result column="deduct_cnt" property="deductCnt" jdbcType="INTEGER" />
+    <result column="profitable" property="profitable" jdbcType="DECIMAL" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="charging_guid" property="chargingGuid" jdbcType="CHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="after_remain_cnt" property="afterRemainCnt" jdbcType="INTEGER" />
+    <result column="after_remain_amount" property="afterRemainAmount" jdbcType="DECIMAL" />
+    <result column="dev_log_id" property="devLogId" jdbcType="INTEGER" />
+    <result column="open_means" property="openMeans" jdbcType="INTEGER" />
+    <result column="open_no" property="openNo" jdbcType="VARCHAR" />
+    <result column="recharge_count" property="rechargeCount" jdbcType="INTEGER" />
+  </resultMap>
+
+  <!--客户充电桩使用记录结果集-->
+  <resultMap id="queryUseRecordMap" type="cn.com.cdboost.collect.dto.chargerApp.ChargeHistoryDto">
+     <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+     <result column="install_addr" property="installAddr" jdbcType="VARCHAR" />
+     <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
+     <result column="charging_way" property="chargingWay" jdbcType="INTEGER" />
+     <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+      <result column="pay_category" property="payCategory" jdbcType="INTEGER" />
+      <result column="s_date" property="sDate" jdbcType="VARCHAR" />
+      <result column="s_time" property="sTime" jdbcType="VARCHAR" />
+      <result column="e_time" property="eTime" jdbcType="VARCHAR" />
+      <result column="after_remain_cnt" property="remainCnt" jdbcType="INTEGER" />
+      <result column="after_remain_amount" property="pay" jdbcType="DECIMAL" />
+      <result column="charging_guid" property="chargeGuid" jdbcType="VARCHAR" />
+      <result column="event_code" property="eventCode" jdbcType="INTEGER" />
+      <result column="sms_content" property="smsContent" jdbcType="VARCHAR" />
+      <result column="deduct_money" property="deductMoney" jdbcType="DECIMAL" />
+      <result column="deduct_cnt" property="deductCnt" jdbcType="INTEGER" />
+      <result column="refund_money" property="refundMoney" jdbcType="DECIMAL" />
+  </resultMap>
+    <resultMap id="customerInfoListMap" type="cn.com.cdboost.collect.dto.CustomerInfoListInfo">
+        <result column="customer_state" property="customerState" jdbcType="VARCHAR" />
+        <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+        <result column="remain_amount" property="remainAmount" jdbcType="VARCHAR" />
+        <result column="charge_count" property="chargeCount" jdbcType="VARCHAR" />
+        <result column="alipay_nick_name" property="alipayNickName" jdbcType="VARCHAR" />
+        <result column="customer_name" property="customerName" jdbcType="VARCHAR" />
+        <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="VARCHAR" />
+        <result column="customer_guid" property="customerGuid" jdbcType="VARCHAR" />
+        <result column="project_name" property="projectName" jdbcType="VARCHAR" />
+    </resultMap>
+    <resultMap id="useRecordListMap" type="cn.com.cdboost.collect.dto.UseRecordListInfo">
+        <result column="create_time" property="date" jdbcType="VARCHAR" />
+        <result column="end_method" property="deviceState" jdbcType="VARCHAR" />
+        <result column="charging_way" property="payCategory" jdbcType="VARCHAR" />
+        <result column="device_no" property="deviceNo" jdbcType="VARCHAR" />
+        <result column="port" property="port" jdbcType="VARCHAR" />
+        <result column="use_power" property="deviceElect" jdbcType="VARCHAR" />
+        <result column="use_time" property="useTime" jdbcType="VARCHAR" />
+        <result column="start_time" property="startDate" jdbcType="VARCHAR" />
+        <result column="end_time" property="endDate" jdbcType="VARCHAR" />
+        <result column="start_time" property="startDate" jdbcType="VARCHAR" />
+        <result column="install_addr" property="installAddress" jdbcType="VARCHAR" />
+        <result column="price" property="price" jdbcType="VARCHAR" />
+        <result column="charging_plie_guid" property="chargingPlieGuid" jdbcType="VARCHAR" />
+        <result column="charging_guid" property="chargingGuid" jdbcType="VARCHAR" />
+        <result column="open_means" property="payMethod" jdbcType="VARCHAR" />
+    </resultMap>
+    <resultMap id="customerInfoDetailMap" type="cn.com.cdboost.collect.dto.ChargeCustomerInfoDetailInfo">
+        <result column="customer_contact" property="customerContact" jdbcType="VARCHAR" />
+        <result column="customer_state" property="customerState" jdbcType="VARCHAR" />
+        <result column="remain_amount" property="remainAmount" jdbcType="VARCHAR" />
+        <result column="charge_count" property="chargeCount" jdbcType="VARCHAR" />
+        <result column="alipay_user_id" property="alipayUserId" jdbcType="VARCHAR" />
+        <result column="webchar_no" property="webcharNo" jdbcType="VARCHAR" />
+        <result column="card_id" property="cardId" jdbcType="VARCHAR" />
+        <result column="community_name" property="communityName" jdbcType="VARCHAR" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+    </resultMap>
+    <select id="useRecordList" parameterType="cn.com.cdboost.collect.dto.UseRecordListDto" resultMap="useRecordListMap">
+            SELECT
+            t.create_time,
+            t.end_method,
+        CASE h.pay_category
+        WHEN 1 THEN
+        CONCAT(
+        '临时充值',
+        h.money,
+        '元',
+        IF (
+        h.charging_time = 0,
+        '不限时',
+        concat(h.charging_time, '小时')
+        )
+        )
+        WHEN 2 THEN
+        CONCAT(
+        '包月充值',
+        h.money,
+        '元',
+        concat(h.charging_cnt, '次')
+        )
+        WHEN 3 THEN
+        CONCAT(
+        '一次充满',
+        h.money,
+        '元',
+        IF (
+        h.charging_time = 0,
+        '不限时',
+        concat(h.charging_time, '小时')
+        )
+        )
+        WHEN 4 THEN
+        CONCAT(
+        '余额活动充值',
+        h.money,
+        '元',
+        IF (
+        h.charging_time = 0,
+        '不限时',
+        concat(h.charging_time, '小时')
+        )
+        )
+        WHEN 5 THEN
+        CONCAT(
+        'IC卡充值',
+        h.money,
+        '元',
+        IF (
+        h.charging_time = 0,
+        '不限时',
+        concat(h.charging_time, '小时')
+        )
+        )
+        END charging_way,
+            t.open_means,
+            d.device_no,
+            d.`port`,
+            t.use_power,
+            t.use_time,
+            t.start_time,
+            t.end_time,
+            d.install_addr,
+            t.price,
+            t.charging_plie_guid,
+            t.charging_guid
+        FROM
+            em_d_charging_use_detailed t
+        INNER JOIN em_d_charging_pay_cheme h on h.scheme_guid=t.scheme_guid
+        INNER JOIN em_d_charging_device d ON t.charging_plie_guid = d.charging_plie_guid AND  t.create_time BETWEEN #{useRecordListDto.startDate}
+        AND concat(#{useRecordListDto.endDate},' 23:59:59')
+        INNER JOIN em_d_charging_cst x on t.customer_guid=x.customer_guid AND t.customer_guid=#{useRecordListDto.customerGuid}
+        <where>
+            <if test="useRecordListDto.deviceNo !=null and useRecordListDto.deviceNo !=''">
+             AND d.device_no like  CONCAT('%',#{useRecordListDto.deviceNo},'%')
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+    </select>
+    <select id="customerInfoDetail" resultMap="customerInfoDetailMap">
+        SELECT
+            t.*, GROUP_CONCAT(h.card_id SEPARATOR ',') card_id,
+            GROUP_CONCAT(
+                DISTINCT x.community_name SEPARATOR ','
+            ) community_name,
+            GROUP_CONCAT(
+                DISTINCT h.remark SEPARATOR ','
+            ) remark
+        FROM
+	   (
+		SELECT
+			t.customer_guid,
+			t.customer_state,
+			t.customer_contact,
+			t.remain_amount,
+			count(d.customer_guid) charge_count,
+			IFNULL(
+				t.alipay_user_id,
+				'未绑定'
+			) alipay_user_id,
+			IFNULL(t.webchar_no, '未绑定') webchar_no,
+			t.update_time
+		FROM
+			em_d_charging_cst t
+		LEFT JOIN em_d_charging_use_detailed d ON t.customer_guid = d.customer_guid
+		GROUP BY
+			t.customer_guid
+	    ) t
+            LEFT JOIN em_d_charging_card h ON t.customer_guid = h.customer_guid
+            LEFT JOIN em_d_charging_project x ON h.project_guid = x.project_guid
+            WHERE  t.customer_guid=#{customerGuid}
+            GROUP BY
+                t.customer_guid
+            ORDER BY
+	      t.update_time DESC
+    </select>
+    <!--客户充电桩用户列表查询-->
+    <select id="customerInfoList" parameterType="cn.com.cdboost.collect.dto.CustomerInfoListDto" resultMap="customerInfoListMap">
+   SELECT
+	t.*, GROUP_CONCAT(h.card_id SEPARATOR ',') card_id
+  FROM
+	(
+		SELECT
+			t.customer_guid,
+			t.customer_state,
+			t.customer_contact,
+			t.remain_amount,
+			count(d.customer_guid) charge_count,
+			t.alipay_nick_name,
+			t.customer_name,
+			t.update_time,
+            t.webchar_no,
+            t.alipay_user_id,
+            t1.project_name
+		FROM
+			em_d_charging_cst t
+		LEFT JOIN em_d_charging_use_detailed d ON t.customer_guid = d.customer_guid
+        LEFT JOIN em_d_charging_device c ON d.charging_plie_guid = c.charging_plie_guid
+        LEFT JOIN em_d_charging_project t1 ON t1.project_guid = c.project_guid
+        WHERE c.project_guid in
+        <foreach collection="customerInfoListDto.proGuids" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+		GROUP BY
+			t.customer_guid
+	) t
+  LEFT JOIN em_d_charging_card h ON t.customer_guid = h.customer_guid
+  <where>
+      <if test="customerInfoListDto.customerState!=2">
+          AND t.customer_state =#{customerInfoListDto.customerState}
+      </if>
+      <if test="customerInfoListDto.webcharNo!=null and customerInfoListDto.webcharNo!=''">
+          AND t.webchar_no like concat('%',#{customerInfoListDto.webcharNo},'%')
+      </if>
+      <if test="customerInfoListDto.alipayUserId!=null and customerInfoListDto.alipayUserId!=''">
+          AND t.alipay_user_id like concat('%',#{customerInfoListDto.alipayUserId},'%')
+      </if>
+      <if test="customerInfoListDto.customerName!=null and customerInfoListDto.customerName!=''">
+          AND t.customer_name like concat('%',#{customerInfoListDto.customerName},'%')
+      </if>
+      <if test="customerInfoListDto.alipayNickName!=null and customerInfoListDto.alipayNickName!=''">
+          AND t.alipay_nick_name like concat('%',#{customerInfoListDto.alipayNickName},'%')
+      </if>
+      <if test="customerInfoListDto.customerContact!=null and customerInfoListDto.customerContact!=''">
+          AND t.customer_contact like concat('%',#{customerInfoListDto.customerContact},'%')
+      </if>
+  </where>
+ GROUP BY
+	t.customer_guid
+	ORDER BY t.update_time DESC
+    </select>
+    <!--客户充电桩使用列表查询-->
+    <select id="queryUseRecord" parameterType="cn.com.cdboost.collect.dto.chargerApp.vo.HistoryVo" resultMap="queryUseRecordMap">
+        SELECT t1.after_remain_amount,t1.after_remain_cnt,t1.deduct_money,t1.deduct_cnt,t1.refund_money,
+        substring(date_format(t1.start_time,'%Y-%m-%d %H:%i:%S'), 1, 10) as s_date,
+        substring(date_format(t1.start_time,'%Y-%m-%d %H:%i:%S'), 11) as s_time,
+        substring(date_format(t1.end_time,'%Y-%m-%d %H:%i:%S'), 11) as e_time,
+        t1.pay_category,CONCAT(t2.device_no,t2.port) as device_no,t2.install_addr,t1.end_time,t1.charging_way,t1.start_time,
+        t1.charging_guid,t3.event_code,t3.sms_content
+        FROM em_d_charging_use_detailed t1
+        INNER JOIN em_d_charging_device t2 ON t1.charging_plie_guid = t2.charging_plie_guid
+        LEFT JOIN em_d_charging_devlog t3 ON t1.dev_log_id = t3.id
+        <where>
+            AND t1.customer_guid = #{customerGuid}
+            AND t1.state = 1
+            AND <![CDATA[ t1.open_means <> 3 ]]>
+        </where>
+        ORDER BY t1.id DESC
+        limit #{pageIndex},#{pageSize}
+    </select>
+
+  <!--获取使用记录总数-->
+    <select id="queryUseRecordTotal" parameterType="cn.com.cdboost.collect.dto.chargerApp.vo.HistoryVo" resultType="java.lang.Long">
+        SELECT count(*) as total
+        FROM em_d_charging_use_detailed t1
+        INNER JOIN em_d_charging_device t2 ON t1.charging_plie_guid = t2.charging_plie_guid
+        LEFT JOIN em_d_charging_devlog t3 ON t1.dev_log_id = t3.id
+        <where>
+            AND t1.customer_guid = #{customerGuid}
+            AND t1.state = 1
+        </where>
+        ORDER BY t1.create_time DESC
+    </select>
+
+  <!--查询设备使用列表-->
+    <select id="deviceDetialUseList" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.ChargingUseDetailedDto">
+        SELECT
+        t.profitable profitable,
+        t.state state,
+        t.use_time useTime,
+        t.use_power usePower,
+        t.start_time startTime,
+        t.end_time endTime,
+        t.pay_category payCategory,
+        t.deduct_money payMoney,
+        t.charging_plie_guid chargingPlieGuid,
+        t.charging_guid chargingGuid,
+        t.open_no openNo,
+        t.open_means openMeans,
+        t1.customer_guid customerGuid,
+        t1.car_category carCategory,
+        t.webchar_no webcharNo,
+        t2.device_no deviceNo,
+        t2.port port
+        FROM
+        em_d_charging_use_detailed t
+        LEFT JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+        INNER JOIN em_d_charging_device t2 ON t.charging_plie_guid=t2.charging_plie_guid
+        WHERE t2.device_no =#{deviceNo}
+        <if test="startDate!=null and startDate!=''">
+            AND t.start_time  &gt;= #{startDate}
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            AND t.start_time &lt;= #{endDate}
+        </if>
+        <if test="customerGuid!=null and customerGuid!=''">
+            AND t.customer_guid like CONCAT('%',#{customerGuid},'%')
+        </if>
+        <if test="port!=null and port!=''">
+            AND t2.port = #{port}
+        </if>
+        ORDER BY t.id DESC LIMIT #{pageIndex},#{pageSize}
+    </select>
+  <!--查询总数-->
+    <select id="queryTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        em_d_charging_use_detailed t
+        LEFT JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+        INNER JOIN em_d_charging_device t2 ON t.charging_plie_guid=t2.charging_plie_guid
+        WHERE t2.device_no =#{deviceNo}
+        <if test="startDate!=null and startDate!=''">
+            AND t.start_time  &gt;= #{startDate}
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            AND t.start_time &lt;= #{endDate}
+        </if>
+        <if test="customerGuid!=null and customerGuid!=''">
+            AND t.customer_guid like CONCAT('%',#{customerGuid},'%')
+        </if>
+        <if test="port!=null and port!=''">
+            AND t2.port = #{port}
+        </if>
+    </select>
+
+
+    <!--统计详情汇总数-->
+    <select id="queryPowerAndFeeCount" parameterType="cn.com.cdboost.collect.dto.param.ElectricCountQueryVo" resultType="cn.com.cdboost.collect.dto.PowerAndFeeDto">
+    SELECT
+        SUM(t.use_power) electricQuantityCount,
+        SUM(t.deduct_money) deductMoneyCount,
+        SUM(t.consumption_money) electricityFeesCount,
+        SUM(t.profitable) profitCount
+    FROM
+        em_d_charging_use_detailed t
+        INNER JOIN em_d_charging_device h1 on t.charging_plie_guid=h1.charging_plie_guid
+        INNER JOIN em_d_charging_project t1 ON h1.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND t1.project_guid=#{nodeId}
+        </if>
+    WHERE
+        t.start_time BETWEEN #{startTime}
+    AND #{endTime}
+  </select>
+
+    <select id="querySchemePofitable" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo"
+            resultType="cn.com.cdboost.collect.dto.SchemePofitableListDto">
+        SELECT
+        DATE_FORMAT(t.start_time,'%Y-%m-%e') as dayStr,
+        SUM(t.profitable) AS profitable
+        FROM
+        em_d_charging_use_detailed t
+        WHERE
+        t.start_time BETWEEN #{beginTime}
+        AND #{endTime}
+        GROUP BY DATE_FORMAT(t.start_time,'%Y-%m-%e')
+    </select>
+
+<!--  <select id="queryPowerAndFeeList" parameterType="java.lang.String" resultType="cn.com.cdboost.collect.dto.ListElectricDto">
+    SELECT
+        DATE_FORMAT(t.start_time,'%d') as dayStr,
+        t.use_power yQuantityData,
+        t.consumption_money yFeesData
+    FROM
+        em_d_charging_use_detailed t
+    WHERE
+        t.start_time BETWEEN #{startTime}
+    AND #{endTime}
+  </select>-->
+
+  <select id="queryPowerAndFeeList" parameterType="java.lang.String" resultType="cn.com.cdboost.collect.dto.ListElectricDto">
+    SELECT
+    SUM(t.active_total) AS yQuantityData,
+    DATE_FORMAT(t.collect_time, '%d') AS dayStr
+    FROM
+    em_d_imp_elecdata t
+    WHERE
+    t.data_type = 0
+    AND t.active_total != -1 AND t.collect_time BETWEEN #{startTime}
+    AND #{endTime} AND t.meter_user_no IN
+      <foreach collection="meterNos" index="index" item="item" open="(" separator="," close=")">
+          CONCAT('00',#{item,jdbcType=VARCHAR})
+      </foreach>
+    GROUP BY
+    DATE_FORMAT(t.collect_time, '%y-%m-%d')
+  </select>
+
+    <!--查询ic卡使用记录-->
+    <select id="queryICCardUseList" parameterType="cn.com.cdboost.collect.dto.param.ChargerICCardQueryVo" resultType="cn.com.cdboost.collect.dto.ChargingICUseDto">
+        SELECT
+        t.use_time chargingTime,
+        t.start_time startTime,
+        t.end_time endTime,
+        t.charging_plie_guid chargingPlieGuid,
+        t.charging_guid chargingGuid,
+        t.open_no openNo,
+        t.open_means openMeans,
+        t.after_remain_amount remainAmount,
+        (t.deduct_money-t.refund_money) deductMoney,
+        t2.device_no deviceNo,
+        t2.port port,
+        t2.install_addr installAddr
+        FROM
+        em_d_charging_use_detailed t
+        LEFT JOIN em_d_charging_device t2 ON t.charging_plie_guid = t2.charging_plie_guid
+        WHERE  t.open_means=3 AND t.open_no = #{cardId}
+        <if test="startDate!=null and startDate!=''">
+            AND t.start_time  &gt;= CONCAT(#{startDate},' 00:00:00')
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            AND t.start_time &lt;= CONCAT(#{endDate},' 23:59:59')
+        </if>
+        ORDER BY t.id DESC LIMIT #{pageIndex},#{pageSize}
+    </select>
+    <select id="queryICCardUseTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerICCardQueryVo" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        em_d_charging_use_detailed t
+        WHERE  t.open_means=3 AND t.open_no = #{cardId}
+        <if test="startDate!=null and startDate!=''">
+            AND t.start_time  &gt;= CONCAT(#{startDate},' 00:00:00')
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            AND t.start_time &lt;= CONCAT(#{endDate},' 23:59:59')
+        </if>
+    </select>
+</mapper>

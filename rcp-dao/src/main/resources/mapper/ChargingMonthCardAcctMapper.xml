@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingMonthCardAcctMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingMonthCardAcct" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_guid" property="customerGuid" jdbcType="CHAR" />
+    <result column="pay_cnt" property="payCnt" jdbcType="INTEGER" />
+    <result column="remain_cnt" property="remainCnt" jdbcType="INTEGER" />
+    <result column="expire_time" property="expireTime" jdbcType="TIMESTAMP" />
+    <result column="power" property="power" jdbcType="INTEGER" />
+    <result column="min_power" property="minPower" jdbcType="INTEGER" />
+    <result column="max_power" property="maxPower" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="scheme_guid" property="schemeGuid" jdbcType="CHAR" />
+    <result column="project_guid" property="projectGuid" jdbcType="CHAR" />
+  </resultMap>
+</mapper>

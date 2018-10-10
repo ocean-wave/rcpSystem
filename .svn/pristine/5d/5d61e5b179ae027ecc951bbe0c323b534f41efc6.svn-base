@@ -1,0 +1,220 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.dao.ChargingDeviceMapper;
+import cn.com.cdboost.collect.dao.ChargingDevlogMapper;
+import cn.com.cdboost.collect.dto.CurveQueryInfo;
+import cn.com.cdboost.collect.dto.HeartDto;
+import cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo;
+import cn.com.cdboost.collect.enums.ChargingEnum;
+import cn.com.cdboost.collect.model.ChargingDevice;
+import cn.com.cdboost.collect.model.ChargingDevlog;
+import cn.com.cdboost.collect.service.ChargingDeviceService;
+import cn.com.cdboost.collect.service.ChargingDevlogService;
+import cn.com.cdboost.collect.util.DateUtil;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+
+/**
+ * 充电设备日志接口实现类
+ */
+@Service
+public class ChargingDevlogServiceImpl extends BaseServiceImpl<ChargingDevlog> implements ChargingDevlogService {
+    @Autowired
+    private ChargingDevlogMapper chargingDevlogMapper;
+    @Autowired
+    private ChargingDeviceMapper chargingDeviceMapper;
+    @Autowired
+    private ChargingDeviceService chargingDeviceService;
+
+    @Override
+    public CurveQueryInfo queryCurve(String sessionId, String chargingPlieGuid, String chargingGuid, Integer queryFlag) {
+        ChargingDevice chargingDevice = chargingDeviceService.queryByChargingPlieGuid(chargingPlieGuid);
+        List<ChargingDevlog> chargingDevlogs = Lists.newArrayList();
+        CurveQueryInfo curveQueryInfo = new CurveQueryInfo();
+
+        if (chargingDevice.getRunState() == ChargingEnum.ON_STATE.getKey()){
+            //查询该设备的记录
+            chargingDevlogs = chargingDevlogMapper.queryCurve(chargingPlieGuid,chargingGuid);
+        }else {
+            //判断是监控页面还是统计页面  1--监控页曲线；2--统计页曲线
+            if (queryFlag == 1){
+                return curveQueryInfo;
+            }else if (queryFlag == 2) {
+                //查询该设备的记录
+                chargingDevlogs = chargingDevlogMapper.queryCurve(chargingPlieGuid, chargingGuid);
+            }
+        }
+
+        //设置横坐标
+        List<String> xData = Lists.newArrayList();
+        //功率纵坐标
+        List<Float> yPowerData = Lists.newArrayList();
+        //电流纵坐标
+        List<Float>yCurrentData = Lists.newArrayList();
+        //电压纵坐标
+        List<Float>yVoltageData = Lists.newArrayList();
+        for (ChargingDevlog chargingDevlog:chargingDevlogs){
+            if (chargingDevlog.getCreateTime() != null){
+                xData.add(DateUtil.formatDate(chargingDevlog.getCreateTime()).substring(11,16));
+            }
+            yPowerData.add(chargingDevlog.getPower().floatValue());
+            yCurrentData.add(chargingDevlog.getCurrent().floatValue());
+            yVoltageData.add(chargingDevlog.getVoltage().floatValue());
+        }
+        //设置返回对象
+        curveQueryInfo.setxData(xData);
+        curveQueryInfo.setyCurrentData(yCurrentData);
+        curveQueryInfo.setyPowerData(yPowerData);
+        curveQueryInfo.setyVoltageData(yVoltageData);
+
+        return curveQueryInfo;
+    }
+    @Override
+    public ChargingDevlog queryRecentError(String chargingGuid) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingGuid",chargingGuid);
+        criteria.andEqualTo("eventCode",1);
+        condition.setOrderByClause("id DESC limit 1");
+        List<ChargingDevlog> list = chargingDevlogMapper.selectByCondition(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        ChargingDevlog chargingDevlog = list.get(0);
+        return chargingDevlog;
+    }
+
+    @Override
+    public ChargingDevlog queryRecntDevlog(String chargingGuid) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingGuid",chargingGuid);
+        condition.setOrderByClause("id DESC limit 1");
+        List<ChargingDevlog> list = chargingDevlogMapper.selectByCondition(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        ChargingDevlog chargingDevlog = list.get(0);
+        return chargingDevlog;
+    }
+
+    @Override
+    public ChargingDevlog queryRecentAlarm(String chargingGuid) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingGuid",chargingGuid);
+        criteria.andEqualTo("eventCode",1);
+        criteria.andEqualTo("smsStatus",0);
+        condition.setOrderByClause("id DESC limit 1");
+        List<ChargingDevlog> list = chargingDevlogMapper.selectByCondition(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        ChargingDevlog chargingDevlog = list.get(0);
+        return chargingDevlog;
+    }
+
+    @Override
+    public ChargingDevlog queryRecentStop(String chargingGuid) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingGuid",chargingGuid);
+        criteria.andEqualTo("eventCode",-1);
+        criteria.andEqualTo("smsStatus",0);
+        condition.setOrderByClause("create_time DESC limit 1");
+        List<ChargingDevlog> list = chargingDevlogMapper.selectByCondition(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        ChargingDevlog chargingDevlog = list.get(0);
+        return chargingDevlog;
+    }
+
+    @Override
+    public ChargingDevlog queryRecentEvent(String chargingGuid, Integer messageType) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingGuid",chargingGuid);
+        criteria.andEqualTo("eventCode",messageType);
+        condition.setOrderByClause("create_time DESC limit 1");
+        List<ChargingDevlog> list = chargingDevlogMapper.selectByCondition(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        ChargingDevlog chargingDevlog = list.get(0);
+        return chargingDevlog;
+    }
+
+    @Override
+    public void updateSmsStatus(String chargingGuid) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingGuid",chargingGuid);
+        criteria.andEqualTo("eventCode",1);
+        criteria.andEqualTo("smsStatus",0);
+        ChargingDevlog params = new ChargingDevlog();
+        params.setSmsStatus(1);
+        chargingDevlogMapper.updateByConditionSelective(params,condition);
+    }
+
+    @Override
+    public List<HeartDto> queryHeartList(String chargingPlieGuid) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingPlieGuid",chargingPlieGuid);
+        PageHelper.startPage(0,100,"create_time desc");
+        List<ChargingDevlog> chargingDevlogs = chargingDevlogMapper.selectByCondition(condition);
+
+        List<HeartDto> heartDtos = Lists.newArrayList();
+        for (ChargingDevlog chargingDevlog : chargingDevlogs) {
+            HeartDto heartDto = new HeartDto();
+            BeanUtils.copyProperties(chargingDevlog,heartDto);
+            heartDto.setHeartTime(chargingDevlog.getCreateTime());
+            heartDto.setState(chargingDevlog.getEventCode());
+            heartDtos.add(heartDto);
+        }
+        return heartDtos;
+    }
+
+    @Override
+    public List<HeartDto> queryHeartBychargingGuid(ChargerDeviceQueryVo queryVo) {
+        Condition condition = new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingPlieGuid",queryVo.getChargingPlieGuid());
+        criteria.andEqualTo("chargingGuid",queryVo.getChargingGuid());
+        PageHelper.startPage(queryVo.getPageNumber(),queryVo.getPageSize(),"create_time desc");
+        List<ChargingDevlog> chargingDevlogs = chargingDevlogMapper.selectByCondition(condition);
+        // 设置分页总条数
+        PageInfo pageInfo = new PageInfo(chargingDevlogs);
+        queryVo.setTotal(pageInfo.getTotal());
+
+        List<HeartDto> heartDtos = Lists.newArrayList();
+        for (ChargingDevlog chargingDevlog : chargingDevlogs) {
+            HeartDto heartDto = new HeartDto();
+            BeanUtils.copyProperties(chargingDevlog,heartDto);
+            heartDto.setHeartTime(chargingDevlog.getCreateTime());
+            heartDto.setState(chargingDevlog.getEventCode());
+            heartDtos.add(heartDto);
+        }
+        return heartDtos;
+    }
+
+    @Override
+    public List<ChargingDevlog> queryByChargingGuid(String chargingGuid) {
+        Condition condition=new Condition(ChargingDevlog.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("chargingGuid",chargingGuid);
+        condition.setOrderByClause("create_time ASC");
+        return chargingDevlogMapper.selectByCondition(condition);
+    }
+}

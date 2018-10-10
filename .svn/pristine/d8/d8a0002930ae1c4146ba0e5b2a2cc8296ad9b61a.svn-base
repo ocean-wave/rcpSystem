@@ -1,0 +1,50 @@
+package cn.com.cdboost.collect.dao;
+
+import cn.com.cdboost.collect.common.CommonMapper;
+import cn.com.cdboost.collect.dto.*;
+import cn.com.cdboost.collect.dto.chargerApp.ChargeHistoryDto;
+import cn.com.cdboost.collect.dto.chargerApp.vo.HistoryVo;
+import cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo;
+import cn.com.cdboost.collect.dto.param.ChargerICCardQueryVo;
+import cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo;
+import cn.com.cdboost.collect.dto.param.ElectricCountQueryVo;
+import cn.com.cdboost.collect.model.ChargingUseDetailed;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+public interface ChargingUseDetailedMapper extends CommonMapper<ChargingUseDetailed> {
+    List<UseRecordListInfo> useRecordList(@Param("useRecordListDto")  UseRecordListDto useRecordListDto);
+    ChargeCustomerInfoDetailInfo customerInfoDetail(@Param("customerGuid") String customerGuid);
+    List<CustomerInfoListInfo> customerInfoList(@Param("customerInfoListDto") CustomerInfoListDto customerInfoListDto);
+    /**
+     * 查询客户充电记录
+     * @param historyVo
+     * @return
+     */
+    List<ChargeHistoryDto> queryUseRecord(HistoryVo historyVo);
+
+    /**
+     * 获取客户充电记录总数
+      * @param historyVo
+     * @return
+     */
+    Long queryUseRecordTotal(HistoryVo historyVo);
+
+    List<ChargingUseDetailedDto> deviceDetialUseList(ChargerDeviceQueryVo queryVo);
+
+    Integer queryTotal(ChargerDeviceQueryVo queryVo);
+
+    PowerAndFeeDto queryPowerAndFeeCount( ElectricCountQueryVo electricCountQueryVo);
+
+    // 按时间范围查询
+    List<ListElectricDto> queryPowerAndFeeList(@Param("startTime") String startTime, @Param("endTime") String endTime, @Param("meterNos") List<String> meterNos);
+
+    //查询ic卡使用记录
+    List<ChargingICUseDto> queryICCardUseList(ChargerICCardQueryVo queryVo);
+
+    Integer queryICCardUseTotal(ChargerICCardQueryVo queryVo);
+
+    //按天统计方案盈利
+    List<SchemePofitableListDto> querySchemePofitable(ChargerSchemeQueryVo queryVo);
+}

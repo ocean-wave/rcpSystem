@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingSpiltAccountMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingSpiltAccount" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="customer_guid" property="customerGuid" jdbcType="VARCHAR" />
+    <result column="charging_guid" property="chargingGuid" jdbcType="VARCHAR" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+    <result column="boost_amount" property="boostAmount" jdbcType="DECIMAL" />
+    <result column="profit_ratio" property="profitRatio" jdbcType="DECIMAL" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+</mapper>

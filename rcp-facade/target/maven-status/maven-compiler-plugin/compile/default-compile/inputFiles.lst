@@ -1,10 +1,13 @@
+D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\result\vo\Result.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\HistoryElectricAmountParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\RemainAmount.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\PaymentRecordresponseParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\BasequeryParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\service\RemainAmountService.java
+D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\QueryListParamDate.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\vo\SmokeDeviceListVo.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\DayElectricInfoParam.java
+D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\BaseSychronizeReseponse.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\vo\SmokeDeviceSelectTotalDB.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\vo\SmokeDevlogVo.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\util\SelfDateAnnValidator.java
@@ -19,8 +22,8 @@ D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\vo\Smok
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\service\HistoryElectricAmountService.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\exception\RcpDubboException.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\service\PaymentRecordService.java
+D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\service\BaseSychronizeServiceDubbo.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\util\MyDate.java
-D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\util\DateUtil.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\BaseresponseParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\FeeOnOffQueryParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\service\OnOffMessageService.java
@@ -28,8 +31,9 @@ D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\service
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\ArrearageMessageParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\OnOffMessageParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\PaymentRecordParam.java
-D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\vo\Result.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\CustomerOnOffParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\vo\OnOffMeterVo.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\service\CustomerOnOffService.java
+D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\QueryListParam.java
 D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\vo\SmokeDeviceListNoTimeVo.java
+D:\svn\develop-zhongtian\rcp-facade\src\main\java\cn\com\cdboost\collect\param\BaseSychronizeDto.java

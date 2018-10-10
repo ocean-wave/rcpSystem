@@ -1,0 +1,38 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.common.BaseService;
+import cn.com.cdboost.collect.dto.ChargingProjectDto;
+import cn.com.cdboost.collect.dto.ProjectDto;
+import cn.com.cdboost.collect.dto.param.ChargerProjectEditParam;
+import cn.com.cdboost.collect.dto.param.ChargerProjectSchemeAddParam;
+import cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo;
+import cn.com.cdboost.collect.dto.response.ProjectInfoDto;
+import cn.com.cdboost.collect.model.ChargingProject;
+
+import java.util.List;
+import java.util.Set;
+
+/**
+ * 项目设备信息服务
+ */
+public interface ChargingProjectService extends BaseService<ChargingProject> {
+    public List<ProjectInfoDto> queryProjectTreeByName(Set<Long> dataOrgNos,String projectName) ;
+
+    List<ProjectDto> queryAllProject();
+
+    // 根据项目guid查询
+    ChargingProject queryByProjectGuid(String projectGuid);
+
+    // 根据项目projectGuid集合，批量查询
+    List<ChargingProject> batchQuery(Set<String> projectGuids);
+
+    ChargingProject queryProjectInfo();
+
+    List<ChargingProjectDto> queryList(ChargerSchemeQueryVo queryVo);
+
+    void add(ChargerProjectSchemeAddParam param, Integer id);
+
+    void edit(ChargerProjectEditParam param, Integer id);
+
+    void deleteProject(List<String> projectGuids, Integer id);
+}

@@ -1,0 +1,216 @@
+package cn.com.cdboost.collect.controller;
+
+import cn.com.cdboost.collect.aop.SystemControllerLog;
+import cn.com.cdboost.collect.dto.*;
+import cn.com.cdboost.collect.dto.param.*;
+import cn.com.cdboost.collect.dto.response.ChargingSchemeInfo;
+import cn.com.cdboost.collect.enums.Action;
+import cn.com.cdboost.collect.enums.GlobalConstant;
+import cn.com.cdboost.collect.model.ChargingPayCheme;
+import cn.com.cdboost.collect.service.ChargingPayChemeService;
+import cn.com.cdboost.collect.service.ChargingProjectService;
+import cn.com.cdboost.collect.service.GenerateFileService;
+import cn.com.cdboost.collect.service.UserLogService;
+import cn.com.cdboost.collect.util.DownLoadUtil;
+import cn.com.cdboost.collect.vo.PageResult;
+import cn.com.cdboost.collect.vo.Result;
+import com.alibaba.fastjson.JSON;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import java.util.List;
+
+/**
+ * 充电桩项目方案管理
+ */
+@Controller
+@RequestMapping(value = "/chargerScheme")
+public class ChargerSchemeController {
+    private static final Logger logger = LoggerFactory.getLogger(ChargerSchemeController.class);
+
+    @Autowired
+    private ChargingPayChemeService chargingPayChemeService;
+
+    @Autowired
+    private UserLogService userLogService;
+
+    @Autowired
+    private GenerateFileService generateFileService;
+
+    @Autowired
+    private ChargingProjectService chargingProjectService;
+
+    @SystemControllerLog(description = "充电项目列表查询")
+    @RequestMapping(value = "/queryList")
+    @ResponseBody
+    public String queryList(HttpSession session,@RequestBody ChargerSchemeQueryVo queryVo){
+        LoginUser loginUser = (LoginUser) session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        PageResult result=new PageResult();
+        //查询数据库
+        List<ChargingProjectDto> chargingProjectDtos = chargingProjectService.queryList(queryVo,loginUser.getId());
+        result.setData(chargingProjectDtos);
+        result.setTotal(queryVo.getTotal());
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "充电项目列表下载")
+    @RequestMapping(value = "/downloadList")
+    @ResponseBody
+    public void downloadList(HttpSession session,HttpServletResponse response, ChargerSchemeQueryVo queryVo){
+        LoginUser loginUser = (LoginUser) session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        //查询数据库
+        List<ChargingProjectDto> chargingProjectDtos = chargingProjectService.queryList(queryVo, loginUser.getId());
+        try {
+            XSSFWorkbook workBook = generateFileService.generateChargingProjectListExcel("充电项目列表下载",chargingProjectDtos);
+            DownLoadUtil.downExcel(response,workBook);
+        } catch (Exception e) {
+            String message = "充电项目列表下载";
+            logger.error(message,e);
+        }
+    }
+
+    @SystemControllerLog(description = "充电方案详情")
+    @RequestMapping(value = "/queryDetail")
+    @ResponseBody
+    public String queryDetail(@RequestParam String projectGuid){
+        Result result=new Result();
+        //查询数据库
+        ChargingSchemeInfo chargingSchemeInfo = chargingPayChemeService.queryDetailByProjectGuid(projectGuid);
+        result.setData(chargingSchemeInfo);
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "添加项目")
+    @RequestMapping(value = "/add")
+    @ResponseBody
+    public String add(HttpSession session, @Valid @RequestBody ChargerProjectSchemeAddParam param){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+
+        //调用业务层
+        chargingProjectService.add(param,currentUser.getId());
+        userLogService.create(currentUser.getId(), Action.ADD.getActionId(), "充电桩项目方案", "项目名称", param.getProjectName(),"新增["+param.getProjectName()+"]充电项目",JSON.toJSONString(param));
+        result.setMessage("添加成功");
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "停用启用充电方案")
+    @RequestMapping(value = "/offOnScheme")
+    @ResponseBody
+    public String offOnScheme(HttpSession session, @RequestBody OffOnSchemeParam param){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+
+        //调用业务层
+        chargingPayChemeService.offOnScheme(param,currentUser.getId());
+        if (param.getOnOrOff() == 0){
+            userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电方案", "", "","停用["+param.getSchemeGuids().toString()+"]充电方案",JSON.toJSONString(param));
+        }else if (param.getOnOrOff() == 1){
+            userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电方案", "", "","启用["+param.getSchemeGuids().toString()+"]充电方案",JSON.toJSONString(param));
+        }
+        result.setMessage("操作成功");
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "编辑项目")
+    @RequestMapping(value = "/editProject")
+    @ResponseBody
+    public String editProject(HttpSession session, @Valid @RequestBody ChargerProjectEditParam param){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+
+        //调用业务层
+        chargingProjectService.edit(param,currentUser.getId());
+        userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电桩项目", "项目名称", param.getProjectName(),"编辑["+param.getProjectName()+"]充电项目",JSON.toJSONString(param));
+        result.setMessage("修改成功");
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "编辑方案")
+    @RequestMapping(value = "/editScheme")
+    @ResponseBody
+    public String editScheme(HttpSession session, @Valid @RequestBody ChargerSchemeEditParam param){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+
+        //调用业务层
+        chargingPayChemeService.edit(param,currentUser.getId());
+        //userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电方案", "方案guid", param,"编辑["+param+"]充电方案",JSON.toJSONString(param));
+        result.setMessage("修改成功");
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "删除充电项目")
+    @RequestMapping(value = "/deleteProject")
+    @ResponseBody
+    public String deleteProject(HttpSession session, @RequestBody List<String> projectGuids){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+
+        //调用业务层
+        chargingProjectService.deleteProject(projectGuids,currentUser.getId());
+        userLogService.create(currentUser.getId(), Action.DELETE.getActionId(), "充电桩项目", "项目Guid", projectGuids.toString(),"删除["+projectGuids.toString()+"]充电IC卡",JSON.toJSONString(projectGuids));
+        result.setMessage("删除成功");
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "方案营收分析")
+    @RequestMapping(value = "/countPofitable")
+    @ResponseBody
+    public String countPofitable(@RequestBody ChargerSchemeQueryVo queryVo){
+        Result result=new Result();
+
+        //调用业务层
+        List<SchemePofitableDto> schemePofitableDtos = chargingPayChemeService.countPofitable(queryVo);
+        result.setData(schemePofitableDtos);
+        result.setMessage("操作成功");
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "方案使用列表")
+    @RequestMapping(value = "/shemeUseList")
+    @ResponseBody
+    public String shemeUseList(@RequestBody ChargerSchemeQueryVo queryVo){
+        PageResult result=new PageResult();
+        //调用业务层
+        List<ChargingUseDetailedDto> useList = chargingPayChemeService.shemeUseList(queryVo);
+        result.setData(useList);
+        result.setTotal(queryVo.getTotal());
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "充电方案使用列表下载")
+    @RequestMapping(value = "/downShemeUseList")
+    @ResponseBody
+    public void downShemeUseList(HttpServletResponse response, ChargerSchemeQueryVo queryVo){
+        List<ChargingUseDetailedDto> useList = chargingPayChemeService.shemeUseList(queryVo);
+        try {
+            XSSFWorkbook workBook = generateFileService.generateChargingSchemeUseListExcel("充电方案使用列表下载",useList);
+            DownLoadUtil.downExcel(response,workBook);
+        } catch (Exception e) {
+            String message = "充电方案使用列表下载";
+            logger.error(message,e);
+        }
+    }
+
+    @SystemControllerLog(description = "方案列表")
+    @RequestMapping(value = "/shemeList")
+    @ResponseBody
+    public String shemeList(@RequestBody ChargerSchemeQueryVo queryVo){
+        Result result=new Result();
+        //调用业务层
+        List<ChargerSchemeDto> useList = chargingPayChemeService.shemeList(queryVo);
+        result.setData(useList);
+        return JSON.toJSONString(result);
+    }
+}

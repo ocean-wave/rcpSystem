@@ -1,0 +1,276 @@
+package cn.com.cdboost.collect.model;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+@Table(name = "em_d_charging_spilt_account")
+public class ChargingSpiltAccount implements Serializable{
+    /**
+     * 主键
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * 分账的账户标识（微信openId，支付宝用户id）
+     */
+    @Column(name = "account_no")
+    private String accountNo;
+
+    /**
+     * 付款方式（0微信，1支付宝）
+     */
+    @Column(name = "pay_method")
+    private Integer payMethod;
+
+    /**
+     * 商户订单号
+     */
+    @Column(name = "partner_trade_no")
+    private String partnerTradeNo;
+
+    /**
+     * 分账金额
+     */
+    private BigDecimal amount;
+
+    /**
+     * 博高从利润中分账金额
+     */
+    @Column(name = "boost_amount")
+    private BigDecimal boostAmount;
+
+    /**
+     * 博高利润分账比例
+     */
+    @Column(name = "profit_ratio")
+    private BigDecimal profitRatio;
+
+    /**
+     * 0，提现处理中，1 提现成功， 2提现失败
+     */
+    private Integer status;
+
+    /**
+     * 微信或支付宝接口错误代码
+     */
+    @Column(name = "error_code")
+    private String errorCode;
+
+    /**
+     * 微信或支付宝接口错误代码描述
+     */
+    @Column(name = "error_msg")
+    private String errorMsg;
+
+    /**
+     * 创建时间
+     */
+    @Column(name = "create_time")
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    @Column(name = "update_time")
+    private Date updateTime;
+
+    /**
+     * 获取主键
+     *
+     * @return id - 主键
+     */
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * 设置主键
+     *
+     * @param id 主键
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * 获取分账的账户标识（微信openId，支付宝用户id）
+     *
+     * @return account_no - 分账的账户标识（微信openId，支付宝用户id）
+     */
+    public String getAccountNo() {
+        return accountNo;
+    }
+
+    /**
+     * 设置分账的账户标识（微信openId，支付宝用户id）
+     *
+     * @param accountNo 分账的账户标识（微信openId，支付宝用户id）
+     */
+    public void setAccountNo(String accountNo) {
+        this.accountNo = accountNo;
+    }
+
+    /**
+     * 获取付款方式（0微信，1支付宝）
+     *
+     * @return pay_method - 付款方式（0微信，1支付宝）
+     */
+    public Integer getPayMethod() {
+        return payMethod;
+    }
+
+    /**
+     * 设置付款方式（0微信，1支付宝）
+     *
+     * @param payMethod 付款方式（0微信，1支付宝）
+     */
+    public void setPayMethod(Integer payMethod) {
+        this.payMethod = payMethod;
+    }
+
+    /**
+     * 获取商户订单号
+     *
+     * @return partner_trade_no - 商户订单号
+     */
+    public String getPartnerTradeNo() {
+        return partnerTradeNo;
+    }
+
+    /**
+     * 设置商户订单号
+     *
+     * @param partnerTradeNo 商户订单号
+     */
+    public void setPartnerTradeNo(String partnerTradeNo) {
+        this.partnerTradeNo = partnerTradeNo;
+    }
+
+    /**
+     * 获取分账金额
+     *
+     * @return amount - 分账金额
+     */
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    /**
+     * 设置分账金额
+     *
+     * @param amount 分账金额
+     */
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    /**
+     * 获取0，提现处理中，1 提现成功， 2提现失败
+     *
+     * @return status - 0，提现处理中，1 提现成功， 2提现失败
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 设置0，提现处理中，1 提现成功， 2提现失败
+     *
+     * @param status 0，提现处理中，1 提现成功， 2提现失败
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * 获取微信或支付宝接口错误代码
+     *
+     * @return error_code - 微信或支付宝接口错误代码
+     */
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    /**
+     * 设置微信或支付宝接口错误代码
+     *
+     * @param errorCode 微信或支付宝接口错误代码
+     */
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    /**
+     * 获取微信或支付宝接口错误代码描述
+     *
+     * @return error_msg - 微信或支付宝接口错误代码描述
+     */
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    /**
+     * 设置微信或支付宝接口错误代码描述
+     *
+     * @param errorMsg 微信或支付宝接口错误代码描述
+     */
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return create_time - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    /**
+     * 获取更新时间
+     *
+     * @return update_time - 更新时间
+     */
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    /**
+     * 设置更新时间
+     *
+     * @param updateTime 更新时间
+     */
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public BigDecimal getBoostAmount() {
+        return boostAmount;
+    }
+
+    public void setBoostAmount(BigDecimal boostAmount) {
+        this.boostAmount = boostAmount;
+    }
+
+    public BigDecimal getProfitRatio() {
+        return profitRatio;
+    }
+
+    public void setProfitRatio(BigDecimal profitRatio) {
+        this.profitRatio = profitRatio;
+    }
+}

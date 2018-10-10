@@ -1,0 +1,47 @@
+# （博高物联网）微信公众号
+# 第三方用户唯一凭证
+appId=wx7f484e7b57ce4a98
+
+# 第三方用户唯一凭证密钥，即appsecret
+secret=e47ceafba85961d7a2e5f45d318a5a8e
+
+# 商户id
+mchId=1485651082
+
+# 这个参数partnerkey是在商户后台配置的一个32位的key,微信商户平台-账户设置-安全设置-api安全
+partnerkey=HYwu7NzyaDZ8axVYozseVqhwSP5Z3eEU
+
+
+# 微信支付成功，模板title消息内容
+paySuccessTitle=尊敬的%s用户您好，您的%s充值订单已付款成功
+
+#  微信支付成功，模板remark消息内容
+paySuccessRemark=系统将在一小时内将充值信息下发至%s%s，请耐心等待。
+
+# 远程下发充值成功，模板title消息内容
+remoteSuccessTitle=尊敬的%s用户您好,您通过%s支付的%s元%s已成功下发至%s%s
+
+# 远程下发充值成功，模板remark消息内容
+remoteSuccessRemark=感谢您的使用。
+
+# 充电成功，微信模板id
+onElecSuccessTemplateId=glCHaOL8iRu-h2mM7vEQiALqWURYQ_crCJ2YbyBKVg0
+
+# 余额扣减时，充电结束，微信模板id
+balanceOffElecTemplateId=kX_3MmcJW0Qze1EwvRahlrtSS0zgLHKPvnqpM1nIOm0
+
+# 月卡扣减时，充电结束，微信模板id
+monthOffElecTemplateId=MKwz6x6RIxQgvobC6K-cZt4lROYP2GJCZLKEQ5652Ho
+
+onElecSuccessTitle = 充电已开始
+
+# 功率超限，微信模板id
+powerUpTemplateId=htQ6I747TnGI7kgVCANdnLL22Zw3TDeITrAiBJCxlME
+
+# 功率超限，微信模板first字段描述
+powerUpFirstContent = 您当前电瓶车功率%s已超所选方案的功率上限%s
+
+# 功率超限，微信模板remark字段描述
+powerUpRemarkContent = 后台将在5分钟之后按%s计费，如不接受次此调档，请在手机上结束此次充电，谢谢使用！
+
+# 告警信息，微信模板title消息内容

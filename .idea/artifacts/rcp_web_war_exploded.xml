@@ -57,7 +57,7 @@
           <element id="library" level="project" name="Maven: commons-lang:commons-lang:2.5" />
           <element id="library" level="project" name="Maven: net.sf.ezmorph:ezmorph:1.0.6" />
           <element id="library" level="project" name="Maven: org.apache.shiro:shiro-core:1.2.4" />
-          <element id="file-copy" path="D:/repository/com/cn/cdboost/client/BASE1.5-SNAPSHOT/client-BASE1.5-20180813.060823-1.jar" output-file-name="client-BASE1.5-SNAPSHOT.jar" />
+          <element id="file-copy" path="D:/repository/com/cn/cdboost/client/BASE1.6-SNAPSHOT/client-BASE1.6-20181010.075229-20.jar" output-file-name="client-BASE1.6-SNAPSHOT.jar" />
           <element id="file-copy" path="D:/repository/com/cn/cdboost/library-common/0.0.1-SNAPSHOT/library-common-0.0.1-20180130.064333-1.jar" output-file-name="library-common-0.0.1-SNAPSHOT.jar" />
           <element id="file-copy" path="D:/repository/com/cn/cdboost/conersion-common/0.0.1-SNAPSHOT/conersion-common-0.0.1-20180130.064451-1.jar" output-file-name="conersion-common-0.0.1-SNAPSHOT.jar" />
           <element id="library" level="project" name="Maven: wsdl4j:wsdl4j:1.6.3" />
@@ -94,7 +94,7 @@
           <element id="library" level="project" name="Maven: org.jodd:jodd-bean:3.7.1" />
           <element id="library" level="project" name="Maven: org.jodd:jodd-core:3.7.1" />
           <element id="library" level="project" name="Maven: com.alipay.sdk:alipay-sdk-java:3.3.4.ALL" />
-          <element id="library" level="project" name="Maven: org.springframework.amqp:spring-amqp:2.0.5.RELEASE" />
+          <element id="library" level="project" name="Maven: org.springframework.amqp:spring-amqp:2.0.6.RELEASE" />
           <element id="archive" name="rcp-facade-1.0-SNAPSHOT.jar">
             <element id="module-output" name="rcp-facade" />
           </element>
@@ -148,6 +148,7 @@
           <element id="library" level="project" name="Maven: org.springframework.amqp:spring-rabbit:1.4.5.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework.retry:spring-retry:1.1.2.RELEASE" />
           <element id="library" level="project" name="Maven: org.springframework:spring-tx:4.3.10.RELEASE" />
+          <element id="file-copy" path="D:/repository/cn/com/cdboost/sensorDubbo/1.0-SNAPSHOT/sensorDubbo-1.0-20180830.104342-1.jar" output-file-name="sensorDubbo-1.0-SNAPSHOT.jar" />
         </element>
       </element>
       <element id="directory" name="META-INF">

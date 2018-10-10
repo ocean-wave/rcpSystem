@@ -16,6 +16,9 @@
     <result column="project_guid" property="projectGuid" jdbcType="VARCHAR" />
     <result column="sort_no" property="sortNo" jdbcType="INTEGER" />
     <result column="is_enable" property="isEnable" jdbcType="INTEGER" />
+    <result column="min_power" property="minPower" jdbcType="INTEGER" />
+    <result column="max_power" property="maxPower" jdbcType="INTEGER" />
+    <result column="scheme_type" property="schemeType" jdbcType="INTEGER" />
   </resultMap>
 
   <select id="countPofitable" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo" resultType="cn.com.cdboost.collect.dto.SchemePofitableDto">
@@ -31,7 +34,9 @@
         SUM(t1.profitable) profitable
     FROM
         em_d_charging_pay_cheme t
-    INNER JOIN em_d_charging_use_detailed t1 ON t.scheme_guid = t1.scheme_guid WHERE t.project_guid=#{projectGuid} AND t1.end_time BETWEEN #{beginTime} AND #{endTime}
+    INNER JOIN em_d_charging_use_detailed t1 ON t.scheme_guid = t1.scheme_guid
+    WHERE t.project_guid=#{projectGuid} AND t.min_power=#{minPower} AND t.max_power=#{maxPower}
+    AND t1.end_time BETWEEN #{beginTime} AND #{endTime}
     GROUP BY
         t.scheme_guid
   </select>
@@ -50,6 +55,8 @@
         t.deduct_money payMoney,
         t.charging_plie_guid chargingPlieGuid,
         t.charging_guid chargingGuid,
+        t.open_no openNo,
+        t.open_means openMeans,
         t1.customer_guid customerGuid,
         t1.car_category carCategory,
         t.webchar_no webcharNo,
@@ -57,14 +64,14 @@
         t2.port port
         FROM
         em_d_charging_use_detailed t
-        INNER JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+        LEFT JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
         INNER JOIN em_d_charging_device t2 ON t.charging_plie_guid=t2.charging_plie_guid
         WHERE t.scheme_guid = #{schemeGuid}
         <if test="beginTime!=null and beginTime!=''">
-            AND t.end_time  &gt;= #{beginTime}
+            AND t.start_time &gt;= #{beginTime}
         </if>
         <if test="endTime!=null and endTime!=''">
-            AND t.end_time &lt;= #{endTime}
+            AND t.start_time &lt;= #{endTime}
         </if>
         ORDER BY t.id DESC LIMIT #{pageIndex},#{pageSize}
     </select>
@@ -75,7 +82,7 @@
         COUNT(*)
         FROM
         em_d_charging_use_detailed t
-        INNER JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+        LEFT JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
         INNER JOIN em_d_charging_device t2 ON t.charging_plie_guid=t2.charging_plie_guid
         WHERE t.scheme_guid = #{schemeGuid}
         <if test="beginTime!=null and beginTime!=''">
@@ -85,4 +92,21 @@
             AND t.end_time &lt;= #{endTime}
         </if>
     </select>
+    <select id="queryPower" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        t.min_power,
+        t.max_power
+        FROM
+        em_d_charging_pay_cheme t
+        WHERE t.project_guid = #{projectGuid}
+        GROUP BY t.min_power,t.max_power
+    </select>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            UPDATE em_d_charging_pay_cheme
+            SET is_enable = #{item.isEnable,jdbcType=INTEGER}
+            WHERE scheme_guid = #{item.schemeGuid,jdbcType=INTEGER}
+        </foreach>
+    </update>
 </mapper>

@@ -30,6 +30,16 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../dubbo_api.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="dubbo_api" level="project" />
     <orderEntry type="module" module-name="rcp-common" />
     <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.40" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:23.0" level="project" />
@@ -74,7 +84,7 @@
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.5" level="project" />
     <orderEntry type="library" name="Maven: net.sf.ezmorph:ezmorph:1.0.6" level="project" />
     <orderEntry type="library" name="Maven: org.apache.shiro:shiro-core:1.2.4" level="project" />
-    <orderEntry type="library" name="Maven: com.cn.cdboost:client:BASE1.5-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.cn.cdboost:client:BASE1.6-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.cn.cdboost:library-common:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.cn.cdboost:conersion-common:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: wsdl4j:wsdl4j:1.6.3" level="project" />
@@ -111,7 +121,7 @@
     <orderEntry type="library" name="Maven: org.jodd:jodd-bean:3.7.1" level="project" />
     <orderEntry type="library" name="Maven: org.jodd:jodd-core:3.7.1" level="project" />
     <orderEntry type="library" name="Maven: com.alipay.sdk:alipay-sdk-java:3.3.4.ALL" level="project" />
-    <orderEntry type="library" name="Maven: org.springframework.amqp:spring-amqp:2.0.5.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.amqp:spring-amqp:2.0.6.RELEASE" level="project" />
     <orderEntry type="module" module-name="rcp-facade" />
     <orderEntry type="library" name="Maven: javax.validation:validation-api:1.1.0.Final" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:druid:1.1.2" level="project" />
@@ -184,5 +194,6 @@
     <orderEntry type="library" name="Maven: org.springframework.amqp:spring-rabbit:1.4.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.retry:spring-retry:1.1.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-tx:4.3.10.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: cn.com.cdboost:sensorDubbo:1.0-SNAPSHOT" level="project" />
   </component>
 </module>

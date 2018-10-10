@@ -7,11 +7,13 @@
     -->
     <result column="id" property="id" jdbcType="INTEGER" />
     <result column="account_id" property="accountId" jdbcType="INTEGER" />
+    <result column="month_account_id" property="monthAccountId" jdbcType="INTEGER" />
     <result column="business_type" property="businessType" jdbcType="INTEGER" />
     <result column="amount" property="amount" jdbcType="DECIMAL" />
     <result column="charge_cnt" property="chargeCnt" jdbcType="INTEGER" />
     <result column="guid" property="guid" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="card_id" property="cardId" jdbcType="VARCHAR" />
   </resultMap>
 </mapper>

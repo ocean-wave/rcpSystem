@@ -1,0 +1,26 @@
+{
+	"code": 1,
+	"message": "success",
+	"data": [
+	   {
+            "open": false,
+            "hasChild": false,
+            "nodeName": "站点1",
+            "nodeType": 2,
+            "pNodeId": "01",
+            "nodeId": "011",
+            "selected": false,
+            "children": []
+       },
+       {
+            "open": false,
+            "hasChild": false,
+            "nodeName": "站点2",
+            "nodeType": 2,
+            "pNodeId": "01",
+            "nodeId": "012",
+            "selected": false,
+            "children": []
+        }
+	]
+}

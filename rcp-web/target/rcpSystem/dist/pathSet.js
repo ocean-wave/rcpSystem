@@ -1,6 +1,6 @@
 (function(env) {
 	const dev  =   {
-		host: "ws://10.1.3.123:8086"
+		host: "ws://10.10.1.226:8080"
 	};
 	switch (env) {
 		case 'dev':

@@ -15,7 +15,7 @@
 	<dubbo:registry address="${zookeeper.address}" protocol="zookeeper"/>
 
 	<!-- 配置Dubbo客户端的访问端口 -->
-	<dubbo:protocol name="dubbo" port="20880"/>
+	<dubbo:protocol name="dubbo" port="20882"/>
 
 	<!-- 配置提供的服务的接口 -->
 	<dubbo:service interface="cn.com.cdboost.collect.service.CustomerOnOffService" ref="customerOnOffServiceImpl"
@@ -37,5 +37,8 @@
 				   version="1.0" timeout="3000"/>
 	<!-- 配置提供的服务的接口 -->
 	<dubbo:service interface="cn.com.cdboost.collect.service.SmokeDevlogServiceDubbo" ref="smokeDevlogServiceDubboImpl"
+				   version="1.0" timeout="3000"/>
+	<!-- 配置提供的服务的接口 -->
+	<dubbo:service interface="cn.com.cdboost.collect.service.BaseSychronizeServiceDubbo" ref="baseSychronizeServiceDubboImpl"
 				   version="1.0" timeout="3000"/>
 </beans>

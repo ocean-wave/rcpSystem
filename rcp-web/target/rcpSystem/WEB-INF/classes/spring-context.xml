@@ -14,8 +14,7 @@
 	<context:component-scan base-package="cn.com.cdboost.collect">
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
 	</context:component-scan>
-
-	<bean class="cn.com.cdboost.collect.listener.InitSocketMiddlewareListener">
+ 	<bean class="cn.com.cdboost.collect.listener.InitSocketMiddlewareListener">
 		<property name="sysConfigService" ref="sysConfigService"></property>
 		<property name="aFN04ResultDataBackLisener" ref="aFN04ResultDataBackLisener"></property>
 		<property name="aFN08ResultDataBackLisener" ref="aFN08ResultDataBackLisener"></property>
@@ -28,6 +27,10 @@
 		<property name="aFN21ResultDataBackLisener" ref="aFN21ResultDataBackLisener"></property>
 		<property name="aFN22ResultDataBackLisener" ref="aFN22ResultDataBackLisener"></property>
 		<property name="aFN23ResultDataBackLisener" ref="aFN23ResultDataBackLisener"></property>
+		<property name="aFN25ResultDataBackLisener" ref="aFN25ResultDataBackLisener"></property>
+		<property name="aFN26ResultDataBackLisener" ref="aFN26ResultDataBackLisener"></property>
+		<property name="aFN27ResultDataBackLisener" ref="aFN27ResultDataBackLisener"></property>
+		<property name="aFN28ResultDataBackLisener" ref="aFN28ResultDataBackLisener"></property>
 	</bean>
 
 	<!-- 安全管理器 本地测试用-->
@@ -62,6 +65,8 @@
 				<!-- 注销 -->
 				/logout = anon
 				/websocket = anon
+				<!-- 浏览器每次默认都会去访问这个文件，忽略favicon.ico文件的访问，否则每次都会被拦截，然后又跳转到index.html页面，前端相当于会请求两次index.html -->
+				/favicon.ico = anon
 				<!-- 通过认证可以访问 -->
 				/**=authc
 			</value>

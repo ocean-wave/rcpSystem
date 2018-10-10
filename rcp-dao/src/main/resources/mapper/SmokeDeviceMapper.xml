@@ -24,12 +24,37 @@
     <result column="status" property="status" jdbcType="VARCHAR" />
     <result column="total" property="total" jdbcType="VARCHAR" />
   </resultMap>
-  <select id="SmokeDeviceSelectTotal" resultMap="selectTotalMap">
-    SELECT status,count(*)total FROM em_d_smoke_device
-    where status
-    GROUP BY STATUS
+  <select id="SmokeDeviceSelectTotal"  resultMap="selectTotalMap">
+    SELECT
+    t.*
+    FROM
+    (
+    SELECT
+    t.org_no,
+    STATUS,
+    count(*) total
+    FROM
+    em_d_smoke_device t
+    INNER JOIN em_b_org h ON t.org_no = h.org_no
+    AND h.org_no IN
+    <foreach collection="orgNoList" item="item" separator="," open="(" close=")">
+    #{item}
+   </foreach>
+    GROUP BY
+    STATUS,org_no
     UNION
-    SELECT 'total',count(*)total FROM em_d_smoke_device
-    where status
+    SELECT
+    t.org_no,
+    'total',
+    count(*) total
+    FROM
+    em_d_smoke_device t
+    INNER JOIN em_b_org h ON t.org_no = h.org_no
+    AND h.org_no IN
+    <foreach collection="orgNoList" item="item" separator="," open="(" close=")">
+      #{item}
+    </foreach>
+    GROUP BY org_no
+    ) t
   </select>
 </mapper>

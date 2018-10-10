@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingProjectMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingProject" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="project_guid" property="projectGuid" jdbcType="CHAR" />
+    <result column="project_name" property="projectName" jdbcType="VARCHAR" />
+    <result column="project_addr" property="projectAddr" jdbcType="VARCHAR" />
+    <result column="community_name" property="communityName" jdbcType="VARCHAR" />
+    <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+    <result column="contact" property="contact" jdbcType="VARCHAR" />
+    <result column="contact_telphone" property="contactTelphone" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_user_id" property="updateUserId" jdbcType="BIGINT" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+    <resultMap id="queryProjectTreeMap" type="cn.com.cdboost.collect.dto.response.ProjectInfoDto">
+        <result column="project_guid" property="projectGuid" jdbcType="BIGINT" />
+        <result column="project_name" property="projectName" jdbcType="TIMESTAMP" />
+        <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+        <result column="projectHolds" property="projectHolds" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <select id="queryProjectTreeByName"  resultMap="queryProjectTreeMap">
+        SELECT
+        t.project_guid projectGuid,
+        t.project_name projectName,
+        t.org_no orgNo,
+        h.projectHolds
+        FROM
+        (SELECT count(*) projectHolds,org_no FROM
+        em_d_charging_project t
+        <where>
+            t.org_no in
+            <foreach collection="list" item="item" separator="," open="(" close=")">
+                #{item,jdbcType=BIGINT}
+            </foreach>
+        </where>
+        GROUP  by t.org_no)h
+        INNER JOIN
+        em_d_charging_project t
+        <where>
+            t.org_no=h.org_no   AND t.is_del=0
+            <if test="projectName !=null and  projectName!=''">
+             and t.project_name like concat('%',#{projectName,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </select>
+  <select id="queryList" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo" resultType="cn.com.cdboost.collect.dto.ChargingProjectDto">
+    SELECT
+		t.project_guid projectGuid,
+        t.project_name projectName,
+        t.base_price basePrice,
+        t.up_price upPrice,
+        t.contact contact,
+        t.contact_telphone contactTelphone,
+        t.project_addr projectAddr,
+        t1.dev_count deviceNum,
+        t.community_name communityName,
+        t.company_name companyName,
+        t.create_time createTime,
+        t.remark remark,
+        t.org_no orgNo,
+        t2.org_name orgName
+    FROM
+        em_d_charging_project t
+        INNER JOIN em_b_org t2 ON t.org_no=t2.org_no
+        LEFT JOIN (SELECT project_guid,count(*)/2 as dev_count FROM em_d_charging_device WHERE is_del=0 GROUP BY project_guid) t1 ON t.project_guid = t1.project_guid
+    <where>
+      t.is_del = 0 and t.org_no in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+      <if test="projectName!=null and projectName!=''">
+        AND t.project_name LIKE CONCAT('%',#{projectName},'%')
+      </if>
+    </where>
+    ORDER BY t.create_time DESC
+    LIMIT #{pageIndex},#{pageSize}
+  </select>
+</mapper>

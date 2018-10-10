@@ -4,16 +4,37 @@
     "data": [{
         "open": false,
         "hasChild": true,
-        "nodeName": "小区1",
+        "nodeName": "物业1",
         "nodeType": 1,
         "pNodeId": "0",
         "nodeId": "01",
         "selected": false,
-        "children": []
+        "children": [
+          {
+            "open": false,
+            "hasChild": false,
+            "nodeName": "站点1",
+            "nodeType": 2,
+            "pNodeId": "01",
+            "nodeId": "011",
+            "selected": false,
+            "children": []
+         },
+         {
+            "open": false,
+            "hasChild": false,
+            "nodeName": "站点2",
+            "nodeType": 2,
+            "pNodeId": "01",
+            "nodeId": "012",
+            "selected": false,
+            "children": []
+          }
+        ]
     }, {
         "open": false,
-        "hasChild": true,
-        "nodeName": "小区2",
+        "hasChild": false,
+        "nodeName": "物业2",
         "nodeType": 1,
         "pNodeId": 0,
         "isDepart": true,
@@ -23,7 +44,7 @@
     }, {
         "open": false,
         "hasChild": false,
-        "nodeName": "小区3",
+        "nodeName": "物业3",
         "nodeType": 1,
         "pNodeId": 0,
         "isDepart": false,

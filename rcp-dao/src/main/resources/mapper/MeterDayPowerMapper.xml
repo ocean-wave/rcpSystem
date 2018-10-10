@@ -34,7 +34,34 @@
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
   </resultMap>
 
-
+    <select id="CstFromService" parameterType="cn.com.cdboost.collect.dto.param.BaseSychronizeDtoVo"
+             statementType="CALLABLE" >
+        {call PRC_S_D_Query_CstFromZT(
+        #{batchNo, mode=IN,jdbcType=VARCHAR},
+        #{result, mode=OUT,jdbcType=INTEGER}
+        )}
+    </select>
+    <select id="ElecFromService" parameterType="cn.com.cdboost.collect.dto.param.BaseSychronizeDtoVo"
+            statementType="CALLABLE" >
+        {call PRC_S_D_Query_ElecFromZT(
+         #{batchNo, mode=IN,jdbcType=VARCHAR},
+         #{result, mode=OUT,jdbcType=INTEGER}
+        )}
+    </select>
+    <select id="OrgFromService" parameterType="cn.com.cdboost.collect.dto.param.BaseSychronizeDtoVo"
+            statementType="CALLABLE" >
+        {call PRC_S_D_Query_OrgFromZT(
+        #{batchNo, mode=IN,jdbcType=VARCHAR},
+        #{result, mode=OUT,jdbcType=INTEGER}
+        )}
+    </select>
+    <select id="PayFromService" parameterType="cn.com.cdboost.collect.dto.param.BaseSychronizeDtoVo"
+            statementType="CALLABLE" >
+        {call PRC_S_D_Query_PayFromZT(
+        #{batchNo, mode=IN,jdbcType=VARCHAR},
+        #{result, mode=OUT,jdbcType=INTEGER}
+        )}
+    </select>
   <resultMap id="villageList" type="cn.com.cdboost.collect.dto.VillageElectricityDto">
       <result column="org_no" property="orgNo" jdbcType="INTEGER" />
       <result column="org_name" property="orgName" jdbcType="VARCHAR" />

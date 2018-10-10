@@ -1,0 +1,68 @@
+package cn.com.cdboost.collect.service;
+
+import cn.com.cdboost.collect.common.BaseService;
+import cn.com.cdboost.collect.dto.CardListInfo;
+import cn.com.cdboost.collect.dto.ChargingICCardDto;
+import cn.com.cdboost.collect.dto.CustomerBatchImportInfo;
+import cn.com.cdboost.collect.dto.param.*;
+import cn.com.cdboost.collect.model.ChargingCard;
+import cn.com.cdboost.collect.vo.Result;
+
+import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * 充电桩ic卡
+ */
+public interface ChargingCardService extends BaseService<ChargingCard> {
+    List<ChargingICCardDto> queryList(ChargerICCardQueryVo queryVo);
+
+    void addCard(ChargerICCardAddParam param, Integer id);
+
+    void editCard(ChargerICCardEditParam param, Integer id);
+
+    void delete(List<String> cardIds, Integer id);
+
+    void offOnCard(OffOnCardParam param, Integer id);
+
+    CustomerBatchImportInfo excelImport(HttpSession session, String saveName, String uuid);
+
+    // 根据IC卡卡号查询
+    ChargingCard queryByCardId(String cardId);
+
+    // 根据IC卡卡号查询,加悲观锁
+    ChargingCard queryByCardIdForUpdate(String cardId);
+
+    // 根据绑定用户customerGuid查询
+    List<ChargingCard> queryByCustomerGuid(String customerGuid);
+
+    // 根据customerGuid查询所有状态的IC卡
+    List<ChargingCard> queryAllByCustomerGuid(String customerGuid);
+
+    // IC卡账户变动操作，并记录流水
+    void updateIcCardAccount(ChargingCard card, AccountOperateVo operateVo);
+
+    void addCardList(ChargerICCardAddParam param, Result result);
+
+    void editCardList(ChargerICCardEditParam param,String oldProjectGuid, Result result);
+
+    void deleteCardList(List<String> cardIds, Result result);
+
+    void offOnCardList(OffOnCardParam param, Result result);
+
+    //下发ic卡档案
+    void sendCard(List<SendAndReadCardParam> param, String sessionId);
+
+    //查询ic卡下发列表
+    List<CardListInfo> queryCardSendList(ChargerICCardQueryVo queryVo, String id);
+
+    //读取ic下发信息
+    void readCard(List<SendAndReadCardParam> param, String id);
+
+    //清除设备ic卡信息
+    void clearCard(List<String> commNos, String id);
+
+    // 根据主键id集合。批量更新card_owe字段为1
+    void batchUpdateCardOwe(Set<Integer> idSet);
+}

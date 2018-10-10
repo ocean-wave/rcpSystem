@@ -19,8 +19,43 @@
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="update_user_id" property="updateUserId" jdbcType="BIGINT" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="scheme_type" property="schemeType" jdbcType="INTEGER" />
+    <result column="meter_no" property="meterNo" jdbcType="VARCHAR" />
+    <result column="customer_guid" property="customerGuid" jdbcType="VARCHAR" />
+    <result column="profit_ratio" property="profitRatio" jdbcType="DECIMAL" />
   </resultMap>
 
+    <resultMap id="queryProjectTreeMap" type="cn.com.cdboost.collect.dto.response.ProjectInfoDto">
+        <result column="project_guid" property="projectGuid" jdbcType="BIGINT" />
+        <result column="project_name" property="projectName" jdbcType="TIMESTAMP" />
+        <result column="org_no" property="orgNo" jdbcType="BIGINT" />
+        <result column="projectHolds" property="projectHolds" jdbcType="TIMESTAMP" />
+    </resultMap>
+    <select id="queryProjectTreeByName"  resultMap="queryProjectTreeMap">
+        SELECT
+        t.project_guid projectGuid,
+        t.project_name projectName,
+        t.org_no orgNo,
+        h.projectHolds
+        FROM
+        (SELECT count(*) projectHolds,org_no FROM
+        em_d_charging_project t
+        <where>
+            t.org_no in
+            <foreach collection="list" item="item" separator="," open="(" close=")">
+                #{item,jdbcType=BIGINT}
+            </foreach>
+        </where>
+        GROUP  by t.org_no)h
+        INNER JOIN
+        em_d_charging_project t
+        <where>
+            t.org_no=h.org_no   AND t.is_del=0
+            <if test="projectName !=null and  projectName!=''">
+             and t.project_name like concat('%',#{projectName,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </select>
   <select id="queryList" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo" resultType="cn.com.cdboost.collect.dto.ChargingProjectDto">
     SELECT
 		t.project_guid projectGuid,
@@ -30,22 +65,320 @@
         t.contact contact,
         t.contact_telphone contactTelphone,
         t.project_addr projectAddr,
-        COUNT(t1.project_guid) deviceNum,
+        t1.dev_count deviceNum,
         t.community_name communityName,
         t.company_name companyName,
         t.create_time createTime,
-        t.remark remark
+        t.remark remark,
+        t.org_no orgNo,
+        t.scheme_type schemeType,
+        t.meter_no meterNo,
+        t2.org_name orgName
     FROM
         em_d_charging_project t
-    LEFT JOIN (SELECT * FROM em_d_charging_device WHERE is_del=0 GROUP BY device_no) t1 ON t.project_guid = t1.project_guid
+        INNER JOIN em_b_org t2 ON t.org_no=t2.org_no
+      <if test="nodeType !=null and nodeType==2">
+          AND t.project_guid=#{nodeId}
+      </if>
+      AND t.org_no IN
+      <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+          #{item}
+      </foreach>
+        LEFT JOIN (SELECT project_guid,count(*)/2 as dev_count FROM em_d_charging_device WHERE is_del=0 GROUP BY project_guid) t1 ON t.project_guid = t1.project_guid
+      <if test="nodeType !=null and nodeType==1">
+          INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+          AND h3.org_no =#{nodeId}
+      </if>
     <where>
       t.is_del = 0
       <if test="projectName!=null and projectName!=''">
         AND t.project_name LIKE CONCAT('%',#{projectName},'%')
       </if>
     </where>
-    GROUP BY t.project_guid
     ORDER BY t.create_time DESC
     LIMIT #{pageIndex},#{pageSize}
   </select>
+    <select id="queryListTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo" resultType="java.lang.Long">
+        SELECT
+        count(1) total
+        FROM
+        em_d_charging_project t
+        INNER JOIN em_b_org t2 ON t.org_no=t2.org_no
+        <if test="nodeType !=null and nodeType==2">
+        AND t.project_guid=#{nodeId}
+        </if>
+        AND t.org_no IN
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        LEFT JOIN (SELECT project_guid,count(*)/2 as dev_count FROM em_d_charging_device WHERE is_del=0 GROUP BY project_guid) t1 ON t.project_guid = t1.project_guid
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <where>
+            t.is_del = 0
+            <if test="projectName!=null and projectName!=''">
+                AND t.project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+    </select>
+    <select id="queryProjectUseCountList" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo"
+            resultType="cn.com.cdboost.collect.dto.ProjectUseCountListDto">
+        SELECT
+        t.project_guid projectGuid,
+        t.project_name projectName,
+        t1.dev_count deviceNum,
+        t2.chargingNum chargingNum,
+        t2.projectPower projectPower,
+        t2.projectFee projectFee,
+        t2.projectProfitable projectProfitable,
+        t3.org_name orgName
+        FROM
+        em_d_charging_project t
+        INNER JOIN em_b_org t3 ON t.org_no=t3.org_no AND t.org_no IN
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON t3.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND t.project_guid=#{nodeId}
+        </if>
+        LEFT JOIN (
+        SELECT
+        project_guid,
+        count(*) / 2 AS dev_count
+        FROM em_d_charging_device
+        WHERE is_del = 0
+        GROUP BY project_guid
+        ) t1 ON t.project_guid = t1.project_guid
+        LEFT JOIN (
+        SELECT
+        temp0.project_guid,
+        count(temp1.id) AS chargingNum,
+        SUM(temp1.use_power) projectPower,
+        SUM(temp1.consumption_money) projectFee,
+        SUM(temp1.profitable) projectProfitable
+        FROM em_d_charging_project temp0
+        LEFT JOIN em_d_charging_device temp2 ON temp0.project_guid = temp2.project_guid
+        LEFT JOIN em_d_charging_use_detailed temp1 ON temp1.charging_plie_guid = temp2.charging_plie_guid
+        <if test="beginTime !=null and beginTime!='' and endTime !=null and endTime!=''">
+            AND temp1.start_time BETWEEN #{beginTime} AND CONCAT(#{endTime},' 23:59:59')
+        </if>
+        WHERE temp2.is_del = 0
+        GROUP BY temp0.project_guid
+        ) t2 ON t.project_guid = t2.project_guid
+        <where>
+             t.is_del = 0
+            <if test="projectName != null and projectName != ''">
+                AND t.project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+        </where>
+        <if test="sortName != null and sortName != ''">
+            <choose>
+                <when test="sortName =='deviceNum'">
+                    ORDER BY t1.dev_count ${sortOrder}
+                </when>
+                <otherwise>
+                    ORDER BY t2.${sortName} ${sortOrder}
+                </otherwise>
+            </choose>
+        </if>
+        LIMIT #{pageIndex},#{pageSize}
+    </select>
+    <select id="countProjectTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo"
+            resultType="cn.com.cdboost.collect.dto.ProjectCountStatic">
+        SELECT
+        sum(t2.use_power) projectPower,
+        sum(t2.fee) projectFee,
+        sum(t2.profitable) projectProfitable
+        FROM
+        em_d_charging_project t
+        INNER JOIN em_b_org t3 ON t.org_no=t3.org_no AND t.org_no IN
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON t3.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND t.project_guid=#{nodeId}
+        </if>
+        LEFT JOIN (
+        SELECT
+        project_guid,
+        count(*) / 2 AS dev_count
+        FROM em_d_charging_device
+        WHERE is_del = 0
+        GROUP BY project_guid
+        ) t1 ON t.project_guid = t1.project_guid
+        LEFT JOIN (
+        SELECT
+        temp0.project_guid,
+        count(temp1.id) AS chargingNum,
+        SUM(temp1.use_power) use_power,
+        SUM(temp1.consumption_money) fee,
+        SUM(temp1.profitable) profitable
+        FROM em_d_charging_project temp0
+        LEFT JOIN em_d_charging_device temp2 ON temp0.project_guid = temp2.project_guid
+        LEFT JOIN em_d_charging_use_detailed temp1 ON temp1.charging_plie_guid = temp2.charging_plie_guid
+        <if test="beginTime !=null and beginTime!='' and endTime !=null and endTime!=''">
+            AND temp1.start_time BETWEEN #{beginTime} AND CONCAT(#{endTime},' 23:59:59')
+        </if>
+        WHERE temp2.is_del = 0
+        GROUP BY temp0.project_guid
+        ) t2 ON t.project_guid = t2.project_guid
+        <where>
+            t.is_del = 0
+            <if test="projectName != null and projectName != ''">
+                AND t.project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+        </where>
+    </select>
+    <select id="queryProjectUseListTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo"
+            resultType="java.lang.Integer">
+        SELECT
+        count(*)
+        FROM
+        em_d_charging_project t
+        INNER JOIN em_b_org t3 ON t.org_no=t3.org_no AND t.org_no IN
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON t3.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND t.project_guid=#{nodeId}
+        </if>
+        <where>
+            t.is_del = 0
+            <if test="projectName != null and projectName != ''">
+                AND t.project_name LIKE CONCAT('%',#{projectName},'%')
+            </if>
+        </where>
+    </select>
+    <select id="queryMerchantCount" resultType="cn.com.cdboost.collect.dto.MerchantCountDto">
+        SELECT
+        COUNT(*) projectNum,
+        SUM(deviceNum) deviceNum,
+        SUM(profitable) profitable
+        FROM(	SELECT
+        t1.dev_count deviceNum,
+        t1.profitable profitable
+        FROM em_d_charging_project t
+        LEFT JOIN (SELECT
+        project_guid,
+        count(DISTINCT t1.charging_plie_guid)/2 as  dev_count,
+        sum(IFNULL(t2.profitable,0)) as profitable
+        FROM em_d_charging_device t1
+        left JOIN em_d_charging_use_detailed t2 ON  t1.charging_plie_guid=t2.charging_plie_guid
+        WHERE t1.is_del = 0
+        group by project_guid
+        ) t1 ON t.project_guid = t1.project_guid
+        where t.is_del = 0 and  t.org_no IN
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+        #{item}
+        </foreach> ) b
+    </select>
+    <select id="queryCustomerCount" resultType="cn.com.cdboost.collect.dto.MerchantCountDto">
+        SELECT COUNT(*) customerNum,SUM(remain_amount) remainAmount FROM
+        (SELECT
+			t.remain_amount
+		FROM
+			em_d_charging_cst t
+		LEFT JOIN em_d_charging_use_detailed d ON t.customer_guid = d.customer_guid
+        LEFT JOIN em_d_charging_device c ON d.charging_plie_guid = c.charging_plie_guid
+        LEFT JOIN em_d_charging_project t1 ON t1.project_guid = c.project_guid
+        WHERE c.project_guid in
+        <foreach collection="list" item="item" open="(" close=")" separator="," >
+            #{item.projectGuid}
+        </foreach>
+		GROUP BY
+			t.customer_guid) a
+    </select>
+    <select id="queryCompareDataCount" resultType="cn.com.cdboost.collect.dto.CompareDataCountDto">
+        SELECT
+            COUNT(*) chargeNum,
+            SUM(t.use_power) usePower,
+            SUM(
+                CASE WHEN t.refund_state = 0 THEN
+                    t.deduct_money
+                ELSE
+                    t.deduct_money - t.refund_money
+                END ) deductMoney,
+            SUM(t.profitable) profitable,
+            SUM(t.use_time) useTime
+        FROM
+            em_d_charging_use_detailed t
+        LEFT JOIN em_d_charging_device t1 ON t.charging_plie_guid = t1.charging_plie_guid
+        AND t1.is_del = 0
+        LEFT JOIN em_d_charging_project t2 ON t1.project_guid = t2.project_guid
+        AND t2.org_no IN
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <where>
+            <if test="beginTime !=null and beginTime!='' and endTime !=null and endTime!=''">
+                AND t.start_time BETWEEN #{beginTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+    <select id="queryProjectCount" resultType="cn.com.cdboost.collect.dto.FirstProjectCountDto">
+        SELECT * FROM(
+        SELECT
+        ROUND((t2.chargingNum*100)/(t2.dayNum*t1.dev_count*2),2) useRate,
+        t.project_name projectName,
+        t1.dev_count deviceNum,
+        t2.chargingNum chargingNum,
+        t2.projectPower projectPower,
+        t2.projectProfitable projectProfitable,
+        ROUND((t3.active_total*100-t2.projectPower*100)/t3.active_total,2) lossRate
+        FROM
+        em_d_charging_project t
+        INNER JOIN em_b_org t3 ON t.org_no=t3.org_no AND t.org_no IN
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        LEFT JOIN (
+        SELECT
+        project_guid,
+        count(*) / 2 AS dev_count
+        FROM em_d_charging_device
+        WHERE is_del = 0
+        GROUP BY project_guid
+        ) t1 ON t.project_guid = t1.project_guid
+        LEFT JOIN (
+        SELECT
+        TIMESTAMPDIFF(day,temp0.create_time,NOW())+1 dayNum,
+        temp0.project_guid,
+        temp0.meter_no,
+        count(temp1.id) AS chargingNum,
+        SUM(temp1.use_power) projectPower,
+        SUM(temp1.profitable) projectProfitable
+        FROM em_d_charging_project temp0
+        LEFT JOIN em_d_charging_device temp2 ON temp0.project_guid = temp2.project_guid
+        LEFT JOIN em_d_charging_use_detailed temp1 ON temp1.charging_plie_guid = temp2.charging_plie_guid
+        WHERE temp2.is_del = 0
+        GROUP BY temp0.project_guid
+        ) t2 ON t.project_guid = t2.project_guid
+        LEFT JOIN (
+        SELECT
+        SUM(e.active_total) AS active_total,
+        e.meter_user_no
+        FROM
+        em_d_imp_elecdata e
+        WHERE
+        e.data_type = 0
+        AND e.active_total != -1
+        GROUP BY e.meter_user_no
+        ) t3 on CONCAT('00',t2.meter_no)=t3.meter_user_no
+        where t.is_del = 0 ) a ORDER BY a.useRate DESC LIMIT 10
+    </select>
 </mapper>

@@ -1,0 +1,831 @@
+package cn.com.cdboost.collect.controller;
+
+import cn.com.cdboost.collect.aop.SystemControllerLog;
+import cn.com.cdboost.collect.dto.*;
+import cn.com.cdboost.collect.dto.param.*;
+import cn.com.cdboost.collect.enums.Action;
+import cn.com.cdboost.collect.enums.GlobalConstant;
+import cn.com.cdboost.collect.model.ChargingDevice;
+import cn.com.cdboost.collect.service.*;
+import cn.com.cdboost.collect.util.DateUtil;
+import cn.com.cdboost.collect.util.DownLoadUtil;
+import cn.com.cdboost.collect.vo.PageResult;
+import cn.com.cdboost.collect.vo.Result;
+import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageInfo;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Hashtable;
+import java.util.List;
+
+/**
+ * 充电控制类
+ */
+@Controller
+@RequestMapping(value = "/charger")
+public class ChargerController {
+    private static final Logger logger = LoggerFactory.getLogger(ChargerController.class);
+
+    @Autowired
+    private ChargingDeviceService chargingDeviceService;
+    @Autowired
+    private GenerateFileService generateFileService;
+    @Autowired
+    private ChargingProjectService chargingProjectService;
+    @Autowired
+    private ChargingDevlogService chargingDevlogService;
+    @Autowired
+    private UserLogService userLogService;
+
+    @Value("${callback.url}")
+    private String host;
+    /**
+     * 提现记录
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "提现记录")
+    @RequestMapping(value = "/withdrawCashList")
+    @ResponseBody
+    public String withdrawCashList(HttpSession session,@RequestBody @Valid WithdrawCashListDto withdrawCashListDto){
+        PageResult result=new PageResult();
+        LoginUser user = (LoginUser) session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        withdrawCashListDto.setUserId(user.getId());
+        PageInfo useRecordListInfo = chargingDeviceService.withdrawCashList(withdrawCashListDto);
+        result.setTotal(useRecordListInfo.getTotal());
+        result.setData(useRecordListInfo.getList());
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 提现记录下载
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "提现记录下载")
+    @RequestMapping(value = "/withdrawCashListDownload")
+    public void withdrawCashListDownload(HttpSession session, HttpServletResponse response, WithdrawCashListDto withdrawCashListDto) throws IOException {
+        LoginUser user = (LoginUser) session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        withdrawCashListDto.setUserId(user.getId());
+        PageInfo useRecordListInfo = chargingDeviceService.withdrawCashList(withdrawCashListDto);
+        XSSFWorkbook xssfWorkbook = generateFileService.withdrawCashListDownload("提现记录", useRecordListInfo.getList());
+        DownLoadUtil.downExcel(response,xssfWorkbook);
+    }
+    /**
+     * 充值记录
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "充值记录")
+    @RequestMapping(value = "/chargeRecordList")
+    @ResponseBody
+    public String chargeRecordList(HttpSession session, @RequestBody @Valid ChargeRecordListDto chargeRecordListDto){
+        PageResult result=new PageResult();
+        LoginUser user = (LoginUser) session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        chargeRecordListDto.setUserId(user.getId());
+        PageInfo useRecordListInfo = chargingDeviceService.chargeRecordList(chargeRecordListDto);
+        result.setTotal(useRecordListInfo.getTotal());
+        result.setData(useRecordListInfo.getList());
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 充值记录下载
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "充值记录下载")
+    @RequestMapping(value = "/chargeRecordListDownload")
+    public void chargeRecordListDownload( HttpSession session,HttpServletResponse response,ChargeRecordListDto chargeRecordListDto) throws IOException {
+        LoginUser user = (LoginUser) session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        chargeRecordListDto.setUserId(user.getId());
+        PageInfo useRecordListInfo = chargingDeviceService.chargeRecordList(chargeRecordListDto);
+        XSSFWorkbook xssfWorkbook = generateFileService.chargeRecordListDownload("充值记录", useRecordListInfo.getList());
+        DownLoadUtil.downExcel(response,xssfWorkbook);
+    }
+    /**
+     * 使用记录
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "使用记录")
+    @RequestMapping(value = "/useRecordList")
+    @ResponseBody
+    public String useRecordList(@RequestBody @Valid UseRecordListDto useRecordListDto){
+        PageResult result=new PageResult();
+        PageInfo useRecordListInfo = chargingDeviceService.useRecordList(useRecordListDto);
+        result.setTotal(useRecordListInfo.getTotal());
+        result.setData(useRecordListInfo.getList());
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 使用记录
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "使用记录下载")
+    @RequestMapping(value = "/useRecordListDownload")
+    public void useRecordListDownload(HttpServletResponse response, UseRecordListDto useRecordListDto) throws IOException {
+        PageInfo useRecordListInfo = chargingDeviceService.useRecordList(useRecordListDto);
+        XSSFWorkbook xssfWorkbook = generateFileService.useRecordListDownload("使用记录", useRecordListInfo.getList());
+        DownLoadUtil.downExcel(response,xssfWorkbook);
+    }
+    /**
+     * 拉黑用户
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "拉黑用户")
+    @RequestMapping(value = "/setCustomerState")
+    @ResponseBody
+    public String setCustomerState(@RequestParam("customerGuid") String customerGuid,
+                                   @RequestParam("customerState")Integer customerState){
+        Result result=new Result();
+        Integer integer = chargingDeviceService.setCustomerState(customerGuid,customerState);
+       if(integer!=1){
+           result.error("更新失败");
+       }
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 用户列表基础信息
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "用户列表基础信息查询")
+    @RequestMapping(value = "/customerInfoDetail")
+    @ResponseBody
+    public String customerInfoDetail(@RequestParam("customerGuid") String customerGuid){
+        Result result=new Result();
+        ChargeCustomerInfoDetailInfo chargeCustomerInfoDetailInfo = chargingDeviceService.customerInfoDetail(customerGuid);
+        //查询数据库
+        result.setData(chargeCustomerInfoDetailInfo);
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 用户列表
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "用户列表查询")
+    @RequestMapping(value = "/customerInfoList")
+    @ResponseBody
+    public String customerInfoList(@RequestBody @Valid CustomerInfoListDto customerInfoListDto){
+        PageResult result=new PageResult();
+        PageInfo customerInfoListInfo = chargingDeviceService.customerInfoList(customerInfoListDto);
+        //查询数据库
+        result.setData(customerInfoListInfo.getList());
+        result.setTotal(customerInfoListInfo.getTotal());
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 用户列表
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "用户列表下载")
+    @RequestMapping(value = "/customerInfoListDownload")
+    public void customerInfoListDownload(HttpServletResponse response,CustomerInfoListDto customerInfoListDto) throws IOException {
+        PageInfo customerInfoListInfo = chargingDeviceService.customerInfoList(customerInfoListDto);
+        XSSFWorkbook xssfWorkbook = generateFileService.customerInfoListDownload("用户列表", customerInfoListInfo.getList());
+        DownLoadUtil.downExcel(response,xssfWorkbook);
+    }
+
+    /**
+     * 总表线损列表
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "总表线损列表查询")
+    @RequestMapping(value = "/totalLineLoss")
+    @ResponseBody
+    public String totalLineLoss(@RequestBody TotalLineLossDto totalLineLossDto) throws ParseException {
+        PageResult result=new PageResult();
+        TotalLineLossInfo totalLineLossInfo = chargingDeviceService.totalLineLoss(totalLineLossDto);
+        //查询数据库
+        result.setData(totalLineLossInfo);
+        result.setTotal(totalLineLossDto.getTotal());
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 总表线损列表
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "总表线损列表查询下载")
+    @RequestMapping(value = "/totalLineLossDownload")
+    public void totalLineLossDownload(HttpServletResponse response, TotalLineLossDto totalLineLossDto) throws IOException, ParseException {
+        TotalLineLossInfo totalLineLossInfo = chargingDeviceService.totalLineLoss(totalLineLossDto);
+        //查询数据库
+        XSSFWorkbook xssfWorkbook = generateFileService.totalLineLossDownload("总表线损列表", totalLineLossInfo);
+        DownLoadUtil.downExcel(response,xssfWorkbook);
+    }
+    /**
+     * 每日充电线路分析详情
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "每日充电线路分析详情")
+    @RequestMapping(value = "/dayLineLoss")
+    @ResponseBody
+    public String dayLineLoss(@RequestBody DayLineLossDto dayLineLossDto) throws ParseException {
+        PageResult result=new PageResult();
+        DayLineLossInfo totalLineLossInfo = chargingDeviceService.dayLineLoss(dayLineLossDto);
+        //查询数据库
+        result.setData(totalLineLossInfo);
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 每日充电线路分析详情
+     * @param
+     * @return
+     */
+    @SystemControllerLog(description = "每日充电线路分析详情下载")
+    @RequestMapping(value = "/dayLineLossDownload")
+    @ResponseBody
+    public void dayLineLossDownload(HttpServletResponse response ,DayLineLossDto dayLineLossDto) throws IOException, ParseException {
+        DayLineLossInfo dayLineLossInfo = chargingDeviceService.dayLineLoss(dayLineLossDto);
+        //查询数据库
+        XSSFWorkbook xssfWorkbook = generateFileService.dayLineLossDownload("总表线损列表", dayLineLossInfo);
+        DownLoadUtil.downExcel(response,xssfWorkbook);
+    }
+    /**
+     * 充电设备列表查询
+     * @param queryVo
+     * @return
+     */
+    @SystemControllerLog(description = "充电设备列表查询")
+    @RequestMapping(value = "/deviceList")
+    @ResponseBody
+    public String deviceList(@RequestBody ChargerDeviceQueryVo queryVo){
+        PageResult result=new PageResult();
+        //查询数据库
+        List<ChargingDeviceDto> chargingDevices = chargingDeviceService.deviceList(queryVo);
+        result.setData(chargingDevices);
+        result.setTotal(queryVo.getTotal());
+        return JSON.toJSONString(result);
+    }
+
+
+    /**
+     * 充电设备列表下载
+     * @param queryVo
+     * @return
+     */
+    @SystemControllerLog(description = "充电设备列表下载")
+    @RequestMapping(value = "/deviceListDown")
+    @ResponseBody
+    public void deviceListDown(HttpServletResponse response, ChargerDeviceQueryVo queryVo){
+        //查询数据库
+        List<ChargingDeviceDto> chargingDevices = chargingDeviceService.deviceList(queryVo);
+        try {
+            XSSFWorkbook workBook = generateFileService.generateChargingDeviceListExcel("充电桩列表",chargingDevices);
+            //通过Response把数据以Excel格式保存
+            response.reset();
+            //设置response流信息的头类型，MIME码
+            response.setContentType("application/vnd.ms-excel");
+            ServletOutputStream out = null;
+            response.addHeader("Content-Disposition", "attachment;filename=\""
+                    + new String(("导出表" + System.currentTimeMillis() + ".xls").getBytes("utf-8"),
+                    "ISO8859_1") + "\"");
+            //创建输出流对象
+            out=response.getOutputStream();
+            //将创建的Excel对象利用二进制流的形式强制输出到客户端去
+            workBook.write(out);
+            //强制将数据从内存中保存
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            String message = "充电桩列表";
+            logger.error(message,e);
+        }
+    }
+
+    /**
+     * 充电设备详情---基础信息
+     * @param deviceNo
+     * @return
+     */
+    @SystemControllerLog(description = "充电设备详情---基础信息")
+    @RequestMapping(value = "/deviceDetial")
+    @ResponseBody
+    public String deviceDetial(@RequestParam String deviceNo){
+        Result result=new Result();
+        //查询数据库
+        ChargingDeviceDto chargingDeviceDto = chargingDeviceService.queryDeviceDetial(deviceNo);
+        result.setData(chargingDeviceDto);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 生成设备二维码
+     * @param res
+     * @param deviceNo
+     * @throws IOException
+     */
+    @SystemControllerLog(description = "生成设备二维码")
+    @RequestMapping(value = "/getQ")
+    public void getqcode(HttpServletResponse res,String deviceNo,String port) throws IOException {
+        String format = "png";
+        String content = host+"/chargePay/index.html?deviceNo="+deviceNo+port;
+
+        int width = 150;//图片的宽度
+        int height = 150;//高度
+
+        if(content != null && !"".equals(content)){
+            ServletOutputStream stream = null;
+            try {
+                Hashtable hints = new Hashtable();
+                //内容所使用编码
+                hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+                hints.put(EncodeHintType.MARGIN, 3);
+                //生成二维码
+                stream = res.getOutputStream();
+                BitMatrix bitMatrix = new QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, width, height , hints);
+                MatrixToImageWriter.writeToStream(bitMatrix, format, stream);
+            } catch (WriterException e) {
+                e.printStackTrace();
+            }finally{
+                if(stream != null){
+                    stream.flush();
+                    stream.close();
+                }
+            }
+
+        }
+    }
+    /**
+     * 充电设备详情--使用列表
+     * @param queryVo
+     * @return
+     */
+    @SystemControllerLog(description = "充电设备详情--使用列表")
+    @RequestMapping(value = "/deviceDetialUseList")
+    @ResponseBody
+    public String deviceDetialUseList(@RequestBody ChargerDeviceQueryVo queryVo){
+        PageResult result=new PageResult();
+        //查询数据库
+        List<ChargingUseDetailedDto> chargingUseDetailedDtos = chargingDeviceService.deviceDetialUseList(queryVo);
+        result.setData(chargingUseDetailedDtos);
+        result.setTotal(queryVo.getTotal());
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 充电设备使用列表下载
+     * @param queryVo
+     * @return
+     */
+    @SystemControllerLog(description = "充电设备使用列表下载")
+    @RequestMapping(value = "/deviceDetialUseDown")
+    @ResponseBody
+    public void deviceDetialUseDown(HttpServletResponse response, ChargerDeviceQueryVo queryVo){
+        //查询数据库
+        List<ChargingUseDetailedDto> chargingUseDetailedDtos = chargingDeviceService.deviceDetialUseList(queryVo);
+        try {
+            XSSFWorkbook workBook = generateFileService.generateUseDetailedListExcel("设备使用列表",chargingUseDetailedDtos);
+            //通过Response把数据以Excel格式保存
+            response.reset();
+            //设置response流信息的头类型，MIME码
+            response.setContentType("application/vnd.ms-excel");
+            ServletOutputStream out = null;
+            response.addHeader("Content-Disposition", "attachment;filename=\""
+                    + new String(("导出表" + System.currentTimeMillis() + ".xls").getBytes("utf-8"),
+                    "ISO8859_1") + "\"");
+            //创建输出流对象
+            out=response.getOutputStream();
+            //将创建的Excel对象利用二进制流的形式强制输出到客户端去
+            workBook.write(out);
+            //强制将数据从内存中保存
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            String message = "使用列表";
+            logger.error(message,e);
+        }
+    }
+
+
+    /**
+     * 添加充电设备
+     * @param param
+     * @return
+     */
+    @SystemControllerLog(description = "添加充电设备")
+    @RequestMapping(value = "/addDevice")
+    @ResponseBody
+    public String addDevice(HttpSession session,@Valid @RequestBody ChargerDeviceAddParam param){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        ChargingDevice chargingDevice = new ChargingDevice();
+        BeanUtils.copyProperties(param,chargingDevice);
+        try {
+            chargingDevice.setInstallDate(DateUtil.parseDate(param.getInstallDate()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        //调用业务层
+        chargingDeviceService.addDevice(chargingDevice,currentUser.getId());
+
+        //添加ic卡下发表
+        chargingDeviceService.addCardList(chargingDevice,result);
+        userLogService.create(currentUser.getId(), Action.ADD.getActionId(), "充电桩设备", "充电桩设备编号", param.getDeviceNo(),"新增["+param.getDeviceNo()+"]充电桩设备",JSON.toJSONString(param));
+        result.setMessage("添加成功！");
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 删除充电设备
+     * @param deviceNos
+     * @return
+     */
+    @SystemControllerLog(description = "删除充电设备")
+    @RequestMapping(value = "/deleteDevice")
+    @ResponseBody
+    public String deleteDevice(HttpSession session,@RequestBody List<String> deviceNos){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        //调用业务层删除设备
+        boolean flag = chargingDeviceService.deleteDevice(deviceNos,currentUser.getId());
+        if (flag){
+            result.setMessage("删除成功");
+            userLogService.create(currentUser.getId(), Action.DELETE.getActionId(), "充电桩设备", "充电桩设备编号", "","删除["+deviceNos.toString()+"]充电桩设备",JSON.toJSONString(deviceNos));
+        } else {
+            result.error("删除失败");
+        }
+        chargingDeviceService.deleteCardList(deviceNos);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 编辑充电设备
+     * @param param
+     * @return
+     */
+    @SystemControllerLog(description = "编辑充电设备")
+    @RequestMapping(value = "/editDevice")
+    @ResponseBody
+    public String editDevice(HttpSession session,@Valid @RequestBody ChargerDeviceEditParam param){
+        Result result=new Result();
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        ChargingDevice chargingDevice = new ChargingDevice();
+        BeanUtils.copyProperties(param,chargingDevice);
+        try {
+            chargingDevice.setInstallDate(DateUtil.parseDate(param.getInstallDate()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        //查询修改前所属的项目
+        ChargingDevice chargingDevice1 = chargingDeviceService.queryByChargingPlieGuid(param.getChargingPlieGuid());
+        //调用业务层
+        boolean flag = chargingDeviceService.editDevice(chargingDevice,currentUser.getId());
+        if (flag){
+            result.setMessage("修改成功");
+            userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电桩设备", "chargingPlieGuid", String.valueOf(param.getChargingPlieGuid()),"修改充电桩设备["+param.getDeviceNo()+"]信息", JSON.toJSONString(param));
+        } else {
+            result.error("修改失败");
+        }
+        if (!chargingDevice1.getProjectGuid().equals(param.getProjectGuid())){
+            //修改cardlist
+            chargingDeviceService.editCardList(chargingDevice,chargingDevice1.getProjectGuid(),result);
+        }
+        return JSON.toJSONString(result);
+    }
+
+
+    /**
+     * 停用(启用)充电桩
+     * @param offOnChargeVo
+     * @return
+     */
+    @SystemControllerLog(description = "停用(启用)充电桩")
+    @RequestMapping(value = "/offOn")
+    @ResponseBody
+    public String offOn(HttpSession session, @RequestBody OffOnChargeVo offOnChargeVo){
+        Result result=new Result("操作成功");
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        //停止充电操作
+        offOnChargeVo.setSessionId(session.getId());
+        chargingDeviceService.offOnCharge(offOnChargeVo);
+        if (offOnChargeVo.getOnOrOff() == 0){
+            userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电桩设备端口", "commNo+port", offOnChargeVo.getCommNo()+offOnChargeVo.getPort(),"停用充电桩设备["+offOnChargeVo.getCommNo()+"-"+offOnChargeVo.getPort()+"]信息", JSON.toJSONString(offOnChargeVo));
+        }else if (offOnChargeVo.getOnOrOff() == 1){
+            userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电桩设备端口", "commNo+port", offOnChargeVo.getCommNo()+offOnChargeVo.getPort(),"启用充电桩设备["+offOnChargeVo.getCommNo()+"-"+offOnChargeVo.getPort()+"]信息", JSON.toJSONString(offOnChargeVo));
+        }else if (offOnChargeVo.getOnOrOff() == -1){
+            userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电桩设备端口", "commNo+port", offOnChargeVo.getCommNo()+offOnChargeVo.getPort(),"停充设备["+offOnChargeVo.getCommNo()+"-"+offOnChargeVo.getPort()+"]信息", JSON.toJSONString(offOnChargeVo));
+        }
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 查询所有项目信息
+     * @return
+     */
+    @SystemControllerLog(description = "查询所有项目信息")
+    @RequestMapping(value = "/queryProject")
+    @ResponseBody
+    public String queryProject(){
+        Result result=new Result();
+        //调用业务层
+        List<ProjectDto> projects = chargingProjectService.queryAllProject();
+        result.setData(projects);
+        result.setCode(1);
+        return JSON.toJSONString(result);
+    }
+
+
+    /**
+     * 充电状态监测—设备统计
+     * @return
+     */
+    @SystemControllerLog(description = "充电状态监测—设备统计")
+    @RequestMapping(value = "/monitorDevice")
+    @ResponseBody
+    public String monitorDevice(@RequestBody ChargerDeviceQueryVo queryVo){
+        Result result=new Result();
+        //调用业务层
+        ChargingCountByRunState count = chargingDeviceService.monitorDeviceCount(queryVo);
+        result.setData(count);
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 充电状态监测—设备详细列表
+     * @return
+     */
+    @SystemControllerLog(description = "充电状态监测—设备详细列表")
+    @RequestMapping(value = "/monitorDeviceList")
+    @ResponseBody
+    public String monitorDeviceList(@RequestBody ChargerDeviceQueryVo queryVo){
+        PageResult result=new PageResult();
+        //调用业务层
+        List<MonitorDeviceDto> monitorDeviceDtos = chargingDeviceService.monitorDeviceList(queryVo);
+        result.setData(monitorDeviceDtos);
+        result.setTotal(queryVo.getTotal());
+        return JSON.toJSONString(result);
+    }
+    /**
+     * 充电状态监测—设备详细列表下载
+     * @return
+     */
+    @SystemControllerLog(description = "充电状态监测—设备详细列表下载")
+    @RequestMapping(value = "/monitorDeviceListDown")
+    @ResponseBody
+    public void monitorDeviceListDown(HttpServletResponse response, ChargerDeviceQueryVo queryVo){
+        //调用业务层
+        List<MonitorDeviceDto> monitorDeviceDtos = chargingDeviceService.monitorDeviceList(queryVo);
+        try {
+            XSSFWorkbook workBook = generateFileService.generateMonitorDeviceListExcel("设备实时数据列表",monitorDeviceDtos);
+            //通过Response把数据以Excel格式保存
+            response.reset();
+            //设置response流信息的头类型，MIME码
+            response.setContentType("application/vnd.ms-excel");
+            ServletOutputStream out = null;
+            response.addHeader("Content-Disposition", "attachment;filename=\""
+                    + new String(("导出表" + System.currentTimeMillis() + ".xls").getBytes("utf-8"),
+                    "ISO8859_1") + "\"");
+            //创建输出流对象
+            out=response.getOutputStream();
+            //将创建的Excel对象利用二进制流的形式强制输出到客户端去
+            workBook.write(out);
+            //强制将数据从内存中保存
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            String message = "设备实时数据列表";
+            logger.error(message,e);
+        }
+    }
+
+
+    /**
+     * 充电状态监测--设备统计曲线
+     * @param chargingPlieGuid
+     * @return
+     */
+    @SystemControllerLog(description = "充电状态监测--设备统计曲线")
+    @RequestMapping(value = "/queryCurve")
+    @ResponseBody
+    public String queryCurve(HttpSession session, @RequestParam String chargingPlieGuid,@RequestParam String chargingGuid){
+        Result result=new Result();
+        //调用业务层
+        CurveQueryInfo curveQueryDto = chargingDevlogService.queryCurve(session.getId(),chargingPlieGuid ,chargingGuid,1);
+        result.setData(curveQueryDto);
+        return JSON.toJSONString(result);
+    }
+
+
+    /**
+     * 充电电量电费统计-统计数据详情柱状图
+     * @return
+     */
+    @SystemControllerLog(description = "充电电量电费统计-统计数据详情柱状图")
+    @RequestMapping(value = "/electricCount")
+    @ResponseBody
+    public String electricCount(@RequestBody ElectricCountQueryVo queryVo){
+        Result result=new Result();
+        //调用业务层
+        PowerAndFeeCountInfo powerAndFeeCountInfo = chargingDeviceService.queryPowerAndFeeCount(queryVo);
+        result.setData(powerAndFeeCountInfo);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 电量电费统计列表
+     * @param queryVo
+     * @return
+     */
+    @SystemControllerLog(description = "电量电费统计列表")
+    @RequestMapping(value = "/electricCountList")
+    @ResponseBody
+    public String electricCountList(@RequestBody ChargerDeviceQueryVo queryVo){
+        PageResult result=new PageResult();
+        //查询数据库
+        ElectricCountDto electricCountDto = chargingDeviceService.queryCountList(queryVo);
+        result.setData(electricCountDto);
+        result.setTotal(queryVo.getTotal());
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 电量电费统计列表下载
+     * @return
+     */
+    @SystemControllerLog(description = "电量电费统计列表下载")
+    @RequestMapping(value = "/electricCountListDown")
+    @ResponseBody
+    public void electricCountListDown(HttpServletResponse response, ChargerDeviceQueryVo queryVo){
+        //查询数据库
+        ElectricCountDto electricCountDto = chargingDeviceService.queryCountList(queryVo);
+        try {
+            XSSFWorkbook workBook = generateFileService.generateElectricAndFeeListExcel("电量电费统计列表",electricCountDto.getElectricAndFeeDtoList());
+            //通过Response把数据以Excel格式保存
+            response.reset();
+            //设置response流信息的头类型，MIME码
+            response.setContentType("application/vnd.ms-excel");
+            ServletOutputStream out = null;
+            response.addHeader("Content-Disposition", "attachment;filename=\""
+                    + new String(("导出表" + System.currentTimeMillis() + ".xls").getBytes("utf-8"),
+                    "ISO8859_1") + "\"");
+            //创建输出流对象
+            out=response.getOutputStream();
+            //将创建的Excel对象利用二进制流的形式强制输出到客户端去
+            workBook.write(out);
+            //强制将数据从内存中保存
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            String message = "电量电费统计列表";
+            logger.error(message,e);
+        }
+    }
+
+    /**
+     * 心跳列表查询
+     * @param chargingPlieGuid
+     * @return
+     */
+    @SystemControllerLog(description = "心跳列表查询")
+    @RequestMapping(value = "/queryHeartList")
+    @ResponseBody
+    public String queryHeartList(@RequestParam String chargingPlieGuid){
+        PageResult result=new PageResult();
+        //查询数据库
+        List<HeartDto> heartDtos = chargingDevlogService.queryHeartList(chargingPlieGuid);
+        result.setData(heartDtos);
+
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 电量电费统计--设备统计曲线
+     * @param chargingPlieGuid
+     * @return
+     */
+    @SystemControllerLog(description = "电量电费统计--设备统计曲线")
+    @RequestMapping(value = "/queryCurveCount")
+    @ResponseBody
+    public String queryCurveCount(HttpSession session, @RequestParam String chargingPlieGuid,@RequestParam String chargingGuid){
+        Result result=new Result();
+        //调用业务层
+        CurveQueryInfo curveQueryDto = chargingDevlogService.queryCurve(session.getId(),chargingPlieGuid ,chargingGuid,2);
+        result.setData(curveQueryDto);
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 查询每次使用记录心跳列表
+     * @param queryVo
+     * @return
+     */
+    @SystemControllerLog(description = "心跳列表查询")
+    @RequestMapping(value = "/queryHeartBychargingGuid")
+    @ResponseBody
+    public String queryHeartBychargingGuid(@RequestBody ChargerDeviceQueryVo queryVo){
+        PageResult<List<HeartDto>> result=new PageResult<>();
+        //查询数据库
+        List<HeartDto> heartDtos = chargingDevlogService.queryHeartBychargingGuid(queryVo);
+        result.setData(heartDtos);
+        result.setTotal(queryVo.getTotal());
+        return JSON.toJSONString(result);
+    }
+
+    /**
+     * 下载每次使用记录心跳列表
+     * @param queryVo
+     * @return
+     */
+    @SystemControllerLog(description = "下载心跳列表查询")
+    @RequestMapping(value = "/downHeartBychargingGuid")
+    @ResponseBody
+    public void downHeartBychargingGuid(HttpServletResponse response, ChargerDeviceQueryVo queryVo){
+        //查询数据库
+        List<HeartDto> heartDtos = chargingDevlogService.queryHeartBychargingGuid(queryVo);
+        try {
+            XSSFWorkbook workBook = generateFileService.generateHeartListExcel("心跳列表",heartDtos);
+            //通过Response把数据以Excel格式保存
+            response.reset();
+            //设置response流信息的头类型，MIME码
+            response.setContentType("application/vnd.ms-excel");
+            ServletOutputStream out = null;
+            response.addHeader("Content-Disposition", "attachment;filename=\""
+                    + new String(("导出表" + System.currentTimeMillis() + ".xls").getBytes("utf-8"),
+                    "ISO8859_1") + "\"");
+            //创建输出流对象
+            out=response.getOutputStream();
+            //将创建的Excel对象利用二进制流的形式强制输出到客户端去
+            workBook.write(out);
+            //强制将数据从内存中保存
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            String message = "心跳列表";
+            logger.error(message,e);
+        }
+    }
+
+
+    @SystemControllerLog(description = "查询充电桩阈值")
+    @RequestMapping(value = "/queryThreshold")
+    @ResponseBody
+    public String queryThreshold(HttpSession session, @RequestParam String commNo,@RequestParam String port){
+        Result result=new Result("操作成功");
+        chargingDeviceService.queryThreshold(session.getId(), commNo, port);
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "设置充电桩阈值")
+    @RequestMapping(value = "/setThreshold")
+    @ResponseBody
+    public String setThreshold(HttpSession session,@Valid @RequestBody ChargeThresholdParam param){
+        Result result=new Result("操作成功");
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        ChargeThresholdVo chargeThresholdVo = new ChargeThresholdVo();
+        BeanUtils.copyProperties(param,chargeThresholdVo);
+        chargingDeviceService.setThreshold(session.getId(), chargeThresholdVo);
+        userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电桩设备端口", "commNo+port", param.getCommNo()+param.getPort(),"设置充电桩["+param.getCommNo()+param.getPort()+"]阈值", JSON.toJSONString(param));
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "查询充电桩心跳间隔")
+    @RequestMapping(value = "/queryHeartStep")
+    @ResponseBody
+    public String queryHeartStep(HttpSession session, @RequestParam String commNo){
+        Result result=new Result("操作成功");
+        //查询数据库
+        chargingDeviceService.queryHeartStep(session.getId(), commNo);
+        return JSON.toJSONString(result);
+    }
+
+    @SystemControllerLog(description = "设置充电桩心跳间隔")
+    @RequestMapping(value = "/setHeartStep")
+    @ResponseBody
+    public String setHeartStep(HttpSession session,@Valid @RequestBody ChargeHeartStepParam param){
+        Result result=new Result("操作成功");
+        LoginUser currentUser = (LoginUser)session.getAttribute(GlobalConstant.CURRENT_LOGIN_USER);
+        ChargeHeartStepVo chargeHeartStepVo = new ChargeHeartStepVo();
+        BeanUtils.copyProperties(param,chargeHeartStepVo);
+        chargingDeviceService.setHeartStep(session.getId(), chargeHeartStepVo);
+        userLogService.create(currentUser.getId(), Action.MODIFY.getActionId(), "充电桩设备端口", "commNo", param.getCommNo(),"设置充电桩["+param.getCommNo()+"]心跳间隔", JSON.toJSONString(param));
+        return JSON.toJSONString(result);
+    }
+}

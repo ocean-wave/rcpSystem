@@ -1,0 +1,10 @@
+# mysql 连接参数
+mysql.driverClass = com.mysql.cj.jdbc.Driver
+mysql.url = jdbc:mysql://10.10.1.250:3306/sm_metercollect_design_zt?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia%2FShanghai&useSSL=true&allowMultiQueries=true&nullNamePatternMatchesAll=true
+mysql.username = sa_pda
+mysql.password = emerp@250.123
+
+
+# 通用Mapper配置
+mapper.plugin = tk.mybatis.mapper.generator.MapperPlugin
+mapper.Mapper = cn.com.cdboost.collect.common.CommonMapper

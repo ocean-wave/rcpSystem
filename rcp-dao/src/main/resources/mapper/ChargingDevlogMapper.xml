@@ -9,6 +9,7 @@
     <result column="charging_plie_guid" property="chargingPlieGuid" jdbcType="CHAR" />
     <result column="event_code" property="eventCode" jdbcType="INTEGER" />
     <result column="event_content" property="eventContent" jdbcType="VARCHAR" />
+    <result column="sms_content" property="smsContent" jdbcType="VARCHAR" />
     <result column="current" property="current" jdbcType="DECIMAL" />
     <result column="voltage" property="voltage" jdbcType="DECIMAL" />
     <result column="power" property="power" jdbcType="DECIMAL" />
@@ -22,12 +23,10 @@
   </resultMap>
 
   <select id="queryCurve" parameterType="java.lang.String" resultMap="BaseResultMap">
-    SELECT * FROM (
     SELECT t.id,t.create_time,current,voltage,power FROM em_d_charging_devlog t WHERE t.charging_plie_guid=#{chargingPlieGuid}
     <if test="chargingGuid!=null and chargingGuid!=''">
       AND t.charging_guid = #{chargingGuid}
     </if>
-    ORDER BY t.id DESC
-    ) temp ORDER BY id
+    ORDER BY t.id
   </select>
 </mapper>

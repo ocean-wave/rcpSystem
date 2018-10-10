@@ -13,7 +13,7 @@
 	<dubbo:application name="rcp-web"/>
 	<!-- 配置注册中心位置 -->
 	<dubbo:consumer check="false"/>
-	<dubbo:registry address="${zookeeper.address}" protocol="zookeeper" />
+	<dubbo:registry check="false" address="${zookeeper.address}" protocol="zookeeper" />
 	<!-- 配置Dubbo客户端的访问端口 -->
 	<dubbo:protocol name="dubbo" port="20880"/>
 	<!-- 配置提供服务的接口类型 -->
@@ -21,4 +21,5 @@
 					 version="1.0" timeout="3000"/>
 	<dubbo:reference id="smokeDevlogServiceDubbo" interface="cn.com.cdboost.collect.service.SmokeDevlogServiceDubbo"
 					 version="1.0" timeout="3000"/>
+	<dubbo:reference id="smokeDetectorService" interface="com.smokeDetector.service.SmokeDetectorService" timeout="3000"/>
 </beans>

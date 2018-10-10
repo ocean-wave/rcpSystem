@@ -1,0 +1,80 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.dao.SmokeDevlogMapper;
+import cn.com.cdboost.collect.model.SmokeDevlog;
+import cn.com.cdboost.collect.service.SmokeDevlogService;
+import cn.com.cdboost.collect.service.SmokeDevlogServiceDubbo;
+import cn.com.cdboost.collect.vo.SmokeDeviceListVo;
+import cn.com.cdboost.collect.vo.SmokeDevlogVo;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+
+/**
+ * @author wt
+ * @desc
+ * @create in  2018/8/23
+ **/
+@Service
+public class SmokeDevlogServiceDubboImpl  implements SmokeDevlogServiceDubbo {
+    @Autowired
+    SmokeDevlogMapper smokeDevlogMapper;
+    @Autowired
+    SmokeDevlogService smokeDevlogService;
+
+    @Override
+    public List<SmokeDevlogVo> smokeDeviceStatusList(SmokeDevlogVo smokeDevlogVo) {
+        SmokeDevlog smokeDevlog=new SmokeDevlog();
+        BeanUtils.copyProperties(smokeDevlogVo,smokeDevlog);
+        PageHelper.orderBy(" create_time desc limit 2");
+        List<SmokeDevlog> select = smokeDevlogService.select(smokeDevlog);
+        List<SmokeDevlogVo> smokeDevlogVos= Lists.newArrayList();
+        for (SmokeDevlog devlog : select) {
+            smokeDevlogVo=new SmokeDevlogVo();
+            BeanUtils.copyProperties(devlog,smokeDevlogVo);
+            smokeDevlogVos.add(smokeDevlogVo);
+        }
+        return smokeDevlogVos;
+    }
+
+    @Override
+    public SmokeDevlogVo selectOne(SmokeDevlogVo smokeDevlogVo) {
+        Condition condition=new Condition(SmokeDevlog.class);
+        Example.Criteria criteria=condition.createCriteria();
+        criteria.andEqualTo("cno",smokeDevlogVo.getCno());
+        condition.setOrderByClause("create_time desc");
+        List<SmokeDevlog> smokeDevlogs=smokeDevlogMapper.selectByCondition(condition);
+        if(smokeDevlogs.size()>0){
+            BeanUtils.copyProperties(smokeDevlogs.get(0),smokeDevlogVo);
+        }
+        return smokeDevlogVo;
+    }
+    @Override
+    public PageInfo smokeDeviceStatusList(SmokeDeviceListVo smokeDeviceListDto) {
+        Condition condition=new Condition(SmokeDevlog.class);
+        Example.Criteria criteria=condition.createCriteria();
+        criteria.andEqualTo("cno",smokeDeviceListDto.getCno());
+        criteria.andBetween("createTime",smokeDeviceListDto.getStartDate(),smokeDeviceListDto.getEndDate()+" 23:59:59");
+        if(!"0".equals(smokeDeviceListDto.getStatus())){
+            criteria.andEqualTo("status",smokeDeviceListDto.getStatus());
+        }
+        PageHelper.startPage(smokeDeviceListDto.getPageNumber(),smokeDeviceListDto.getPageSize(),"create_time desc");
+        List<SmokeDevlog> smokeDevlogs = smokeDevlogMapper.selectByCondition(condition);
+        PageInfo<SmokeDevlogVo> pageInfo=new PageInfo(smokeDevlogs);
+        List<SmokeDevlogVo> smokeDevlogVos= Lists.newArrayList();
+        for (SmokeDevlog smokeDevlog : smokeDevlogs) {
+            SmokeDevlogVo smokeDevlogVo=new SmokeDevlogVo();
+            BeanUtils.copyProperties(smokeDevlog,smokeDevlogVo);
+            smokeDevlogVos.add(smokeDevlogVo);
+        }
+        pageInfo.setList(smokeDevlogVos);
+        return pageInfo;
+    }
+}

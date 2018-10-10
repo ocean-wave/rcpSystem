@@ -1,0 +1,103 @@
+package cn.com.cdboost.collect.job;
+
+import cn.com.cdboost.collect.service.AppChargerService;
+import cn.com.cdboost.collect.service.ChargingSpiltAccountService;
+import cn.com.cdboost.collect.service.WxChargerPayService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+/**
+ * 针对分账未处理的记录处理
+ */
+//@Lazy(false)
+//@Component
+//@EnableScheduling
+//@PropertySource("classpath:job-config.properties")
+public class QuerySplitAccountStatusJob {
+    private static final Logger logger = LoggerFactory.getLogger(QuerySplitAccountStatusJob.class);
+
+    @Value("${job.isOpen}")
+    private String isOpen;
+    @Autowired
+    private ChargingSpiltAccountService chargingSpiltAccountService;
+    @Autowired
+    private AppChargerService appChargerService;
+    @Autowired
+    private WxChargerPayService wxChargerPayService;
+
+//    @Scheduled(cron = "${job6.schedule}")
+//    public void checkSplitStatus() {
+//        if ("0".equals(isOpen)) {
+//            logger.info("checkSplitStatus开始运行");
+//            return;
+//        }
+//
+//        logger.info("---------QuerySplitAccountStatusJob任务开始----------");
+//        try {
+//            Date beginTime = DateUtil.getStartTimeOfYesterday();
+//            Date endTime = DateUtil.getEndTimeOfYesterday();
+//            List<ChargingSpiltAccount> list = chargingSpiltAccountService.queryNeedProcessRecord(beginTime, endTime);
+//            if (CollectionUtils.isEmpty(list)) {
+//                logger.info("没有分账失败或者未分账的记录");
+//                return;
+//            }
+//            // 微信，未分账记录
+//            List<ChargingSpiltAccount> one = Lists.newArrayList();
+//            // 支付宝，未分账记录
+//            List<ChargingSpiltAccount> two = Lists.newArrayList();
+//            // 微信，分账失败记录
+//            List<ChargingSpiltAccount> three = Lists.newArrayList();
+//            // 支付宝，分账失败记录
+//            List<ChargingSpiltAccount> four = Lists.newArrayList();
+//            for (ChargingSpiltAccount account : list) {
+//                Integer status = account.getStatus();
+//                Integer payMethod = account.getPayMethod();
+//                if (status == 0) {
+//                    if (payMethod == 0) {
+//                        one.add(account);
+//                    } else {
+//                        two.add(account);
+//                    }
+//                } else {
+//                    if (payMethod == 0) {
+//                        three.add(account);
+//                    } else {
+//                        four.add(account);
+//                    }
+//                }
+//            }
+//            // 微信，针对处理中的分账记录，查询分账状态
+//            if (!CollectionUtils.isEmpty(one)) {
+//                for (ChargingSpiltAccount account : one) {
+//                    appChargerService.wxOrderQueryProcess(account);
+//                }
+//            }
+//            // 支付宝，针对处理中的分账记录，查询分账状态
+//            if (!CollectionUtils.isEmpty(two)) {
+//                for (ChargingSpiltAccount account : two) {
+//                    wxChargerPayService.processAlipaySplitRecord(account.getId(),account.getPartnerTradeNo());
+//                }
+//            }
+//
+//            // 微信，针对未分账的重新发起分账
+//            if (!CollectionUtils.isEmpty(three)) {
+//                for (ChargingSpiltAccount account : three) {
+//                    appChargerService.split2Wechat(account,account.getAccountNo(),account.getPartnerTradeNo(),account.getAmount());
+//                }
+//            }
+//
+//            // 支付宝，针对未分账的重新发起分账
+//            if (!CollectionUtils.isEmpty(four)) {
+//                for (ChargingSpiltAccount account : four) {
+//                    appChargerService.split2Alipay(account,account.getAccountNo(),account.getPartnerTradeNo(),account.getAmount());
+//                }
+//            }
+//
+//            logger.info("---------QuerySplitAccountStatusJob任务结束----------");
+//        } catch (Exception e) {
+//            logger.error("检查分账订单定时任务异常",e);
+//        }
+//    }
+}

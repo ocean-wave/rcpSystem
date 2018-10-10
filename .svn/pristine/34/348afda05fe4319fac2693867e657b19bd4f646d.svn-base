@@ -1,0 +1,326 @@
+package cn.com.cdboost.collect.impl;
+
+import cn.com.cdboost.collect.common.BaseServiceImpl;
+import cn.com.cdboost.collect.constant.ChargeConstant;
+import cn.com.cdboost.collect.dao.ChargingDeviceMapper;
+import cn.com.cdboost.collect.dao.ChargingProjectMapper;
+import cn.com.cdboost.collect.dao.ChargingUseDetailedMapper;
+import cn.com.cdboost.collect.dto.*;
+import cn.com.cdboost.collect.dto.param.ChargerProjectEditParam;
+import cn.com.cdboost.collect.dto.param.ChargerProjectSchemeAddParam;
+import cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo;
+import cn.com.cdboost.collect.dto.response.ProjectInfoDto;
+import cn.com.cdboost.collect.exception.BusinessException;
+import cn.com.cdboost.collect.model.ChargingDevice;
+import cn.com.cdboost.collect.model.ChargingProject;
+import cn.com.cdboost.collect.model.Org;
+import cn.com.cdboost.collect.service.ChargingProjectService;
+import cn.com.cdboost.collect.service.OrgService;
+import cn.com.cdboost.collect.service.RedisService;
+import cn.com.cdboost.collect.util.DateUtil;
+import cn.com.cdboost.collect.util.MathUtil;
+import cn.com.cdboost.collect.util.UuidUtil;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
+
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Service
+public class ChargingProjectServiceImpl extends BaseServiceImpl<ChargingProject> implements ChargingProjectService {
+    @Autowired
+    private ChargingProjectMapper chargingProjectMapper;
+    @Autowired
+    private ChargingDeviceMapper chargingDeviceMapper;
+    @Autowired
+    private RedisService redisService;
+    @Autowired
+    private ChargingUseDetailedMapper chargingUseDetailedMapper;
+
+    @Override
+    public List<FirstProjectCountDto> queryProjectCount(Integer userId) {
+        //查询用户所属组织
+        Set<Long> dataOrgNos = redisService.queryUserOrgNoByUserId(userId);
+        List orgNoList = Lists.newArrayList(dataOrgNos);
+        List<FirstProjectCountDto> dtos = chargingProjectMapper.queryProjectCount(orgNoList);
+        /*for (FirstProjectCountDto dto : dtos) {
+            Integer a = dto.getChargingNum();
+            Integer b = dto.getDeviceNum();
+            String createTime = dto.getCreateTime();
+            int i = DateUtil.compareDate(createTime, DateUtil.CurrentDate())+1;
+            if (b != null && b != 0){
+                BigDecimal d1 = new BigDecimal((float)a*100/(b*4*i)).setScale(2, BigDecimal.ROUND_HALF_UP);
+                dto.setUseRate(d1);
+            }
+        }*/
+        return dtos;
+    }
+
+    @Override
+    public FirstCurveInfo queryCountCurve(Integer userId, String startDate, String endDate) {
+        FirstCurveInfo info = new FirstCurveInfo();
+        //查询所有站点
+        List<ProjectDto> projectDtos = this.queryAllProject(userId);
+        List<String> proGuids = Lists.newArrayList();
+        for (ProjectDto projectDto : projectDtos) {
+            proGuids.add(projectDto.getProjectGuid());
+        }
+        List<FirstCurveDto> curveDtos = chargingUseDetailedMapper.queryCountCurve(proGuids,startDate,endDate);
+        List<String> xData = Lists.newArrayList();//保存日期集合
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date_start = sdf.parse(startDate);
+            Date date_end = sdf.parse(endDate);
+            Date date =date_start;
+            Calendar cd = Calendar.getInstance();//用Calendar 进行日期比较判断
+            while (date.getTime()<=date_end.getTime()){
+                xData.add(sdf.format(date));
+                cd.setTime(date);
+                cd.add(Calendar.DATE, 1);//增加一天 放入集合
+                date=cd.getTime();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        List<BigDecimal> useRateData = Lists.newArrayList();
+        List<BigDecimal> profitableData = Lists.newArrayList();
+        Map<String,FirstCurveDto> map = Maps.newHashMap();
+        for (FirstCurveDto curveDto : curveDtos) {
+            map.put(curveDto.getDayStr(),curveDto);
+        }
+        for (String dayStr : xData) {
+            if (map.get(dayStr) != null){
+                useRateData.add(map.get(dayStr).getUseRate());
+                profitableData.add(map.get(dayStr).getyProfitable());
+            }else {
+                useRateData.add(BigDecimal.ZERO);
+                profitableData.add(BigDecimal.ZERO);
+            }
+        }
+        info.setxData(xData);
+        info.setUseRateData(useRateData);
+        info.setProfitableData(profitableData);
+        return info;
+    }
+
+    @Override
+    public ChargerEnergyCountInfo queryEnergyCount(Integer userId) {
+        ChargerEnergyCountInfo countInfo = new ChargerEnergyCountInfo();
+        //查询用户所属组织
+        Set<Long> dataOrgNos = redisService.queryUserOrgNoByUserId(userId);
+        List orgNoList = Lists.newArrayList(dataOrgNos);
+        //查询累计使用数据
+        CompareDataCountDto compareDataCountDto = chargingProjectMapper.queryCompareDataCount(orgNoList,"","");
+        countInfo.setChargeNumTotal(compareDataCountDto.getChargeNum());
+        countInfo.setUsePowerTotal(compareDataCountDto.getUsePower());
+        countInfo.setUseTimeTotal(MathUtil.divide(compareDataCountDto.getUseTime(),60));
+        //查询线损电量
+        List<ProjectDto> projectDtos = this.queryAllProject(userId);
+        List<String> meterNos = Lists.newArrayList();
+        for (ProjectDto projectDto : projectDtos) {
+            meterNos.add(projectDto.getMeterNo());
+        }
+        BigDecimal meterPowerTotal = BigDecimal.ZERO;
+        List<ListElectricDto> listElectricDtos = chargingUseDetailedMapper.queryPowerAndFeeList("1900-01-01 00:00:00", DateUtil.CurrentDateTime(), meterNos);
+        for (ListElectricDto listElectricDto : listElectricDtos) {
+            meterPowerTotal = meterPowerTotal.add(listElectricDto.getyQuantityData());
+        }
+        countInfo.setLossPowerTotal(meterPowerTotal.subtract(countInfo.getUsePowerTotal()));
+        return countInfo;
+    }
+
+    @Override
+    public CompareDataCountInfo queryCompareDataCount(Integer userId) {
+        //查询用户所属组织
+        Set<Long> dataOrgNos = redisService.queryUserOrgNoByUserId(userId);
+        List orgNoList = Lists.newArrayList(dataOrgNos);
+        String beginTime = DateUtil.CurrentDate()+" 00:00:00";
+        String endTime = DateUtil.CurrentDate()+" 23:59:59";
+        //查询今日数据
+        CompareDataCountDto compareDataCountDto = chargingProjectMapper.queryCompareDataCount(orgNoList,beginTime,endTime);
+        try {
+            beginTime = DateUtil.getInputlastDayDate(DateUtil.CurrentDate())+" 00:00:00";
+            endTime = DateUtil.getInputlastDayDate(DateUtil.CurrentDate())+" 23:59:59";
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        //查询昨天数据
+        CompareDataCountDto compareDataCountDto2 = chargingProjectMapper.queryCompareDataCount(orgNoList,beginTime,endTime);
+        CompareDataCountInfo compareDataCountInfo = new CompareDataCountInfo();
+        BeanUtils.copyProperties(compareDataCountDto, compareDataCountInfo);
+        compareDataCountInfo.setLastChargeNum(compareDataCountDto2.getChargeNum());
+        compareDataCountInfo.setLastDeductMoney(compareDataCountDto2.getDeductMoney());
+        compareDataCountInfo.setLastProfitable(compareDataCountDto2.getProfitable());
+        compareDataCountInfo.setLastUsePower(compareDataCountDto2.getUsePower());
+        return compareDataCountInfo;
+    }
+
+    @Override
+    public MerchantCountDto queryMerchantCount(Integer userId) {
+        //查询用户所属组织
+        Set<Long> dataOrgNos = redisService.queryUserOrgNoByUserId(userId);
+        List orgNoList = Lists.newArrayList(dataOrgNos);
+        //查询站点数和设备数
+        MerchantCountDto merchantCountDto = chargingProjectMapper.queryMerchantCount(orgNoList);
+        //查询所有站点
+        List<ProjectDto> projectDtos = this.queryAllProject(userId);
+        //查询用户数
+        MerchantCountDto merchantCountDto2 = chargingProjectMapper.queryCustomerCount(projectDtos);
+        merchantCountDto.setCustomerNum(merchantCountDto2.getCustomerNum());
+        merchantCountDto.setRemainAmount(merchantCountDto2.getRemainAmount());
+        //merchantCountDto.setProfitable(merchantCountDto2.getProfitable());
+        return merchantCountDto;
+    }
+    @Autowired
+    private OrgService orgService;
+
+    @Override
+    public List<ProjectInfoDto> queryProjectTreeByName(Set<Long> dataOrgNos, String projectName) {
+        List<Long> orgList= Lists.newArrayList(dataOrgNos);
+        return chargingProjectMapper.queryProjectTreeByName(orgList,projectName);
+    }
+
+
+    @Override
+    @Transactional
+    public void deleteProject(List<String> projectGuids, Integer id) {
+        Condition conditionDevice = new Condition(ChargingDevice.class);
+        Condition.Criteria criteriaDevice = conditionDevice.createCriteria();
+        criteriaDevice.andIn("projectGuid",projectGuids);
+        criteriaDevice.andEqualTo("isDel", ChargeConstant.IsDel.NOTDEL.getStatus());
+        int i = chargingDeviceMapper.selectCountByCondition(conditionDevice);
+        if (i>0){
+            throw new BusinessException("项目下还有设备，不能删除！");
+        }
+
+        ChargingProject chargingProject = new ChargingProject();
+        chargingProject.setIsDel(ChargeConstant.IsDel.DEL.getStatus());
+        Condition condition = new Condition(ChargingProject.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        criteria.andIn("projectGuid",projectGuids);
+        chargingProjectMapper.updateByConditionSelective(chargingProject, condition);
+    }
+
+    @Override
+    @Transactional
+    public void edit(ChargerProjectEditParam param, Integer id) {
+        //项目名去重
+        Condition condition1 = new Condition(ChargingProject.class);
+        Example.Criteria criteria1 = condition1.createCriteria();
+        criteria1.andNotEqualTo("projectGuid",param.getProjectGuid());
+        criteria1.andEqualTo("projectName",param.getProjectName());
+        criteria1.andEqualTo("isDel", ChargeConstant.IsDel.NOTDEL);
+        int i = chargingProjectMapper.selectCountByCondition(condition1);
+        if (i > 0){
+            throw new BusinessException("该项目名已存在！");
+        }
+
+        //修改项目
+        ChargingProject project = new ChargingProject();
+        Condition condition = new Condition(ChargingProject.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andEqualTo("projectGuid",param.getProjectGuid());
+        BeanUtils.copyProperties(param,project);
+        project.setIsDel(ChargeConstant.IsDel.NOTDEL.getStatus());
+        project.setPrice(project.getBasePrice().add(project.getUpPrice()));
+        project.setUpdateUserId(id.longValue());
+        //project.setOrgNo(param.getOrgNo());
+        project.setUpdateTime(new Date());
+
+        chargingProjectMapper.updateByConditionSelective(project,condition);
+    }
+
+    @Override
+    @Transactional
+    public void add(ChargerProjectSchemeAddParam param, Integer id) {
+        ChargingProject project = new ChargingProject();
+        project.setProjectName(param.getProjectName());
+        project.setIsDel(ChargeConstant.IsDel.NOTDEL.getStatus());
+        //判断项目名是否存在
+        List<ChargingProject> select = chargingProjectMapper.select(project);
+        if (select.size() > 0){
+            throw new BusinessException("该项目名已存在！");
+        }
+        Org org = orgService.queryByOrgNo(param.getOrgNo());
+        BeanUtils.copyProperties(param,project);
+        String projectGuid = UuidUtil.getUuid();
+        project.setProjectGuid(projectGuid);
+        project.setCreateUserId(id.longValue());
+        project.setPrice(project.getBasePrice().add(project.getUpPrice()));
+        //project.setOrgNo(param.getOrgNo());
+        project.setOrgNo(param.getOrgNo());
+        //分账维护字段
+        project.setAlipayUserId(org.getAlipayUserId());
+        project.setOpenId(org.getOpenId());
+        project.setProfitRatio(org.getProfitRatio());
+        project.setSplitFlag(org.getSplitFlag());
+        //插入项目信息表
+        chargingProjectMapper.insertSelective(project);
+    }
+
+    @Override
+    public List<ProjectDto> queryAllProject(Integer userId) {
+        //查询用户所属组织
+        Set<Long> dataOrgNos = redisService.queryUserOrgNoByUserId(userId);
+        List list = Lists.newArrayList(dataOrgNos);
+        Condition condition = new Condition(ChargingProject.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andIn("orgNo",list);
+        criteria.andEqualTo("isDel", ChargeConstant.IsDel.NOTDEL.getStatus());
+        //查询用户所属组织下的所有项目
+        List<ChargingProject> chargingProjects = chargingProjectMapper.selectByCondition(condition);
+        List<ProjectDto> projectDtos = Lists.newArrayList();
+        for (ChargingProject chargingProject:chargingProjects){
+            ProjectDto projectDto = new ProjectDto();
+            BeanUtils.copyProperties(chargingProject,projectDto);
+            projectDtos.add(projectDto);
+        }
+        return projectDtos;
+    }
+
+    @Override
+    public ChargingProject queryByProjectGuid(String projectGuid) {
+        ChargingProject param = new ChargingProject();
+        param.setProjectGuid(projectGuid);
+        param.setIsDel(0);
+        return chargingProjectMapper.selectOne(param);
+    }
+
+    @Override
+    public List<ChargingProject> batchQuery(Set<String> projectGuids) {
+        Condition condition = new Condition(ChargingProject.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andIn("projectGuid",projectGuids);
+        return chargingProjectMapper.selectByCondition(condition);
+    }
+
+    @Override
+    public ChargingProject queryProjectInfo() {
+        List<ChargingProject> chargingProjects = chargingProjectMapper.selectAll();
+        ChargingProject chargingProject = chargingProjects.get(0);
+        return chargingProject;
+    }
+
+    @Override
+    public List<ChargingProjectDto> queryList(ChargerSchemeQueryVo queryVo, Integer userId) {
+        // 查询用户的组织数据权限
+        Set<Long> dataOrgNos = redisService.queryUserOrgNoByUserId(userId);
+        List list = Lists.newArrayList(dataOrgNos);
+        queryVo.setOrgNoList(list);
+        queryVo.setPageIndex((queryVo.getPageNumber() - 1) * queryVo.getPageSize());
+        //查询列表
+        List<ChargingProjectDto> chargingProjectInfos = chargingProjectMapper.queryList(queryVo);
+        //设置总条数
+        Long total = chargingProjectMapper.queryListTotal(queryVo);
+        queryVo.setTotal(total);
+        return chargingProjectInfos;
+    }
+}

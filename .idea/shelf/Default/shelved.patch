@@ -1,0 +1,16 @@
+Index: rcp-dao/src/main/resources/config/db-zt-123.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- rcp-dao/src/main/resources/config/db-zt-123.properties	(revision 1714)
++++ rcp-dao/src/main/resources/config/db-zt-123.properties	(date 1536564509080)
+@@ -1,6 +1,6 @@
+ # 250 开发环境
+ host.ip = 10.1.3.123
+ host.port = 3306
+-db.name = sm_metercollect_design_zt
++db.name = sm_metercollect_design_zt_test
+ db.username = sa_pda
+ db.password = emerp@250.123
+\ No newline at end of file

@@ -1,0 +1,43 @@
+package cn.com.cdboost.collect.dto.param;
+
+import java.util.List;
+
+public class ElectricCountQueryVo {
+    private String mark;
+
+    private String nodeId;
+    private Integer nodeType;
+    private List<Long> orgNoList;
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public Integer getNodeType() {
+        return nodeType;
+    }
+
+    public void setNodeType(Integer nodeType) {
+        this.nodeType = nodeType;
+    }
+
+    public List<Long> getOrgNoList() {
+        return orgNoList;
+    }
+
+    public void setOrgNoList(List<Long> orgNoList) {
+        this.orgNoList = orgNoList;
+    }
+
+    public String getMark() {
+        return mark;
+    }
+
+    public void setMark(String mark) {
+        this.mark = mark;
+    }
+}

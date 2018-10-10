@@ -266,32 +266,13 @@
             "menuTitle": "电瓶车充电",
             "menuUrl": "",
             "parentMenuId": 100050
-        },{
-          "children": [{
-            "menuIcon": "equipment",
-            "menuId": 10005201,
-            "menuTitle": "烟感设备列表",
-            "menuUrl": "/Main/DeviceList",
-            "parentMenuId": 100052
-          },{
-            "menuIcon": "condition",
-            "menuId": 10005202,
-            "menuTitle": "烟感状态监测",
-            "menuUrl": "/Main/stateMonitoring",
-            "parentMenuId": 100052
-          }],
-          "menuIcon": "smoke_second",
-          "menuId": 100052,
-          "menuTitle": "智能烟感",
-          "menuUrl": "",
-          "parentMenuId": 100050
         }],
         "menuIcon": "brilliant_icon",
         "menuId": 100050,
         "menuTitle": "智慧应用",
         "menuUrl": "",
         "parentMenuId": 0
-       }, {
+    }, {
         "children": [{
             "menuIcon": "department",
             "menuId": 100045,

@@ -1,0 +1,1238 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingDeviceMapper">
+    <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingDevice">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="project_guid" property="projectGuid" jdbcType="CHAR"/>
+        <result column="device_name" property="deviceName" jdbcType="VARCHAR"/>
+        <result column="device_no" property="deviceNo" jdbcType="CHAR"/>
+        <result column="online" property="online" jdbcType="INTEGER"/>
+        <result column="com_method" property="comMethod" jdbcType="INTEGER"/>
+        <result column="comm_no" property="commNo" jdbcType="VARCHAR"/>
+        <result column="run_state" property="runState" jdbcType="INTEGER"/>
+        <result column="current_limit" property="currentLimit" jdbcType="DECIMAL"/>
+        <result column="lng" property="lng" jdbcType="DECIMAL"/>
+        <result column="lat" property="lat" jdbcType="DECIMAL"/>
+        <result column="location_type" property="locationType" jdbcType="INTEGER"/>
+        <result column="install_addr" property="installAddr" jdbcType="VARCHAR"/>
+        <result column="install_date" property="installDate" jdbcType="DATE"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="create_user_id" property="createUserId" jdbcType="BIGINT"/>
+        <result column="meter_no" property="meterNo" jdbcType="VARCHAR"/>
+        <result column="meter_cno" property="meterCno" jdbcType="VARCHAR"/>
+        <result column="transformer_no" property="transformerNo" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_user_id" property="updateUserId" jdbcType="BIGINT"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="charging_plie_guid" property="chargingPlieGuid" jdbcType="CHAR"/>
+        <result column="is_del" property="isDel" jdbcType="INTEGER"/>
+        <result column="port" property="port" jdbcType="CHAR"/>
+    </resultMap>
+
+    <!--获取充电页面基础信息结果集-->
+    <resultMap id="queryBaseInfoMap" type="cn.com.cdboost.collect.dto.chargerApp.WxBaseInfoDto">
+        <result column="device_name" property="deviceName" jdbcType="VARCHAR"/>
+        <result column="device_no" property="deviceNo" jdbcType="CHAR"/>
+        <result column="run_state" property="runState" jdbcType="INTEGER"/>
+        <result column="contact_telphone" property="phone" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="totalLineLossMap" type="cn.com.cdboost.collect.dto.TotalLineLossInfo">
+        <collection property="list"  javaType="java.util.ArrayList" ofType="cn.com.cdboost.collect.dto.LineLossList">
+            <id column="calc_data" property="date" jdbcType="VARCHAR"/>
+            <result column="meter_no" property="deviceNo" jdbcType="VARCHAR"/>
+            <result column="day_eq_value" property="meterElect" jdbcType="VARCHAR"/>
+            <result column="use_power" property="deviceElect" jdbcType="VARCHAR"/>
+            <result column="loss_elect" property="lossElect" jdbcType="VARCHAR"/>
+            <result column="loss_rate" property="lossRate" jdbcType="VARCHAR"/>
+            <result column="charge_time" property="chargeTime" jdbcType="VARCHAR"/>
+            <result column="install_addr" property="installAddr" jdbcType="VARCHAR"/>
+            <result column="last_read_value" property="lastReadValue" jdbcType="VARCHAR"/>
+            <result column="read_value" property="readValue" jdbcType="VARCHAR"/>
+        </collection>
+        <collection property="loss"  javaType="java.util.ArrayList" ofType="cn.com.cdboost.collect.dto.LineLossCurve">
+            <id column="calc_data" property="date" jdbcType="VARCHAR"/>
+            <result column="loss_elect" property="lossElect" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+    <resultMap id="dayLineLossMap" type="cn.com.cdboost.collect.dto.DayLineLossInfo">
+        <collection property="list"  javaType="java.util.ArrayList" ofType="cn.com.cdboost.collect.dto.DayLineLossInfoList">
+            <result column="device_no" property="deviceNo" jdbcType="VARCHAR"/>
+            <result column="port" property="port" jdbcType="VARCHAR"/>
+            <result column="use_power" property="deviceElect" jdbcType="VARCHAR"/>
+            <result column="use_time" property="userTime" jdbcType="VARCHAR"/>
+            <result column="start_time" property="startDate" jdbcType="VARCHAR"/>
+            <result column="end_time" property="endDate" jdbcType="VARCHAR"/>
+            <result column="max_power" property="mostPower" jdbcType="VARCHAR"/>
+            <result column="max_current" property="mostCurrent" jdbcType="VARCHAR"/>
+            <result column="state" property="state" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+    <select id="dayLineLoss" parameterType="cn.com.cdboost.collect.dto.DayLineLossDto"
+            resultMap="dayLineLossMap" >
+        SELECT
+        h.state,
+        h.charging_plie_guid,
+        h.charging_guid,
+        t.device_no,
+        t.PORT,
+        h.use_power,
+        h.use_time,
+        h.start_time,
+        h.end_time,
+        h.max_current,
+        h.max_power
+        FROM
+        em_d_charging_use_detailed h
+        INNER JOIN em_d_charging_device t ON h.charging_plie_guid = t.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(
+        #{dayLineLossDto.date},' 00:00:00') AND h.start_time<![CDATA[<=]]> CONCAT(#{dayLineLossDto.date},' 23:59:59')
+        AND t.meter_cno = #{dayLineLossDto.deviceCno} and t.is_del=0
+        ORDER BY
+        h.start_time ASC
+    </select>
+    <select id="totalLineLossListFreezeInTime" parameterType="cn.com.cdboost.collect.dto.TotalLineLossDto"
+            resultMap="totalLineLossMap" >
+       SELECT * FROM (SELECT
+        t.calc_data,
+        d.meter_no,
+        t.last_read_value,
+        t.read_value,
+        t.day_eq_value,
+        sum(h.use_power) use_power,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect,
+        if(t.day_eq_value=0,'',cast(
+        (
+        (
+        t.day_eq_value - sum(h.use_power)
+        ) / t.day_eq_value
+        ) * 100 AS DECIMAL (20, 2)
+        )) AS loss_rate,
+        count(*) AS charge_time,
+        d.install_addr
+        FROM
+        (
+        SELECT cast(read_value-last_read_value AS DECIMAL (20, 2)) day_eq_value ,t.* from(
+        SELECT
+        cast(
+        min(t.active_total_value) AS DECIMAL (20, 2)
+        ) last_read_value,
+        cast(
+        max(t.active_total_value) AS DECIMAL (20, 2)
+        ) read_value,
+        CURDATE() calc_data,
+        t.cno
+        FROM
+        em_d_imp_elecdata t
+        WHERE
+        t.data_type = '0'
+        AND t.collect_time BETWEEN #{totalLineLossDto.endDate}
+        AND  DATE_ADD(#{totalLineLossDto.endDate},INTERVAL 1 DAY)
+        and t.active_total_value<![CDATA[<>]]>-1
+        GROUP BY
+        t.cno
+        )t) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del=0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        UNION
+        SELECT
+        t.calc_data,
+        d.meter_no,
+        t.last_read_value,
+        t.read_value,
+        t.day_eq_value,
+        sum(h.use_power) use_power,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect,
+        if(t.day_eq_value=0,'',cast(
+        (
+        (
+        t.day_eq_value - sum(h.use_power)
+        ) / t.day_eq_value
+        ) * 100 AS DECIMAL (20, 2)
+        )) AS loss_rate,
+        count(*) AS charge_time,
+        d.install_addr
+        FROM
+        (
+        SELECT
+        t.cno,
+        t.calc_data,
+        t.last_read_value,
+        t.read_value,
+        if(t.day_eq_value<![CDATA[<]]>0,'0',t.day_eq_value) day_eq_value
+        FROM
+        em_d_meter_day_power t
+        WHERE
+        t.calc_data_type = '0'
+        AND t.calc_data BETWEEN #{totalLineLossDto.startDate}
+        AND #{totalLineLossDto.endDateLast}
+        GROUP BY
+        t.calc_data,
+        t.cno
+        ) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del = 0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        ORDER BY calc_data DESC)t
+    </select>
+    <select id="totalLineLossListFreeze" parameterType="cn.com.cdboost.collect.dto.TotalLineLossDto"
+            resultMap="totalLineLossMap" >
+        SELECT * FROM  (SELECT
+        t.calc_data,
+        d.meter_no,
+        t.last_read_value,
+        t.read_value,
+        t.day_eq_value,
+        sum(h.use_power) use_power,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect,
+        if(t.day_eq_value=0,'',cast(((t.day_eq_value - sum(h.use_power)) / t.day_eq_value) * 100 AS DECIMAL (20, 2))) AS loss_rate,
+        count(*) AS charge_time,
+        d.install_addr
+        FROM
+        (
+            SELECT
+            t.cno,
+            t.calc_data,
+            t.last_read_value,
+            t.read_value,
+            if(t.day_eq_value<![CDATA[<]]>0,'0',t.day_eq_value) day_eq_value
+            FROM em_d_meter_day_power t
+            WHERE t.calc_data_type = '0'
+            AND t.calc_data BETWEEN #{totalLineLossDto.startDate}
+            AND #{totalLineLossDto.endDate}
+            GROUP BY t.calc_data, t.cno
+        ) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del = 0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        ORDER BY t.calc_data DESC)t
+    </select>
+    <select id="totalLineLossListInTime" parameterType="cn.com.cdboost.collect.dto.TotalLineLossDto"
+            resultMap="totalLineLossMap" >
+        SELECT * FROM  (SELECT
+        t.calc_data,
+        d.meter_no,
+        t.last_read_value,
+        t.read_value,
+        t.day_eq_value,
+        sum(h.use_power) use_power,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect,
+        if(t.day_eq_value=0,'',cast(
+        (
+        (
+        t.day_eq_value - sum(h.use_power)
+        ) / t.day_eq_value
+        ) * 100 AS DECIMAL (20, 2)
+        )) AS loss_rate,
+        count(*) AS charge_time,
+        d.install_addr
+        FROM
+        (
+        SELECT cast(read_value-last_read_value AS DECIMAL (20, 2)) day_eq_value ,t.* from(
+        SELECT
+        cast(
+        min(t.active_total_value) AS DECIMAL (20, 2)
+        ) last_read_value,
+        cast(
+        max(t.active_total_value) AS DECIMAL (20, 2)
+        ) read_value,
+        CURDATE() calc_data,
+        t.cno
+        FROM
+        em_d_imp_elecdata t
+        WHERE
+        t.data_type = '0'
+        AND t.collect_time BETWEEN #{totalLineLossDto.endDate}
+        AND  DATE_ADD(#{totalLineLossDto.endDate},INTERVAL 1 DAY)
+        and t.active_total_value<![CDATA[<>]]>-1
+        GROUP BY
+        t.cno
+        )t) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del=0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        ORDER BY t.calc_data DESC)t
+    </select>
+    <select id="totalLineLossCurveFreezeInTime" parameterType="cn.com.cdboost.collect.dto.TotalLineLossDto"
+            resultMap="totalLineLossMap">
+        SELECT
+        t.calc_data,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect
+        FROM
+        (
+        SELECT cast(read_value-last_read_value AS DECIMAL (20, 2)) day_eq_value ,t.* from(
+        SELECT
+        cast(
+        min(t.active_total_value) AS DECIMAL (20, 2)
+        ) last_read_value,
+        cast(
+        max(t.active_total_value) AS DECIMAL (20, 2)
+        ) read_value,
+        CURDATE() calc_data,
+        t.cno
+        FROM
+        em_d_imp_elecdata t
+        WHERE
+        t.data_type = '0'
+        AND t.collect_time BETWEEN #{totalLineLossDto.endDate}
+        AND  DATE_ADD(#{totalLineLossDto.endDate},INTERVAL 1 DAY)
+        and t.active_total_value<![CDATA[<>]]>-1
+        GROUP BY
+        t.cno
+        )t) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del=0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        UNION
+        SELECT
+        t.calc_data,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect
+        FROM
+        (
+        SELECT
+        t.cno,
+        t.calc_data,
+        t.last_read_value,
+        t.read_value,
+        if(t.day_eq_value<![CDATA[<]]>0,'0',t.day_eq_value) day_eq_value
+        FROM
+        em_d_meter_day_power t
+        WHERE
+        t.calc_data_type = '0'
+        AND t.calc_data BETWEEN #{totalLineLossDto.startDate}
+        AND #{totalLineLossDto.endDateLast}
+        GROUP BY
+        t.calc_data,
+        t.cno
+        ) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del = 0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        ORDER BY calc_data asc
+    </select>
+    <select id="totalLineLossCurveFreeze" parameterType="cn.com.cdboost.collect.dto.TotalLineLossDto"
+            resultMap="totalLineLossMap">
+        SELECT
+        t.calc_data,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect
+        FROM
+        (
+        SELECT
+        t.cno,
+        t.calc_data,
+        t.last_read_value,
+        t.read_value,
+        if(t.day_eq_value<![CDATA[<]]>0,'0',t.day_eq_value) day_eq_value
+        FROM
+        em_d_meter_day_power t
+        WHERE
+        t.calc_data_type = '0'
+        AND t.calc_data BETWEEN #{totalLineLossDto.startDate}
+        AND #{totalLineLossDto.endDate}
+        GROUP BY
+        t.calc_data,
+        t.cno
+        ) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del = 0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        ORDER BY t.calc_data asc
+    </select>
+    <select id="totalLineLossCurveInTime" parameterType="cn.com.cdboost.collect.dto.TotalLineLossDto"
+            resultMap="totalLineLossMap">
+        SELECT
+        t.calc_data,
+        convert((t.day_eq_value - sum(h.use_power)),DECIMAL(10,2)) AS loss_elect
+        FROM
+        (
+        SELECT cast(read_value-last_read_value AS DECIMAL (20, 2)) day_eq_value ,t.* from(
+        SELECT
+        cast(
+        min(t.active_total_value) AS DECIMAL (20, 2)
+        ) last_read_value,
+        cast(
+        max(t.active_total_value) AS DECIMAL (20, 2)
+        ) read_value,
+        CURDATE() calc_data,
+        t.cno
+        FROM
+        em_d_imp_elecdata t
+        WHERE
+        t.data_type = '0'
+        AND t.collect_time BETWEEN #{totalLineLossDto.endDate}
+        AND  DATE_ADD(#{totalLineLossDto.endDate},INTERVAL 1 DAY)
+        and t.active_total_value<![CDATA[<>]]>-1
+        GROUP BY
+        t.cno
+        )t) t
+        INNER JOIN em_d_charging_device d ON t.cno = d.meter_cno AND d.is_del=0
+        INNER JOIN em_d_charging_project t1 ON d.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        and t2.org_no
+        in
+        <foreach collection="totalLineLossDto.orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{totalLineLossDto.nodeId}
+        </if>
+        <if test="totalLineLossDto.nodeType !=null and totalLineLossDto.nodeType==2">
+            AND t1.project_guid=#{totalLineLossDto.nodeId}
+        </if>
+        INNER JOIN em_d_charging_use_detailed h ON d.charging_plie_guid = h.charging_plie_guid
+        AND h.start_time <![CDATA[>=]]> CONCAT(t.calc_data, ' 00:00:00')
+        AND h.start_time <![CDATA[<=]]> CONCAT(t.calc_data, ' 23:59:59')
+        <if test="totalLineLossDto.deviceNo!=null and totalLineLossDto.deviceNo!=''">
+            where
+            d.meter_no like CONCAT('%',#{totalLineLossDto.deviceNo},'%')
+        </if>
+        GROUP BY
+        t.calc_data,t.cno
+        ORDER BY t.calc_data asc
+    </select>
+  <sql id="QUERY-COMMON">
+    <where>
+        t.is_del = 0
+        and t2.org_no in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+      <if test="deviceNo!=null and deviceNo!=''">
+        AND t.device_no like CONCAT('%',#{deviceNo},'%')
+      </if>
+        <if test="commNo!=null and commNo!=''">
+            AND t.comm_no like CONCAT('%',#{commNo},'%')
+        </if>
+        <if test="ver!=null and ver!=''">
+            AND t.ver like CONCAT('%',#{ver},'%')
+        </if>
+      <if test="startDate!=null and startDate!=''">
+        AND t.install_date  &gt;= #{startDate}
+      </if>
+      <if test="endDate!=null and endDate!=''">
+        AND t.install_date &lt;= #{endDate}
+      </if>
+        <if test="projectName!=null and projectName!=''">
+            AND t1.project_name  like CONCAT('%',#{projectName},'%')
+        </if>
+        <if test="projectGuid!=null and projectGuid!=''">
+            AND t1.project_guid = #{projectGuid}
+        </if>
+    </where>
+  </sql>
+
+    <select id="deviceList" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.ChargingDeviceDto">
+        SELECT
+        t.charging_plie_guid chargingPlieGuid,
+        t.device_no deviceNo,
+        t.ver ver,
+        t.device_name deviceName,
+        t.`online` online,
+        t.com_method comMethod,
+        t.comm_no commNo,
+        t.current_limit currentLimit,
+        t.install_addr installAddr,
+        t.install_date installDate,
+        t.remark remark,
+        t.port port,
+        t.project_guid projectGuid,
+        t1.project_name projectName,
+        t1.project_addr projectAddr,
+        t1.community_name communityName,
+        t1.company_name companyName,
+        t1.contact contact,
+        t1.contact_telphone contactTelphone,
+        t1.price price
+        FROM
+        em_d_charging_device t
+        INNER JOIN em_d_charging_project t1 ON t.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND t1.project_guid=#{nodeId}
+        </if>
+        <include refid="QUERY-COMMON"/>
+        GROUP BY t.device_no order by t.id DESC
+         limit #{pageIndex},#{pageSize}
+    </select>
+
+    <select id="deviceAndPortList" parameterType="java.util.List"
+            resultType="cn.com.cdboost.collect.dto.ChargingDevicePortDto">
+        SELECT
+        t.charging_plie_guid chargingPlieGuid,
+        t.device_no deviceNo,
+        t.run_state runState,
+        t.comm_no commNo,
+        t.port port
+        FROM
+        em_d_charging_device t
+        WHERE
+        t.is_del = 0
+        AND t.device_no IN
+        <foreach collection="deviceNos" index="index" item="item" open="(" separator="," close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+        order by t.id DESC
+    </select>
+
+    <select id="queryTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM (
+        SELECT COUNT(*)
+        FROM
+        em_d_charging_device t
+        INNER JOIN em_d_charging_project t1 ON t.project_guid = t1.project_guid
+        INNER  JOIN em_b_org t2 on t1.org_no=t2.org_no
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON t2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <include refid="QUERY-COMMON"/>
+        GROUP BY t.device_no) temp
+    </select>
+
+
+    <!--获取充电页面基础信息-->
+    <select id="queryBaseInfo" parameterType="cn.com.cdboost.collect.dto.chargerApp.vo.WxBaseInfoVo" resultMap="queryBaseInfoMap">
+        SELECT
+        t1.device_name,
+        t1.device_no,
+        t1.run_state,
+        t2.contact_telphone
+        FROM em_d_charging_device t1
+        LEFT JOIN em_d_charging_project t2 ON t1.project_guid = t2.project_guid
+        WHERE t1.device_no = #{deviceNo}
+    </select>
+
+
+
+    <update id="editDevice" parameterType="cn.com.cdboost.collect.model.ChargingDevice">
+        UPDATE em_d_charging_device SET project_guid=#{projectGuid},device_name=#{deviceName},
+        device_no=#{deviceNo},install_addr=#{installAddr},install_date=#{installDate},
+        com_method=#{comMethod},remark=#{remark},meter_cno=#{meterCno},
+        meter_no=#{meterNo},transformer_no=#{transformerNo},comm_no=#{commNo}
+        WHERE device_no=#{deviceNo}
+    </update>
+
+    <!--统计监控页下的数量详情-->
+    <select id="deviceDetialCount" parameterType="java.lang.String" resultType="cn.com.cdboost.collect.dto.DeviceDetialCountDto">
+      SELECT
+            COUNT(*) useNumber,
+            SUM(t.consumption_money) electricFees,
+            SUM(t.use_power) usePower,
+            SUM(t.profitable) profitable
+        FROM
+            em_d_charging_use_detailed t
+        WHERE
+            t.charging_plie_guid = #{chargingPlieGuid}
+    </select>
+
+    <!--查询设备基础信息详情-->
+    <select id="queryDeviceDetial" parameterType="java.lang.String" resultType="cn.com.cdboost.collect.dto.ChargingDeviceDto">
+        SELECT
+        t.charging_plie_guid chargingPlieGuid,
+        t.device_no deviceNo,
+        t.device_name deviceName,
+        t.`online` online,
+        t.run_state runState,
+        t.com_method comMethod,
+        t.comm_no commNo,
+        t.port port,
+        t.current_limit currentLimit,
+        t.install_addr installAddr,
+        t.install_date installDate,
+        t.remark remark,
+        t.project_guid projectGuid,
+        t.meter_no meterNo,
+        t.meter_cno meterCno,
+        t.transformer_no transformerNo,
+        t1.project_name projectName,
+        t1.project_addr projectAddr,
+        t1.community_name communityName,
+        t1.company_name companyName,
+        t1.contact contact,
+        t1.contact_telphone contactTelphone,
+        t1.price price
+    FROM
+        em_d_charging_device t
+    INNER JOIN em_d_charging_project t1 ON t.project_guid = t1.project_guid
+    WHERE t.charging_plie_guid=#{chargingPlieGuid}
+    </select>
+
+<!--查询电费电量统计信息-->
+    <sql id="QUERYCOUNTLIST-COMMON">
+        <where>
+            t.is_del = 0
+            <if test="deviceNo!=null and deviceNo!=''">
+                AND t.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                AND t1.start_time  &gt;= #{startDate}
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                AND t1.end_time &lt;= #{endDate}
+            </if>
+        </where>
+    </sql>
+
+    <select id="queryCountList" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.ElectricAndFeeDto">
+        SELECT
+        t.charging_plie_guid chargingPlieGuid,
+        t.device_no deviceNo,
+        t.comm_no commNo,
+        t.device_name deviceName,
+        t2.project_addr projectAddr,
+        t.install_addr installAddr,
+        t.install_date installDate
+        FROM
+        em_d_charging_device t
+        LEFT JOIN em_d_charging_project t2 ON t.project_guid=t2.project_guid
+        INNER  JOIN em_b_org h2 on t2.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND t2.project_guid=#{nodeId}
+        </if>
+        <where>
+            <if test="deviceNo!=null and deviceNo!=''">
+                 t.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+            <if test="commNo!=null and commNo!=''">
+                t.comm_no like CONCAT('%',#{commNo},'%')
+            </if>
+        </where>
+        GROUP BY t.device_no ORDER BY t.id DESC limit #{pageIndex},#{pageSize}
+    </select>
+    <select id="queryListCount" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.ElectricAndFeeDto">
+        SELECT
+        t.device_no deviceNo,
+        t1.charging_plie_guid chargingPlieGuid,
+        COUNT(*) useNumber,
+        SUM(t1.use_power) electricQuantity,
+        SUM(t1.consumption_money) electricityFees,
+        SUM(t1.profitable) profitable
+        FROM em_d_charging_use_detailed t1
+        LEFT JOIN em_d_charging_device t ON t1.charging_plie_guid=t.charging_plie_guid
+        INNER JOIN em_d_charging_project h1 ON t.project_guid=h1.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        <where>
+            <if test="startDate!=null and startDate!=''">
+                AND t1.start_time  &gt;= #{startDate}
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                AND t1.start_time &lt;= #{endDate}
+            </if>
+        </where>
+        GROUP BY t.device_no
+    </select>
+
+    <select id="queryCountListTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo" resultType="java.lang.Integer">
+        SELECT count(distinct t.device_no) FROM
+        em_d_charging_device t
+        INNER JOIN em_d_charging_project h1 ON t.project_guid=h1.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        <where>
+
+            <if test="deviceNo!=null and deviceNo!=''">
+                 t.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+        </where>
+    </select>
+    <select id="queryElectricAndFeeTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.Statistics">
+        SELECT
+        SUM(t1.use_power) electricQuantity,
+        SUM(t1.consumption_money) electricityFees
+        FROM
+        em_d_charging_device  t
+        INNER JOIN em_d_charging_use_detailed t1 ON t.charging_plie_guid = t1.charging_plie_guid
+        INNER JOIN em_d_charging_project h1 ON t.project_guid=h1.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        <where>
+
+            <if test="deviceNo!=null and deviceNo!=''">
+                AND t.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                AND t1.start_time  &gt;= #{startDate}
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                AND t1.start_time &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <!--实时监控设备列表-->
+    <select id="monitorDeviceList" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.MonitorDeviceDto">
+        SELECT
+        t0.charging_plie_guid chargingPlieGuid,
+        t0.online online,
+        t0.run_state runState,
+        t0.device_no deviceNo,
+        t0.port port,
+        t0.comm_no commNo,
+        t1.start_time startTime,
+        t1.use_time useTime,
+        t1.charging_time chargingTime,
+        t1.charging_way chargingWay,
+        t1.deduct_money deductMoney,
+        t1.after_remain_amount remainAmount,
+        t1.charging_guid chargingGuid,
+        t1.charging_power chargingPower,
+        t1.use_power usePower,
+        t1.pay_category payCategory,
+        t1.open_no openNo,
+        t1.open_means openMeans,
+        t2.power power,
+        t2.voltage voltage,
+        t2.current current,
+        t2.charging_percent percent,
+        t2.remain_time remainTime,
+        t3.customer_name customerName,
+        t3.car_category carCategory,
+        t4.max_power maxPower,
+        t4.money schemeMoney,
+        t4.charging_time schememTime,
+        t4.charging_cnt chargingCnt
+        FROM em_d_charging_device t0
+        INNER JOIN em_d_charging_use_detailed t1 ON t0.charging_plie_guid = t1.charging_plie_guid AND t1.state=0
+        INNER JOIN em_d_charging_pay_cheme t4 ON t1.scheme_guid=t4.scheme_guid
+        LEFT JOIN em_d_charging_devlog t2 ON t1.dev_log_id = t2.id
+        LEFT JOIN em_d_charging_cst t3 ON t1.customer_guid=t3.customer_guid
+        INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+            <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+            </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        <where>
+            t0.is_del = 0 AND t0.run_state = 1
+            <if test="deviceNo!=null and deviceNo!=''">
+                AND t0.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+            <if test="runState!=null and runState!=''">
+                AND t0.run_state  = #{runState}
+            </if>
+            <if test="chargingPlieGuid!=null and chargingPlieGuid!=''">
+                AND t0.charging_plie_guid  = #{chargingPlieGuid}
+            </if>
+            <if test="online!=null">
+                AND t0.online  = #{online}
+            </if>
+            <if test="commNo!=null and commNo!=''">
+                AND t0.comm_no like CONCAT('%',#{commNo},'%')
+            </if>
+            <if test="payCategory!=null and payCategory!=0">
+                AND t1.pay_category = #{payCategory}
+            </if>
+        </where>
+        ORDER BY t0.id DESC
+    </select>
+    <!--实时监控设备列表查询非在线设备和在线设备-->
+    <select id="notChargingAndChargingDevice" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.MonitorDeviceDto">
+        SELECT * from (
+        SELECT
+        t0.charging_plie_guid chargingPlieGuid,
+        t0.online online,
+        t0.run_state runState,
+        t0.device_no deviceNo,
+        t0.port port,
+        t0.comm_no commNo,
+        t1.start_time startTime,
+        t1.use_time useTime,
+        t1.charging_time chargingTime,
+        t1.charging_way chargingWay,
+        t1.deduct_money deductMoney,
+        t1.after_remain_amount remainAmount,
+        t1.charging_guid chargingGuid,
+        t1.charging_power chargingPower,
+        t1.use_power usePower,
+        t1.pay_category payCategory,
+        t1.open_no openNo,
+        t1.open_means openMeans,
+        t2.power power,
+        t2.voltage voltage,
+        t2.current current,
+        t2.charging_percent percent,
+        t2.remain_time remainTime,
+        t3.customer_name customerName,
+        t3.car_category carCategory,
+        t4.max_power maxPower,
+        t4.money schemeMoney,
+        t4.charging_time schememTime,
+        t4.charging_cnt chargingCnt,
+        h1.project_name projectName
+        FROM em_d_charging_device t0
+        INNER JOIN em_d_charging_use_detailed t1 ON t0.charging_plie_guid = t1.charging_plie_guid AND t1.state=0
+        INNER JOIN em_d_charging_pay_cheme t4 ON t1.scheme_guid=t4.scheme_guid
+        LEFT JOIN em_d_charging_devlog t2 ON t1.dev_log_id = t2.id
+        LEFT JOIN em_d_charging_cst t3 ON t1.customer_guid=t3.customer_guid
+        INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        <where>
+            t0.is_del = 0 AND t0.run_state = 1
+            <if test="deviceNo!=null and deviceNo!=''">
+                AND t0.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+            <if test="runState!=null and runState!=''">
+                AND t0.run_state  = #{runState}
+            </if>
+            <if test="chargingPlieGuid!=null and chargingPlieGuid!=''">
+                AND t0.charging_plie_guid  = #{chargingPlieGuid}
+            </if>
+            <if test="online!=null">
+                AND t0.online  = #{online}
+            </if>
+            <if test="commNo!=null and commNo!=''">
+                AND t0.comm_no like CONCAT('%',#{commNo},'%')
+            </if>
+            <if test="payCategory!=null and payCategory!=0">
+                AND t1.pay_category = #{payCategory}
+            </if>
+        </where>
+        ORDER BY t0.id DESC )h
+        UNION
+        SELECT * from(
+        SELECT
+        t0.charging_plie_guid chargingPlieGuid,
+        t0.online online,
+        t0.run_state runState,
+        t0.device_no deviceNo,
+        t0.port port,
+        t0.comm_no commNo,
+        NULL startTime,
+        NULL useTime,
+        NULL chargingTime,
+        NULL chargingWay,
+        NULL deductMoney,
+        NULL remainAmount,
+        NULL chargingGuid,
+        NULL chargingPower,
+        NULL usePower,
+        NULL payCategory,
+        NULL openNo,
+        NULL openMeans,
+        NULL power,
+        NULL voltage,
+        NULL current,
+        NULL percent,
+        NULL remainTime,
+        NULL customerName,
+        NULL carCategory,
+        null maxPower,
+        null schemeMoney,
+        null schememTime,
+        null chargingCnt,
+        h1.project_name projectName
+        FROM em_d_charging_device t0
+        INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        <where>
+            t0.is_del = 0 AND t0.run_state != 1
+            <if test="deviceNo!=null and deviceNo!=''">
+                AND t0.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+            <if test="runState!=null and runState!=''">
+                AND t0.run_state  = #{runState}
+            </if>
+            <if test="chargingPlieGuid!=null and chargingPlieGuid!=''">
+                AND t0.charging_plie_guid  = #{chargingPlieGuid}
+            </if>
+            <if test="online!=null">
+                AND t0.online  = #{online}
+            </if>
+            <if test="commNo!=null and commNo!=''">
+                AND t0.comm_no like CONCAT('%',#{commNo},'%')
+            </if>
+            <if test="payCategory!=null and payCategory!=0">
+                AND 1=2
+            </if>
+        </where>
+        ORDER BY t0.id DESC
+        )t
+    </select>
+    <!--实时监控设备列表查询非在线设备-->
+    <select id="monitorNotChargingDevice" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.MonitorDeviceDto">
+        SELECT
+        t0.charging_plie_guid chargingPlieGuid,
+        t0.online online,
+        t0.run_state runState,
+        t0.device_no deviceNo,
+        t0.port port,
+        t0.comm_no commNo
+        FROM em_d_charging_device t0
+        INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        <where>
+            t0.is_del = 0 AND t0.run_state != 1
+            <if test="deviceNo!=null and deviceNo!=''">
+                AND t0.device_no like CONCAT('%',#{deviceNo},'%')
+            </if>
+            <if test="runState!=null and runState!=''">
+                AND t0.run_state  = #{runState}
+            </if>
+            <if test="chargingPlieGuid!=null and chargingPlieGuid!=''">
+                AND t0.charging_plie_guid  = #{chargingPlieGuid}
+            </if>
+            <if test="online!=null">
+                AND t0.online  = #{online}
+            </if>
+            <if test="commNo!=null and commNo!=''">
+                AND t0.comm_no like CONCAT('%',#{commNo},'%')
+            </if>
+        </where>
+        ORDER BY t0.id DESC
+    </select>
+
+    <select id="monitorDeviceCount" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceVo"
+            resultType="cn.com.cdboost.collect.dto.MonitorDeviceTotalDto">
+        SELECT COUNT(*) count,t.run_state runState,t.`online` online FROM em_d_charging_device t
+
+        INNER  JOIN em_d_charging_project h1 on h1.project_guid=t.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+        WHERE t.is_del=0
+        <if test="deviceNo!=null and deviceNo!=''">
+            AND t.device_no like CONCAT('%',#{deviceNo},'%')
+        </if>
+        <if test="runState!=null and runState!=''">
+            AND t.run_state  = #{runState}
+        </if>
+        <if test="chargingPlieGuid!=null and chargingPlieGuid!=''">
+            AND t.charging_plie_guid = #{chargingPlieGuid}
+        </if>
+        <if test="commNo!=null and commNo!=''">
+            AND t.comm_no like CONCAT('%',#{commNo},'%')
+        </if>
+        GROUP BY t.run_state,t.`online` ORDER BY t.run_state
+    </select>
+
+    <select id="queryMeterNo"  parameterType="cn.com.cdboost.collect.dto.param.ElectricCountQueryVo" resultType="java.lang.String">
+        SELECT DISTINCT t.meter_no FROM em_d_charging_device t
+        INNER  JOIN em_d_charging_project h1 on h1.project_guid=t.project_guid
+        INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
+        in
+        <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+        <if test="nodeType !=null and nodeType==1">
+            INNER  JOIN em_b_org h3 ON h2.level_code like concat('%',h3.org_no,'%')
+            AND h3.org_no =#{nodeId}
+        </if>
+        <if test="nodeType !=null and nodeType==2">
+            AND h1.project_guid=#{nodeId}
+        </if>
+    </select>
+
+    <select id="deviceUseCountList" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.DeviceUseCountListDto">
+    SELECT
+        t.device_no deviceNo,
+        t.run_state runState,
+        t.install_addr installAddr,
+        t.install_date installDate,
+        t2.project_name projectName,
+        count(*) chargingNum,
+        SUM(t1.use_power) projectPower,
+        SUM(t1.consumption_money) projectFee,
+        SUM(t1.profitable) projectProfitable
+        FROM em_d_charging_device t
+    LEFT JOIN em_d_charging_use_detailed t1 ON t.charging_plie_guid = t1.charging_plie_guid
+    <if test="startDate !=null and startDate!='' and endDate !=null and endDate!=''">
+        AND t1.start_time BETWEEN #{startDate} AND CONCAT(#{endDate},' 23:59:59')
+    </if>
+    INNER JOIN em_d_charging_project t2 ON t.project_guid=t2.project_guid
+    WHERE t.is_del = 0
+    <if test="projectGuid!=null and projectGuid!=''">
+        AND t.project_guid=#{projectGuid}
+    </if>
+    <if test="deviceNo!=null and deviceNo!=''">
+        AND t.device_no like CONCAT('%',#{deviceNo},'%')
+    </if>
+    GROUP BY t.device_no ORDER BY t.device_no
+    LIMIT #{pageIndex},#{pageSize}
+    </select>
+    <select id="countDeviceTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="cn.com.cdboost.collect.dto.DeviceCountStatic">
+        SELECT
+        SUM(t1.use_power) projectPower,
+        SUM(t1.consumption_money) projectFee,
+        SUM(t1.profitable) projectProfitable
+        FROM em_d_charging_device t
+        LEFT JOIN em_d_charging_use_detailed t1 ON t.charging_plie_guid = t1.charging_plie_guid
+        <if test="startDate !=null and startDate!='' and endDate !=null and endDate!=''">
+            AND t1.start_time BETWEEN #{startDate} AND CONCAT(#{endDate},' 23:59:59')
+        </if>
+        WHERE t.is_del = 0
+        <if test="projectGuid!=null and projectGuid!=''">
+            AND t.project_guid=#{projectGuid}
+        </if>
+        <if test="deviceNo!=null and deviceNo!=''">
+            AND t.device_no like CONCAT('%',#{deviceNo},'%')
+        </if>
+    </select>
+
+    <select id="queryDeviceUseListTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerDeviceQueryVo"
+            resultType="java.lang.Integer">
+        SELECT
+        count(*)/2
+        FROM em_d_charging_device t
+        WHERE t.is_del = 0
+        <if test="projectGuid!=null and projectGuid!=''">
+            AND t.project_guid=#{projectGuid}
+        </if>
+        <if test="deviceNo!=null and deviceNo!=''">
+            AND t.device_no like CONCAT('%',#{deviceNo},'%')
+        </if>
+    </select>
+</mapper>

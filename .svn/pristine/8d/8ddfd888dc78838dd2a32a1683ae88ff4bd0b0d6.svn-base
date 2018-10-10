@@ -1,0 +1,189 @@
+package cn.com.cdboost.collect.model;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+@Table(name = "em_d_charging_account_flow")
+public class ChargingAccountFlow implements Serializable{
+    /**
+     * 主键
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    /**
+     * 充电用户账户id
+     */
+    @Column(name = "account_id")
+    private Integer accountId;
+
+    /**
+     * business_type 业务类型（1充电时临时充值，2月卡充值，3、充电时一次充满充值，活动充值购买余额）
+     */
+    @Column(name = "business_type")
+    private Integer businessType;
+
+    /**
+     * 本次账户变动金额（正数表示账户充钱，负数表示账户扣钱）
+     */
+    private BigDecimal amount;
+
+    /**
+     * 本次账户充值次数变动值
+     */
+    @Column(name = "charge_cnt")
+    private Integer chargeCnt;
+
+    /**
+     * 业务操作唯一标识
+     */
+    private String guid;
+
+    @Column(name = "create_time")
+    private Date createTime;
+
+    private String remark;
+
+    /**
+     * ic卡编号
+     */
+    @Column(name = "card_id")
+    private String cardId;
+
+    /**
+     * 获取主键
+     *
+     * @return id - 主键
+     */
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * 设置主键
+     *
+     * @param id 主键
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * 获取充电用户账户id
+     *
+     * @return account_id - 充电用户账户id
+     */
+    public Integer getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * 设置充电用户账户id
+     *
+     * @param accountId 充电用户账户id
+     */
+    public void setAccountId(Integer accountId) {
+        this.accountId = accountId;
+    }
+
+    /**
+     * 获取business_type 业务类型（1充电时临时充值，2月卡充值，3、充电时一次充满充值，活动充值购买余额）
+     *
+     * @return business_type - business_type 业务类型（1充电时临时充值，2月卡充值，3、充电时一次充满充值，活动充值购买余额）
+     */
+    public Integer getBusinessType() {
+        return businessType;
+    }
+
+    /**
+     * 设置business_type 业务类型（1充电时临时充值，2月卡充值，3、充电时一次充满充值，活动充值购买余额）
+     *
+     * @param businessType business_type 业务类型（1充电时临时充值，2月卡充值，3、充电时一次充满充值，活动充值购买余额）
+     */
+    public void setBusinessType(Integer businessType) {
+        this.businessType = businessType;
+    }
+
+    /**
+     * 获取本次账户变动金额（正数表示账户充钱，负数表示账户扣钱）
+     *
+     * @return amount - 本次账户变动金额（正数表示账户充钱，负数表示账户扣钱）
+     */
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    /**
+     * 设置本次账户变动金额（正数表示账户充钱，负数表示账户扣钱）
+     *
+     * @param amount 本次账户变动金额（正数表示账户充钱，负数表示账户扣钱）
+     */
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public Integer getChargeCnt() {
+        return chargeCnt;
+    }
+
+    public void setChargeCnt(Integer chargeCnt) {
+        this.chargeCnt = chargeCnt;
+    }
+
+    /**
+     * 获取业务操作唯一标识
+     *
+     * @return guid - 业务操作唯一标识
+     */
+    public String getGuid() {
+        return guid;
+    }
+
+    /**
+     * 设置业务操作唯一标识
+     *
+     * @param guid 业务操作唯一标识
+     */
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    /**
+     * @return create_time
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * @param createTime
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    /**
+     * @return remark
+     */
+    public String getRemark() {
+        return remark;
+    }
+
+    /**
+     * @param remark
+     */
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getCardId() {
+        return cardId;
+    }
+
+    public void setCardId(String cardId) {
+        this.cardId = cardId;
+    }
+}

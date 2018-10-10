@@ -1,0 +1,24 @@
+package cn.com.cdboost.collect.dao;
+
+import cn.com.cdboost.collect.common.CommonMapper;
+import cn.com.cdboost.collect.dto.ChargingProjectDto;
+import cn.com.cdboost.collect.dto.ProjectCountStatic;
+import cn.com.cdboost.collect.dto.ProjectUseCountListDto;
+import cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo;
+import cn.com.cdboost.collect.dto.response.ProjectInfoDto;
+import cn.com.cdboost.collect.model.ChargingProject;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+public interface ChargingProjectMapper extends CommonMapper<ChargingProject> {
+    List<ProjectInfoDto> queryProjectTreeByName(@Param("list") List<Long> orgNo, @Param("projectName") String projectName);
+    List<ChargingProjectDto> queryList(ChargerSchemeQueryVo queryVo);
+    Long queryListTotal(ChargerSchemeQueryVo queryVo);
+
+    List<ProjectUseCountListDto> queryProjectUseCountList(ChargerSchemeQueryVo queryVo);
+
+    Integer queryProjectUseListTotal(ChargerSchemeQueryVo queryVo);
+
+    ProjectCountStatic countProjectTotal(ChargerSchemeQueryVo queryVo);
+}

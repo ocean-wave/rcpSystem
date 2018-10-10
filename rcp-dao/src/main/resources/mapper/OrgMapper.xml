@@ -17,6 +17,9 @@
     <result column="is_enabled" property="isEnabled" jdbcType="INTEGER" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
     <result column="create_user_id" property="createUserId" jdbcType="BIGINT" />
+    <result column="is_sys" property="isSys" jdbcType="INTEGER" />
+    <result column="customer_guid" property="customerGuid" jdbcType="VARCHAR" />
+    <result column="profit_ratio" property="profitRatio" jdbcType="DECIMAL" />
   </resultMap>
 
   <!-- 根据用户ID获取组织结构 -->

@@ -32,4 +32,7 @@
 	<!-- 配置提供服务的接口类型 -->
 	<dubbo:reference id="remainAmountService" interface="cn.com.cdboost.collect.service.RemainAmountService"
 					 version="1.0" timeout="3000"/>
+	<!-- 配置提供服务的接口类型 -->
+	<dubbo:reference id="baseSychronizeServiceDubbo" interface="cn.com.cdboost.collect.service.BaseSychronizeServiceDubbo"
+					 version="1.0" timeout="3000"/>
 </beans>

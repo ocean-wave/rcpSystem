@@ -1,0 +1,93 @@
+package cn.com.cdboost.collect.constant;
+
+/**
+ * 账户操作业务类型
+ */
+public enum BusinessType {
+    // 提现相关
+    WECHAT_WITHDRAW_CASH(1,"微信提现"),
+    ALIPAY_WITHDRAW_CASH(2,"支付宝提现"),
+    WECHAT_WITHDRAW_CASH_REFUND(3,"微信提现失败退回"),
+    ALIPAY_WITHDRAW_CASH_REFUND(4,"支付宝提现失败退回"),
+
+    // 充电相关
+    TEMPORARY_CHARGE_SUCCESS(5,"临时充电开电成功"),
+    FULL_CHARGE_SUCCESS(6,"一键充满开电成功"),
+    MONTH_CARD_CHARGE_SUCCESS(7,"月卡充电开电成功"),
+
+    // 账户充值相关
+    MONTH_CARD_RECHARGE_DEDUCT_AMOUNT(8,"月卡购买,扣除账户余额"),
+    MONTH_CARD_RECHARGE_REMAIN_CNT(9,"月卡购买,月卡账户次数新增"),
+    ACTIVITY_RECHARGE(10,"活动页面余额充值"),
+    CHARGE_ELECTRIC_RECHARGE(11,"充电余额不足引起的余额充值"),
+    BIND_ICCARD_RECHARGE(12,"绑定IC卡时引起的余额充值"),
+    UNBIND_ICCARD_RECHARGE(13,"解除绑定IC卡时引起的余额扣减"),
+
+    // 续充相关
+    TEMPORARY_RE_CHARGE_SUCCESS(14,"临时充电续充电成功"),
+    FULL_RE_CHARGE_SUCCESS(15,"一键充满续充电成功"),
+    MONTH_CARD_RE_CHARGE_SUCCESS(16,"月卡充电续充电成功"),
+
+    // 账户退费
+    CHARGE_REFUND_AMOUNT(17,"充电不满5分钟退扣费金额"),
+    CHARGE_REFUND_MONTH(18,"充电不满5分钟退月卡次数"),
+
+    // 功率越限，账户操作
+    POWER_UP_REFUND_AMOUNT(19,"功率越限,后端自动提档退金额"),
+    POWER_UP_REFUND_MONTH(20,"功率越限,后端自动提档退月卡次数"),
+    POWER_UP_DEDUCT_AMOUNT(21,"功率越限,后端自动提档扣余额"),
+    POWER_UP_DEDUCT_MONTH(22,"功率越限,后端自动提档扣月卡次数"),
+
+    // IC卡账户操作
+    IC_CARD_INIT_AMOUNT(23,"IC卡建卡预留金额"),
+    IC_CARD_WECHAT_RECHARGE(24,"IC卡微信充值"),
+    IC_CARD_ALIPAY_RECHARGE(25,"IC卡支付宝充值"),
+    IC_CARD_CHARGE_SUCCESS(26,"IC卡开电成功扣款"),
+    IC_CARD_REFUND(27,"IC卡充电不满5分钟退费"),
+    POWER_UP_IC_CARD_REFUND(28,"功率越限,后端自动提档退IC卡金额"),
+    POWER_UP_IC_CARD_DEDUCT(29,"功率越限,后端自动提档扣IC卡金额"),
+
+    // 月卡账户剩余次数清零
+    MONTH_CARD_REMAIN_CNT_ZERO(30,"月卡账户次数超过有效期清0");
+
+
+
+    /**
+     * 类型
+     */
+    private Integer type;
+    /**
+     * 描述
+     */
+    private String desc;
+
+    BusinessType(Integer type, String desc) {
+        this.type = type;
+        this.desc = desc;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public static final String getDescByType(Integer type) {
+        for (BusinessType businessType : BusinessType.values()) {
+            if (businessType.getType().equals(type)) {
+                return businessType.getDesc();
+            }
+        }
+        return "";
+    }
+}

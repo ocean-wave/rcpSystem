@@ -1,0 +1,146 @@
+package cn.com.cdboost.collect.util;
+
+import cn.com.cdboost.collect.constant.BusinessType;
+import cn.com.cdboost.collect.dto.param.AccountOperateVo;
+
+import java.math.BigDecimal;
+
+/**
+ * 账户相关业务操作工具类
+ */
+public class AccountUtil {
+
+    /**
+     * 根据业务类型，返回账户操作vo
+     * @param businessType
+     * @param amount
+     * @return
+     */
+    public static AccountOperateVo getAccountOperateVo(BusinessType businessType, BigDecimal amount, Integer number) {
+        AccountOperateVo operateVo = new AccountOperateVo();
+        operateVo.setBusinessType(businessType.getType());
+        operateVo.setReamrk(businessType.getDesc());
+        switch (businessType) {
+            case WECHAT_WITHDRAW_CASH:
+                // 微信提现
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case ALIPAY_WITHDRAW_CASH:
+                // 支付宝提现
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case WECHAT_WITHDRAW_CASH_REFUND:
+                // 微信提现失败退回
+                operateVo.setAmount(amount);
+                break;
+            case ALIPAY_WITHDRAW_CASH_REFUND:
+                // 支付宝提现失败退回
+                operateVo.setAmount(amount);
+                break;
+            case TEMPORARY_CHARGE_SUCCESS:
+                // 临时充电开电成功
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case FULL_CHARGE_SUCCESS:
+                // 一键充满开电成功
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case MONTH_CARD_CHARGE_SUCCESS:
+                // 月卡充电开电成功
+                operateVo.setChargeCnt(-number);
+                break;
+            case MONTH_CARD_RECHARGE_DEDUCT_AMOUNT:
+                // 月卡购买，余额扣款
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case MONTH_CARD_RECHARGE_REMAIN_CNT:
+                // 月卡购买第三方支付，月卡账户剩余次数新增
+                operateVo.setChargeCnt(number);
+                break;
+            case ACTIVITY_RECHARGE:
+                // 活动页面余额充值
+                operateVo.setAmount(amount);
+                break;
+            case CHARGE_ELECTRIC_RECHARGE:
+                // 充电余额不足引起的余额充值
+                operateVo.setAmount(amount);
+                break;
+            case BIND_ICCARD_RECHARGE:
+                // 11 绑定IC卡时引起的余额充值
+                operateVo.setAmount(amount);
+                break;
+            case UNBIND_ICCARD_RECHARGE:
+                // 12 解除绑定IC卡时引起的余额扣减
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case TEMPORARY_RE_CHARGE_SUCCESS:
+                // 13 临时充电续充电成功
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case FULL_RE_CHARGE_SUCCESS:
+                // 14 一键充满续充电成功
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case MONTH_CARD_RE_CHARGE_SUCCESS:
+                // 15 月卡充电续充电成功
+                operateVo.setChargeCnt(-number);
+                break;
+            case CHARGE_REFUND_AMOUNT:
+                // 16 充电不满5分钟退扣费金额
+                operateVo.setAmount(amount);
+                break;
+            case CHARGE_REFUND_MONTH:
+                // 17 充电不满5分钟退月卡次数
+                operateVo.setChargeCnt(number);
+                break;
+            case POWER_UP_REFUND_AMOUNT:
+                // 18 功率越限，后端自动提档退金额
+                operateVo.setAmount(amount);
+                break;
+            case POWER_UP_REFUND_MONTH:
+                // 19 功率越限，后端自动提档退月卡次数
+                operateVo.setChargeCnt(number);
+                break;
+            case POWER_UP_DEDUCT_AMOUNT:
+                // 20 功率越限,后端自动提档扣余额
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case POWER_UP_DEDUCT_MONTH:
+                // 21 功率越限,后端自动提档扣月卡次数
+                operateVo.setChargeCnt(-number);
+                break;
+            case IC_CARD_INIT_AMOUNT:
+                // 22 IC卡建卡预留金额
+                operateVo.setAmount(amount);
+                break;
+            case IC_CARD_WECHAT_RECHARGE:
+                // 23 IC卡微信充值
+                operateVo.setAmount(amount);
+                break;
+            case IC_CARD_ALIPAY_RECHARGE:
+                // 24 IC卡支付宝充值
+                operateVo.setAmount(amount);
+                break;
+            case IC_CARD_CHARGE_SUCCESS:
+                // 25 IC卡开电成功扣款
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            case IC_CARD_REFUND:
+                // 26 IC卡充电不满5分钟退费
+                operateVo.setAmount(amount);
+                break;
+            case POWER_UP_IC_CARD_REFUND:
+                // 27 功率越限,后端自动提档退IC卡金额
+                operateVo.setAmount(amount);
+                break;
+            case POWER_UP_IC_CARD_DEDUCT:
+                // 28 功率越限,后端自动提档扣IC卡金额
+                operateVo.setAmount(MathUtil.negate(amount));
+                break;
+            default:
+                // do nothing
+        }
+
+        return operateVo;
+    }
+}

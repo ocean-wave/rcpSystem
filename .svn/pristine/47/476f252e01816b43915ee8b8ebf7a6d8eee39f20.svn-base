@@ -1,0 +1,151 @@
+package cn.com.cdboost.collect.consumer;
+
+import cn.com.cdboost.collect.constant.WebSocketConstant;
+import cn.com.cdboost.collect.dto.param.PushDataInfo;
+import cn.com.cdboost.collect.dto.param.SmokeAlarmParam;
+import cn.com.cdboost.collect.dto.response.WebSocketResponse;
+import cn.com.cdboost.collect.enums.GlobalConstant;
+import cn.com.cdboost.collect.enums.ResultCode;
+import cn.com.cdboost.collect.handler.SpringWebSocketHandler;
+import cn.com.cdboost.collect.service.SmokeDeviceServiceDubbo;
+import cn.com.cdboost.collect.service.SmokeDevlogServiceDubbo;
+import cn.com.cdboost.collect.util.AliyunSmsUtil;
+import cn.com.cdboost.collect.vo.SmokeDeviceSelectTotalInfo;
+import cn.com.cdboost.collect.vo.SmokeDeviceVo;
+import cn.com.cdboost.collect.vo.SmokeDevlogVo;
+import cn.com.cdboost.collect.vo.alisms.SendSmsParam;
+import com.alibaba.fastjson.JSON;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import javax.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+/**
+ * 活动处理listener
+ **/
+@Component("activityListener")
+public class ActivityListener implements MessageListener {
+    private static final Logger logger = LoggerFactory.getLogger(ActivityListener.class);
+
+    @Autowired
+    SmokeDeviceServiceDubbo smokeDeviceServiceDubbo;
+    @Autowired
+    SmokeDevlogServiceDubbo smokeDevlogServiceDubbo;
+    @Value("${aliyun.templateCode.alarmSmokeTemplateCode}")
+    private String alarmSmsTemplateCode;
+    @Value("${aliyun.templateCode.alarmSmokeCancelTemplateCode}")
+    private String alarmCancelSmsTemplateCode;
+    @Value("${aliyun.accessKeyId}")
+    private String accessKeyId;
+    @Value("${aliyun.accessKeySecret}")
+    private String accessKeySecret;
+    @Value("${aliyun.signName}")
+    private String signName;
+
+    @Override
+    public void onMessage(Message message) {
+        // MessageProperties messageProperties=message.getMessageProperties();
+        String msg = new String(message.getBody());
+        logger.info("dubbo消费端接收数据：" + msg);
+        try {
+            CopyOnWriteArraySet<WebSocketSession> users = SpringWebSocketHandler.getUsers();
+            if (CollectionUtils.isEmpty(users)) {
+                logger.info("webSocket 在线用户数为空");
+                return;
+            }
+            for (WebSocketSession session : users) {
+                HttpSession httpSession = (HttpSession) session.getAttributes().get(GlobalConstant.HTTP_SESSION_OBJECT);
+                logger.info("WebSocket中记录的sessionId=" + httpSession.getId());
+                // 发送
+                Map map = (Map<String, Object>) JSON.parse(msg);
+                Map<String, Object> returnData = Maps.newHashMap();
+                returnData.put("code", ResultCode.Success.getValue());
+                returnData.put("message", ResultCode.Success.getDesc());
+                SmokeDeviceSelectTotalInfo smokeDeviceSelectTotalInfo = smokeDeviceServiceDubbo.SmokeDeviceSelectTotal();
+                PushDataInfo pushDataInfo = new PushDataInfo();
+                pushDataInfo.setDataTime(map.get("DataTime").toString());
+                pushDataInfo.setDevType(map.get("DevType").toString());
+                Map map1 = (Map) (map.get("DevData"));
+                pushDataInfo.setParams(map1.get("data").toString());
+                pushDataInfo.setCno(map.get("DevNo").toString());
+                pushDataInfo.setStatusTotal(smokeDeviceSelectTotalInfo);
+                returnData.put("dataSrc", pushDataInfo);
+                // 查询需要发送的手机号
+                SmokeDevlogVo smokeDevlogVo=new SmokeDevlogVo();
+                smokeDevlogVo.setCno(pushDataInfo.getCno());
+                SmokeDeviceVo smokeDeviceVo = new SmokeDeviceVo();
+                smokeDeviceVo.setCno(map.get("DevNo").toString());
+                smokeDeviceVo = smokeDeviceServiceDubbo.selectOne(smokeDeviceVo);
+                if (!StringUtils.isEmpty(smokeDeviceVo.getChargeContact())&& "1".equals(smokeDeviceVo.getIsSms())) {
+                    List<SmokeDevlogVo> smokeDevlogVos = smokeDevlogServiceDubbo.smokeDeviceStatusList(smokeDevlogVo);
+                    List<String> mobiles = Lists.newArrayList();
+                    mobiles.add(smokeDeviceVo.getChargeContact());
+                    // 发送告警短信
+                    SendSmsParam smsParam = new SendSmsParam();
+                    smsParam.setAccessKeyId(accessKeyId);
+                    smsParam.setAccessKeySecret(accessKeySecret);
+                    smsParam.setSignName(signName);
+                    String mobilePhones = Joiner.on(",").join(mobiles);
+                    smsParam.setPhoneMobiles(mobilePhones);
+                    SmokeAlarmParam alarmTempParam = this.getSensorAlarmParam(smokeDeviceVo);
+                    smsParam.setTemplateParam(JSON.toJSONString(alarmTempParam));
+                    if(smokeDevlogVos.size()==1&& "4".equals(smokeDevlogVos.get(0).getStatus())){
+                        smsParam.setTemplateCode(alarmSmsTemplateCode);
+                        AliyunSmsUtil.sendSms(smsParam);
+                    }
+                    if(smokeDevlogVos.size()==2){
+                        if(!smokeDevlogVos.get(0).getStatus().equals(smokeDevlogVos.get(1).getStatus())){
+                            if("4".equals(smokeDevlogVos.get(0).getStatus())){
+                                smsParam.setTemplateCode(alarmSmsTemplateCode);
+                                AliyunSmsUtil.sendSms(smsParam);
+                            }
+                            if("1".equals(smokeDevlogVos.get(0).getStatus())&&"4".equals(smokeDevlogVos.get(1).getStatus())){
+                                smsParam.setTemplateCode(alarmCancelSmsTemplateCode);
+                                AliyunSmsUtil.sendSms(smsParam);
+                            }
+                        }
+                    }
+                }
+                WebSocketResponse socketResponse = new WebSocketResponse<>();
+                socketResponse.setData(returnData);
+                socketResponse.setDataFlag(WebSocketConstant.DataFlagEnum.AUTO_UPLOAD_MSG.getFlag());
+                session.sendMessage(new TextMessage(JSON.toJSONString(socketResponse)));
+                logger.info("dubbo消费端websocket send success: data=" + JSON.toJSONString(socketResponse));
+            }
+        } catch (Exception e) {
+            logger.error("dubbo消费端接口异常：", e);
+        }
+    }
+
+    /**
+     * 构造告警模板参数对象
+     *
+     * @param
+     * @return
+     */
+    private SmokeAlarmParam getSensorAlarmParam(SmokeDeviceVo smokeDeviceVo) {
+        SmokeAlarmParam param = new SmokeAlarmParam();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String format = simpleDateFormat.format(smokeDeviceVo.getUpdateTime());
+        param.setDateTime(format);
+        param.setInstallAddress(smokeDeviceVo.getInstallAddr());
+        param.setCno(smokeDeviceVo.getCno());
+        return param;
+    }
+}

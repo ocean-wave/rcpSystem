@@ -1,0 +1,73 @@
+package cn.com.cdboost.collect.constant;
+
+/**
+ * webSocket 相关常量
+ */
+public class WebSocketConstant {
+
+    /**
+     * webSocket数据通道回复的数据类型
+     */
+    public enum DataFlagEnum {
+        COLLECT_DATA("collectData","实时采集数据"),
+        COLLECT_DATA_STATUS("collectDataStatus","实时抄表任务状态查询"),
+        ON_OFF("onOff","通断数据"),
+        ON_OFF_STATUS("onOffStatus","通断任务状态查询"),
+        ALARM("alarm","告警数据"),
+        LINK_CHECK("linkCheck","链路检查"),
+        JZQ_READ_CUSTOMER_INFO("jzqReadCustomerInfo","集中器读取客户档案信息"),
+        JZQ_READ_CUSTOMER_INFO_STATUS("jzqReadCustomerInfoStatus","集中器读取客户档案信息任务状态查询"),
+        JZQ_HEART_BEAT_SEND("jzqHeartBeatSend","集中器心跳下发"),
+        JZQ_HEART_BEAT_SEND_STATUS("jzqHeartBeatSendStatus","集中器心跳下发任务状态查询"),
+        JZQ_HEART_BEAT_READ("jzqHeartBeatRead","集中器心跳读取"),
+        JZQ_HEART_BEAT_READ_STATUS("jzqHeartBeatReadStatus","集中器心跳读取任务状态查询"),
+        JZQ_CONNECT_PARAM_SEND("jzqConnectionParamSend","集中器主站连接参数下发"),
+        JZQ_CONNECT_PARAM_SEND_STATUS("jzqConnectionParamSendStatus","查询集中器主站连接参数下发任务状态"),
+        COLLECT_DATA_BROADCAST("collectDataBroadcast","重点用户广播操作"),
+        MONITOR_DEVICE_LIST("monitorDeviceList","充电状态监测列表"),
+        ONOFF_DEVICE_DATA("onOffDevice","停用操作返回数据"),
+        CHARGE_ON_OFF("chargeOnOff","充电通断"),
+        RE_CHARGE_ON_OFF("reChargeOnOff","续充通断"),
+        CHARGE_ON_OFF_STATUS("chargeOnOffStatus","充电通断状态查询"),
+        CHARGE_ON_LINE_DATA("chargeOnLineDate","充电实时数据"),
+        CHARGE_ON_DEVICE_SINGAL("deviceSingal","设备信号强度"),
+        CHARGE_THRESHOLD("chargerThreshold","充电桩阈值查询"),
+        CHARGE_HEART_STEP("chargerHeartStep","充电桩心跳间隔查询"),
+        CHARGE_SET_THRESHOLD("setThresholdRes","设置充电桩阈值"),
+        CHARGE_SETHEART_STEP("setHeartStepRes","设置充电桩心跳间隔"),
+        SEND_IC_CARD("sendIcCard","下发ic卡档案"),
+        READ_IC_CARD("readIcCard","读取ic卡档案"),
+        CLEAR_IC_CARD("clearIcCard","清除ic卡档案"),
+        AUTO_UPLOAD_MSG("autoUploadMsg","传感器主动上报");
+        /**
+         * 标识
+         */
+        private String flag;
+
+        /**
+         * 描述
+         */
+        private String desc;
+
+        DataFlagEnum(String flag, String desc) {
+            this.flag = flag;
+            this.desc = desc;
+        }
+
+        public String getFlag() {
+            return flag;
+        }
+
+        public void setFlag(String flag) {
+            this.flag = flag;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public void setDesc(String desc) {
+            this.desc = desc;
+        }
+    }
+}

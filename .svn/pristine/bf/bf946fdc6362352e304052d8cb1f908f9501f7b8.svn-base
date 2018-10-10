@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.cdboost.collect.dao.ChargingPayChemeMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.cdboost.collect.model.ChargingPayCheme" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" property="id" jdbcType="INTEGER" />
+    <result column="scheme_guid" property="schemeGuid" jdbcType="VARCHAR" />
+    <result column="pay_category" property="payCategory" jdbcType="INTEGER" />
+    <result column="num_months" property="numMonths" jdbcType="INTEGER" />
+    <result column="pay_money" property="payMoney" jdbcType="DECIMAL" />
+    <result column="money" property="money" jdbcType="DECIMAL" />
+    <result column="charging_time" property="chargingTime" jdbcType="INTEGER" />
+    <result column="charging_cnt" property="chargingCnt" jdbcType="INTEGER" />
+    <result column="project_guid" property="projectGuid" jdbcType="VARCHAR" />
+    <result column="sort_no" property="sortNo" jdbcType="INTEGER" />
+    <result column="is_enable" property="isEnable" jdbcType="INTEGER" />
+    <result column="min_power" property="minPower" jdbcType="INTEGER" />
+    <result column="max_power" property="maxPower" jdbcType="INTEGER" />
+  </resultMap>
+
+  <select id="countPofitable" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo" resultType="cn.com.cdboost.collect.dto.SchemePofitableDto">
+    SELECT
+        t.scheme_guid schemeGuid,
+        t.pay_category payCategory,
+        t.money money,
+        t.charging_time chargingTime,
+        COUNT(*) useNum,
+        SUM(t1.use_power) usePower,
+        SUM(t1.consumption_money) consumptionMoney,
+        SUM(t1.deduct_money) deductMoney,
+        SUM(t1.profitable) profitable
+    FROM
+        em_d_charging_pay_cheme t
+    INNER JOIN em_d_charging_use_detailed t1 ON t.scheme_guid = t1.scheme_guid
+    WHERE t.project_guid=#{projectGuid} AND t.min_power=#{minPower} AND t.max_power=#{maxPower}
+    AND t1.end_time BETWEEN #{beginTime} AND #{endTime}
+    GROUP BY
+        t.scheme_guid
+  </select>
+
+    <!--查询方案使用列表-->
+    <select id="shemeUseList" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo"
+            resultType="cn.com.cdboost.collect.dto.ChargingUseDetailedDto">
+        SELECT
+        t.profitable profitable,
+        t.state state,
+        t.use_time useTime,
+        t.use_power usePower,
+        t.start_time startTime,
+        t.end_time endTime,
+        t.pay_category payCategory,
+        t.deduct_money payMoney,
+        t.charging_plie_guid chargingPlieGuid,
+        t.charging_guid chargingGuid,
+        t1.customer_guid customerGuid,
+        t1.car_category carCategory,
+        t.webchar_no webcharNo,
+        t2.device_no deviceNo,
+        t2.port port
+        FROM
+        em_d_charging_use_detailed t
+        INNER JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+        INNER JOIN em_d_charging_device t2 ON t.charging_plie_guid=t2.charging_plie_guid
+        WHERE t.scheme_guid = #{schemeGuid}
+        <if test="beginTime!=null and beginTime!=''">
+            AND t.end_time  &gt;= #{beginTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            AND t.end_time &lt;= #{endTime}
+        </if>
+        ORDER BY t.id DESC LIMIT #{pageIndex},#{pageSize}
+    </select>
+    <!--查询总数-->
+    <select id="queryTotal" parameterType="cn.com.cdboost.collect.dto.param.ChargerSchemeQueryVo"
+            resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        em_d_charging_use_detailed t
+        INNER JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
+        INNER JOIN em_d_charging_device t2 ON t.charging_plie_guid=t2.charging_plie_guid
+        WHERE t.scheme_guid = #{schemeGuid}
+        <if test="beginTime!=null and beginTime!=''">
+            AND t.end_time  &gt;= #{beginTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            AND t.end_time &lt;= #{endTime}
+        </if>
+    </select>
+    <select id="queryPower" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        t.min_power,
+        t.max_power
+        FROM
+        em_d_charging_pay_cheme t
+        WHERE t.project_guid = #{projectGuid}
+        GROUP BY t.min_power,t.max_power
+    </select>
+</mapper>
