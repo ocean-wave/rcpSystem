@@ -891,12 +891,19 @@
         t4.max_power maxPower,
         t4.money schemeMoney,
         t4.charging_time schememTime,
-        t4.charging_cnt chargingCnt
+        t4.charging_cnt chargingCnt,
+        h1.project_name projectName,
+        t5.rssi rssi,
+        t5.snr snr
         FROM em_d_charging_device t0
         INNER JOIN em_d_charging_use_detailed t1 ON t0.charging_plie_guid = t1.charging_plie_guid AND t1.state=0
         INNER JOIN em_d_charging_pay_cheme t4 ON t1.scheme_guid=t4.scheme_guid
         LEFT JOIN em_d_charging_devlog t2 ON t1.dev_log_id = t2.id
         LEFT JOIN em_d_charging_cst t3 ON t1.customer_guid=t3.customer_guid
+        LEFT JOIN (
+        SELECT * FROM em_d_charging_devsignal
+        WHERE id IN (SELECT max(id) FROM em_d_charging_devsignal GROUP BY comm_no)
+        ) t5 ON t0.comm_no = t5.comm_no
         INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
         INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
         in
@@ -967,12 +974,18 @@
         t4.money schemeMoney,
         t4.charging_time schememTime,
         t4.charging_cnt chargingCnt,
-        h1.project_name projectName
+        h1.project_name projectName,
+        t5.rssi rssi,
+        t5.snr snr
         FROM em_d_charging_device t0
         INNER JOIN em_d_charging_use_detailed t1 ON t0.charging_plie_guid = t1.charging_plie_guid AND t1.state=0
         INNER JOIN em_d_charging_pay_cheme t4 ON t1.scheme_guid=t4.scheme_guid
         LEFT JOIN em_d_charging_devlog t2 ON t1.dev_log_id = t2.id
         LEFT JOIN em_d_charging_cst t3 ON t1.customer_guid=t3.customer_guid
+        LEFT JOIN (
+        SELECT * FROM em_d_charging_devsignal
+        WHERE id IN (SELECT max(id) FROM em_d_charging_devsignal GROUP BY comm_no)
+        ) t5 ON t0.comm_no = t5.comm_no
         INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
         INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
         in
@@ -1040,9 +1053,15 @@
         null schemeMoney,
         null schememTime,
         null chargingCnt,
-        h1.project_name projectName
+        h1.project_name projectName,
+        t5.rssi rssi,
+        t5.snr snr
         FROM em_d_charging_device t0
         INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
+        LEFT JOIN (
+        SELECT * FROM em_d_charging_devsignal
+        WHERE id IN (SELECT max(id) FROM em_d_charging_devsignal GROUP BY comm_no)
+        ) t5 ON t0.comm_no = t5.comm_no
         INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
         in
         <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >
@@ -1088,9 +1107,15 @@
         t0.run_state runState,
         t0.device_no deviceNo,
         t0.port port,
-        t0.comm_no commNo
+        t0.comm_no commNo,
+        t5.rssi rssi,
+        t5.snr snr
         FROM em_d_charging_device t0
         INNER  JOIN em_d_charging_project h1 on h1.project_guid=t0.project_guid
+        LEFT JOIN (
+        SELECT * FROM em_d_charging_devsignal
+        WHERE id IN (SELECT max(id) FROM em_d_charging_devsignal GROUP BY comm_no)
+        ) t5 ON t0.comm_no = t5.comm_no
         INNER  JOIN em_b_org h2 on h1.org_no=h2.org_no and h2.org_no
         in
         <foreach collection="orgNoList" item="item" open="(" close=")" separator="," >

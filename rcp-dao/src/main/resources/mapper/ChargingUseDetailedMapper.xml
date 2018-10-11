@@ -300,15 +300,23 @@
         t.charging_guid chargingGuid,
         t.open_no openNo,
         t.open_means openMeans,
+        t.max_power maxPower,
         t1.customer_guid customerGuid,
         t1.car_category carCategory,
+        t1.customer_name customerName,
+        t1.alipay_nick_name alipayNickName,
         t.webchar_no webcharNo,
         t2.device_no deviceNo,
-        t2.port port
+        t2.port port,
+        t3.money schemeMoney,
+        t3.charging_time schememTime,
+        t3.charging_cnt chargingCnt,
+        t3.max_power schememMaxPower
         FROM
         em_d_charging_use_detailed t
         LEFT JOIN em_d_charging_cst t1 ON t.customer_guid = t1.customer_guid
         INNER JOIN em_d_charging_device t2 ON t.charging_plie_guid=t2.charging_plie_guid AND t2.is_del=0
+        INNER JOIN em_d_charging_pay_cheme t3 ON t.scheme_guid=t3.scheme_guid
         WHERE t2.device_no =#{deviceNo}
         <if test="startDate!=null and startDate!=''">
             AND t.start_time  &gt;= #{startDate}
@@ -316,8 +324,17 @@
         <if test="endDate!=null and endDate!=''">
             AND t.start_time &lt;= #{endDate}
         </if>
-        <if test="customerGuid!=null and customerGuid!=''">
+        <!--<if test="customerGuid!=null and customerGuid!=''">
             AND t.customer_guid like CONCAT('%',#{customerGuid},'%')
+        </if>-->
+        <if test="customerName!=null and customerName!=''">
+            AND t1.customer_name like CONCAT('%',#{customerName},'%')
+        </if>
+        <if test="alipayNickName!=null and alipayNickName!=''">
+            AND t1.alipay_nick_name like CONCAT('%',#{alipayNickName},'%')
+        </if>
+        <if test="cardId!=null and cardId!=''">
+            AND t.open_no like CONCAT('%',#{cardId},'%')
         </if>
         <if test="port!=null and port!=''">
             AND t2.port = #{port}
@@ -342,6 +359,15 @@
         </if>
         <if test="customerGuid!=null and customerGuid!=''">
             AND t.customer_guid like CONCAT('%',#{customerGuid},'%')
+        </if>
+        <if test="customerName!=null and customerName!=''">
+            AND t1.customer_name like CONCAT('%',#{customerName},'%')
+        </if>
+        <if test="alipayNickName!=null and alipayNickName!=''">
+            AND t1.alipay_nick_name like CONCAT('%',#{alipayNickName},'%')
+        </if>
+        <if test="cardId!=null and cardId!=''">
+            AND t.open_no like CONCAT('%',#{cardId},'%')
         </if>
         <if test="port!=null and port!=''">
             AND t2.port = #{port}

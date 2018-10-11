@@ -31,6 +31,7 @@
 		<property name="aFN26ResultDataBackLisener" ref="aFN26ResultDataBackLisener"></property>
 		<property name="aFN27ResultDataBackLisener" ref="aFN27ResultDataBackLisener"></property>
 		<property name="aFN28ResultDataBackLisener" ref="aFN28ResultDataBackLisener"></property>
+		<property name="aFN29ResultDataBackLisener" ref="aFN29ResultDataBackLisener"></property>
 	</bean>
 
 	<!-- 安全管理器 本地测试用-->
